@@ -29,12 +29,12 @@ class Vehicle extends Model
         'has_warranty' => 'boolean',
         'has_application' => 'boolean',
         'has_dm' => 'boolean',
-        'first_reg_date' => 'date',
-        'second_reg_date' => 'date',
-        'birth_date' => 'date',
-        'security_reg_date' => 'date',
-        'theft_insurance_date' => 'date',
-        'sale_date' => 'date',
+        'first_reg_date' => 'date:Y-m-d',
+        'second_reg_date' => 'date:Y-m-d',
+        'birth_date' => 'date:Y-m-d',
+        'security_reg_date' => 'date:Y-m-d',
+        'theft_insurance_date' => 'date:Y-m-d',
+        'sale_date' => 'date:Y-m-d',
     ];
 
     /** 性別 */

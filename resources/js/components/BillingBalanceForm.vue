@@ -76,7 +76,7 @@ function recalcTotal() {
                 <Input
                     id="billing_date"
                     type="date"
-                    :value="form.billing_date"
+                    :model-value="form.billing_date"
                     @input="set('billing_date', ($event.target as HTMLInputElement).value)"
                 />
                 <p v-if="errors.billing_date" class="text-sm text-destructive">
@@ -106,7 +106,7 @@ function recalcTotal() {
                     type="number"
                     step="0.01"
                     min="0"
-                    :value="form.prev_amount"
+                    :model-value="form.prev_amount"
                     @input="set('prev_amount', ($event.target as HTMLInputElement).value)"
                 />
                 <p v-if="errors.prev_amount" class="text-sm text-destructive">
@@ -122,7 +122,7 @@ function recalcTotal() {
                     type="number"
                     step="0.01"
                     min="0"
-                    :value="form.sales_amount"
+                    :model-value="form.sales_amount"
                     @input="
                         set('sales_amount', ($event.target as HTMLInputElement).value);
                         recalcTotal();
@@ -141,7 +141,7 @@ function recalcTotal() {
                     type="number"
                     step="0.01"
                     min="0"
-                    :value="form.tax_amount"
+                    :model-value="form.tax_amount"
                     @input="
                         set('tax_amount', ($event.target as HTMLInputElement).value);
                         recalcTotal();
@@ -159,7 +159,7 @@ function recalcTotal() {
                     id="total_amount"
                     type="number"
                     step="0.01"
-                    :value="form.total_amount"
+                    :model-value="form.total_amount"
                     readonly
                     class="bg-muted/40 cursor-not-allowed"
                 />
@@ -174,7 +174,7 @@ function recalcTotal() {
                     type="number"
                     step="0.01"
                     min="0"
-                    :value="form.payment_amount"
+                    :model-value="form.payment_amount"
                     @input="set('payment_amount', ($event.target as HTMLInputElement).value)"
                 />
                 <p v-if="errors.payment_amount" class="text-sm text-destructive">

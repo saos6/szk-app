@@ -32,8 +32,8 @@ class Quote extends Model
     ];
 
     protected $casts = [
-        'quote_date' => 'date',
-        'expiry_date' => 'date',
+        'quote_date' => 'date:Y-m-d',
+        'expiry_date' => 'date:Y-m-d',
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',

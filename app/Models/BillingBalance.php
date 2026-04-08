@@ -20,7 +20,7 @@ class BillingBalance extends Model
 
     protected $casts = [
         'is_deleted' => 'boolean',
-        'billing_date' => 'date',
+        'billing_date' => 'date:Y-m-d',
         'prev_amount' => 'decimal:2',
         'sales_amount' => 'decimal:2',
         'tax_amount' => 'decimal:2',
