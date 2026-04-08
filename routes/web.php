@@ -6,6 +6,7 @@ use App\Http\Controllers\DeptController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\VehicleModelController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -35,6 +36,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('products/export', [ProductController::class, 'export'])->name('products.export');
     Route::get('products/{product}/replicate', [ProductController::class, 'replicate'])->name('products.replicate');
     Route::resource('products', ProductController::class)->except(['show']);
+
+    // 車両機種マスタ
+    Route::get('vehicle-models/export', [VehicleModelController::class, 'export'])->name('vehicle-models.export');
+    Route::get('vehicle-models/{vehicle_model}/replicate', [VehicleModelController::class, 'replicate'])->name('vehicle-models.replicate');
+    Route::resource('vehicle-models', VehicleModelController::class)->except(['show']);
 
     // 見積
     Route::get('quotes/export', [QuoteController::class, 'exportMethod'])->name('quotes.export');

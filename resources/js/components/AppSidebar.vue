@@ -10,12 +10,14 @@ import {
     Package,
     Settings2,
     FileText,
+    Bike,
 } from 'lucide-vue-next';
 import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
 import DeptController from '@/actions/App/Http/Controllers/DeptController';
 import EmployeeController from '@/actions/App/Http/Controllers/EmployeeController';
 import ProductController from '@/actions/App/Http/Controllers/ProductController';
 import QuoteController from '@/actions/App/Http/Controllers/QuoteController';
+import VehicleModelController from '@/actions/App/Http/Controllers/VehicleModelController';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -66,6 +68,11 @@ const mainNavItems: NavItem[] = [
                 title: '商品マスタ',
                 href: ProductController.index.url(),
                 icon: Package,
+            },
+            {
+                title: '車両機種マスタ',
+                href: VehicleModelController.index.url(),
+                icon: Bike,
             },
         ],
     },
