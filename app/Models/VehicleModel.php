@@ -14,9 +14,9 @@ class VehicleModel extends Model
 
     protected $casts = [
         'is_deleted' => 'boolean',
-        'sre_tan'    => 'decimal:2',
-        'uri_tan'    => 'decimal:2',
-        'zei_kbn'    => 'string',
+        'sre_tan' => 'decimal:2',
+        'uri_tan' => 'decimal:2',
+        'zei_kbn' => 'string',
     ];
 
     /** 税区分 */

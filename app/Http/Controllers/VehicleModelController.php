@@ -17,9 +17,9 @@ class VehicleModelController extends Controller
     private function enums(): array
     {
         return [
-            'zeiKbn'    => VehicleModel::ZEI_KBN,
-            'g1Types'   => VehicleModel::G1_TYPES,
-            'g2Disp'    => VehicleModel::G2_DISP,
+            'zeiKbn' => VehicleModel::ZEI_KBN,
+            'g1Types' => VehicleModel::G1_TYPES,
+            'g2Disp' => VehicleModel::G2_DISP,
             'g3Options' => VehicleModel::G3_OPTIONS,
             'g4Options' => VehicleModel::G4_OPTIONS,
             'g5Options' => VehicleModel::G5_OPTIONS,
@@ -43,10 +43,10 @@ class VehicleModelController extends Controller
         return Inertia::render('VehicleModels/Index', array_merge([
             'vehicleModels' => $vehicleModels,
             'filters' => [
-                'search'    => $search,
-                'sort'      => $sort,
+                'search' => $search,
+                'sort' => $sort,
                 'direction' => $direction,
-                'per_page'  => (string) $perPage,
+                'per_page' => (string) $perPage,
             ],
         ], $this->enums()));
     }

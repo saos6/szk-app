@@ -27,6 +27,9 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             QuoteSeeder::class,
             VehicleModelSeeder::class,
+            VehicleSeeder::class,
+            SaleSeeder::class,
+            BillingBalanceSeeder::class,
         ]);
     }
 }

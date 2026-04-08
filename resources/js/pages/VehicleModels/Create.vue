@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import VehicleModelController from '@/actions/App/Http/Controllers/VehicleModelController';
+import * as VehicleModelController from '@/actions/App/Http/Controllers/VehicleModelController';
 import VehicleModelForm from '@/components/VehicleModelForm.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';

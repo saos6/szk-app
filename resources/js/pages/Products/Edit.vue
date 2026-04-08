@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Copy } from 'lucide-vue-next';
-import ProductController from '@/actions/App/Http/Controllers/ProductController';
+import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
 import ProductForm from '@/components/ProductForm.vue';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';

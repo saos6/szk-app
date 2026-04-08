@@ -13,7 +13,7 @@ import {
     Eye,
 } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
-import QuoteController from '@/actions/App/Http/Controllers/QuoteController';
+import * as QuoteController from '@/actions/App/Http/Controllers/QuoteController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {

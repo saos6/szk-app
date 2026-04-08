@@ -12,7 +12,7 @@ import {
     Search,
 } from 'lucide-vue-next';
 import { ref, computed, watch } from 'vue';
-import VehicleModelController from '@/actions/App/Http/Controllers/VehicleModelController';
+import * as VehicleModelController from '@/actions/App/Http/Controllers/VehicleModelController';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,

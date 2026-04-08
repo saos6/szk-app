@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import QuoteController from '@/actions/App/Http/Controllers/QuoteController';
+import * as QuoteController from '@/actions/App/Http/Controllers/QuoteController';
 import QuoteForm from '@/components/QuoteForm.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';

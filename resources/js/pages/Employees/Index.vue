@@ -12,7 +12,7 @@ import {
     Search,
 } from 'lucide-vue-next';
 import { ref, computed, watch } from 'vue';
-import EmployeeController from '@/actions/App/Http/Controllers/EmployeeController';
+import * as EmployeeController from '@/actions/App/Http/Controllers/EmployeeController';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,

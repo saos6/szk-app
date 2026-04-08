@@ -3,6 +3,7 @@ import type { InertiaForm } from '@inertiajs/vue3';
 import { Plus, Trash2 } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
+import { Combobox } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -69,9 +70,20 @@ const props = defineProps<{
 
 const emit = defineEmits<{ submit: [] }>();
 
+const customerOptions = computed(() =>
+    props.customers.map((c) => ({ value: String(c.id), label: c.name })),
+);
+
 const productMap = computed(() =>
     Object.fromEntries(props.products.map((p) => [p.id, p])),
 );
+
+const productOptions = computed(() => [
+    ...props.products.map((p) => ({
+        value: String(p.id),
+        label: `[${p.code}] ${p.name}`,
+    })),
+]);
 
 function addItem() {
     props.form.items.push({
@@ -92,7 +104,7 @@ function removeItem(index: number) {
 }
 
 function onProductChange(index: number, productId: string) {
-    const id = productId === '__none__' ? null : Number(productId);
+    const id = productId ? Number(productId) : null;
     props.form.items[index].product_id = id;
 
     if (id && productMap.value[id]) {
@@ -152,26 +164,15 @@ function getItemError(index: number, field: string): string | undefined {
                     <Label
                         >得意先 <span class="text-destructive">*</span></Label
                     >
-                    <Select
+                    <Combobox
+                        :options="customerOptions"
                         :model-value="form.customer_id"
+                        placeholder="得意先を検索..."
+                        :class="{
+                            '[&_input]:border-destructive': form.errors.customer_id,
+                        }"
                         @update:model-value="(v) => (form.customer_id = v)"
-                    >
-                        <SelectTrigger
-                            :class="{
-                                'border-destructive': form.errors.customer_id,
-                            }"
-                        >
-                            <SelectValue placeholder="選択してください" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem
-                                v-for="c in customers"
-                                :key="c.id"
-                                :value="String(c.id)"
-                                >{{ c.name }}</SelectItem
-                            >
-                        </SelectContent>
-                    </Select>
+                    />
                     <p
                         v-if="form.errors.customer_id"
                         class="text-xs text-destructive"
@@ -330,7 +331,7 @@ function getItemError(index: number, field: string): string | undefined {
                     <thead class="bg-muted/50">
                         <tr>
                             <th class="px-3 py-2 text-left font-medium">
-                                商品選択
+                                商品コード
                             </th>
                             <th class="px-3 py-2 text-left font-medium">
                                 品名 <span class="text-destructive">*</span>
@@ -365,34 +366,21 @@ function getItemError(index: number, field: string): string | undefined {
                             :key="i"
                             class="border-t"
                         >
-                            <!-- 商品選択 -->
+                            <!-- 商品コード -->
                             <td class="px-2 py-1.5">
-                                <Select
+                                <Combobox
+                                    :options="productOptions"
                                     :model-value="
                                         item.product_id
                                             ? String(item.product_id)
-                                            : '__none__'
+                                            : ''
                                     "
+                                    placeholder="商品を検索..."
+                                    class="w-44"
                                     @update:model-value="
                                         (v) => onProductChange(i, v)
                                     "
-                                >
-                                    <SelectTrigger class="h-8 w-36">
-                                        <SelectValue placeholder="商品選択" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="__none__"
-                                            >—</SelectItem
-                                        >
-                                        <SelectItem
-                                            v-for="p in products"
-                                            :key="p.id"
-                                            :value="String(p.id)"
-                                        >
-                                            {{ p.code }} {{ p.name }}
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                />
                             </td>
                             <!-- 品名 -->
                             <td class="px-2 py-1.5">

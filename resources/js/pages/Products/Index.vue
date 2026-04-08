@@ -12,7 +12,7 @@ import {
     Search,
 } from 'lucide-vue-next';
 import { ref, computed, watch } from 'vue';
-import ProductController from '@/actions/App/Http/Controllers/ProductController';
+import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {

@@ -12,7 +12,7 @@ import {
     Search,
 } from 'lucide-vue-next';
 import { ref, computed, watch } from 'vue';
-import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
+import * as CustomerController from '@/actions/App/Http/Controllers/CustomerController';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,

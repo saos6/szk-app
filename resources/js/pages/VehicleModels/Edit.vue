@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Copy } from 'lucide-vue-next';
-import VehicleModelController from '@/actions/App/Http/Controllers/VehicleModelController';
+import * as VehicleModelController from '@/actions/App/Http/Controllers/VehicleModelController';
 import VehicleModelForm from '@/components/VehicleModelForm.vue';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';

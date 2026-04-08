@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import { Copy, FileDown, Pencil } from 'lucide-vue-next';
-import QuoteController from '@/actions/App/Http/Controllers/QuoteController';
+import * as QuoteController from '@/actions/App/Http/Controllers/QuoteController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';

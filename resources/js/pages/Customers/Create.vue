@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
+import * as CustomerController from '@/actions/App/Http/Controllers/CustomerController';
 import CustomerForm from '@/components/CustomerForm.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';

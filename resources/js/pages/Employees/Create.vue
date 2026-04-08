@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import EmployeeController from '@/actions/App/Http/Controllers/EmployeeController';
+import * as EmployeeController from '@/actions/App/Http/Controllers/EmployeeController';
 import EmployeeForm from '@/components/EmployeeForm.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';

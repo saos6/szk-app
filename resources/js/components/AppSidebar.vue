@@ -11,13 +11,19 @@ import {
     Settings2,
     FileText,
     Bike,
+    Car,
+    ShoppingCart,
+    Receipt,
 } from 'lucide-vue-next';
-import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
-import DeptController from '@/actions/App/Http/Controllers/DeptController';
-import EmployeeController from '@/actions/App/Http/Controllers/EmployeeController';
-import ProductController from '@/actions/App/Http/Controllers/ProductController';
-import QuoteController from '@/actions/App/Http/Controllers/QuoteController';
-import VehicleModelController from '@/actions/App/Http/Controllers/VehicleModelController';
+import * as BillingBalanceController from '@/actions/App/Http/Controllers/BillingBalanceController';
+import * as CustomerController from '@/actions/App/Http/Controllers/CustomerController';
+import * as DeptController from '@/actions/App/Http/Controllers/DeptController';
+import * as EmployeeController from '@/actions/App/Http/Controllers/EmployeeController';
+import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
+import * as QuoteController from '@/actions/App/Http/Controllers/QuoteController';
+import * as SaleController from '@/actions/App/Http/Controllers/SaleController';
+import * as VehicleController from '@/actions/App/Http/Controllers/VehicleController';
+import * as VehicleModelController from '@/actions/App/Http/Controllers/VehicleModelController';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -39,6 +45,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: '売上',
+        href: SaleController.index.url(),
+        icon: ShoppingCart,
     },
     {
         title: '見積',
@@ -70,9 +81,19 @@ const mainNavItems: NavItem[] = [
                 icon: Package,
             },
             {
+                title: '車両マスタ',
+                href: VehicleController.index.url(),
+                icon: Car,
+            },
+            {
                 title: '車両機種マスタ',
                 href: VehicleModelController.index.url(),
                 icon: Bike,
+            },
+            {
+                title: '請求残高マスタ',
+                href: BillingBalanceController.index.url(),
+                icon: Receipt,
             },
         ],
     },

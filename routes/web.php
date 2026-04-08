@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Controllers\BillingBalanceController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeptController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\SaleController;
+use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\VehicleModelController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -37,10 +40,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('products/{product}/replicate', [ProductController::class, 'replicate'])->name('products.replicate');
     Route::resource('products', ProductController::class)->except(['show']);
 
+    // 車両マスタ
+    Route::get('vehicles/export', [VehicleController::class, 'export'])->name('vehicles.export');
+    Route::get('vehicles/{vehicle}/replicate', [VehicleController::class, 'replicate'])->name('vehicles.replicate');
+    Route::resource('vehicles', VehicleController::class)->except(['show']);
+
     // 車両機種マスタ
     Route::get('vehicle-models/export', [VehicleModelController::class, 'export'])->name('vehicle-models.export');
     Route::get('vehicle-models/{vehicle_model}/replicate', [VehicleModelController::class, 'replicate'])->name('vehicle-models.replicate');
     Route::resource('vehicle-models', VehicleModelController::class)->except(['show']);
+
+    // 請求残高マスタ
+    Route::get('billing-balances/export', [BillingBalanceController::class, 'export'])->name('billing-balances.export');
+    Route::get('billing-balances/{billing_balance}/replicate', [BillingBalanceController::class, 'replicate'])->name('billing-balances.replicate');
+    Route::resource('billing-balances', BillingBalanceController::class)->except(['show']);
+
+    // 売上
+    Route::get('sales/export', [SaleController::class, 'exportMethod'])->name('sales.export');
+    Route::get('sales/{sale}/replicate', [SaleController::class, 'replicate'])->name('sales.replicate');
+    Route::get('sales/{sale}/pdf', [SaleController::class, 'pdf'])->name('sales.pdf');
+    Route::resource('sales', SaleController::class);
 
     // 見積
     Route::get('quotes/export', [QuoteController::class, 'exportMethod'])->name('quotes.export');
