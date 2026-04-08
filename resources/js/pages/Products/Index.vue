@@ -6,6 +6,7 @@ import {
     ArrowDown,
     Download,
     Plus,
+    Eye,
     Pencil,
     Trash2,
     Columns3,
@@ -516,6 +517,16 @@ function formatPrice(val: string | null): string {
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex gap-1">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        class="h-8 w-8"
+                                        as-child
+                                    >
+                                        <Link :href="ProductController.show.url(product.id)">
+                                            <Eye class="h-4 w-4" />
+                                        </Link>
+                                    </Button>
                                     <Button
                                         variant="ghost"
                                         size="icon"

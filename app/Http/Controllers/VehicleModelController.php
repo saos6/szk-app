@@ -72,6 +72,16 @@ class VehicleModelController extends Controller
         ));
     }
 
+    public function show(VehicleModel $vehicleModel): Response
+    {
+        abort_if($vehicleModel->is_deleted, 404);
+
+        return Inertia::render('VehicleModels/Show', array_merge(
+            ['vehicleModel' => $vehicleModel],
+            $this->enums(),
+        ));
+    }
+
     public function store(VehicleModelRequest $request): RedirectResponse
     {
         VehicleModel::create($request->validated());

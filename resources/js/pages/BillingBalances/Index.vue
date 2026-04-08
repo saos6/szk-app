@@ -5,12 +5,12 @@ import {
     ArrowUp,
     ArrowDown,
     Download,
+    Eye,
     Plus,
     Pencil,
     Trash2,
     Columns3,
     Search,
-    Copy,
 } from 'lucide-vue-next';
 import { ref, computed, watch } from 'vue';
 import * as BillingBalanceController from '@/actions/App/Http/Controllers/BillingBalanceController';
@@ -414,18 +414,16 @@ function fmtDate(val: string | null): string {
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex gap-1">
-                                    <!-- 複製 -->
+                                    <!-- 参照 -->
                                     <Button
                                         variant="ghost"
                                         size="icon"
                                         class="h-8 w-8"
-                                        title="複製"
+                                        title="参照"
                                         as-child
                                     >
-                                        <Link
-                                            :href="BillingBalanceController.replicate.url(billing.id)"
-                                        >
-                                            <Copy class="h-4 w-4" />
+                                        <Link :href="BillingBalanceController.show.url(billing.id)">
+                                            <Eye class="h-4 w-4" />
                                         </Link>
                                     </Button>
                                     <!-- 編集 -->
@@ -436,9 +434,7 @@ function fmtDate(val: string | null): string {
                                         title="編集"
                                         as-child
                                     >
-                                        <Link
-                                            :href="BillingBalanceController.edit.url(billing.id)"
-                                        >
+                                        <Link :href="BillingBalanceController.edit.url(billing.id)">
                                             <Pencil class="h-4 w-4" />
                                         </Link>
                                     </Button>

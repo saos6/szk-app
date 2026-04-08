@@ -6,6 +6,7 @@ import {
     ArrowDown,
     Download,
     Plus,
+    Eye,
     Pencil,
     Trash2,
     Columns3,
@@ -485,6 +486,16 @@ function paginationLabel(label: string): string {
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex gap-1">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        class="h-8 w-8"
+                                        as-child
+                                    >
+                                        <Link :href="DeptController.show.url(dept.id)">
+                                            <Eye class="h-4 w-4" />
+                                        </Link>
+                                    </Button>
                                     <Button
                                         variant="ghost"
                                         size="icon"

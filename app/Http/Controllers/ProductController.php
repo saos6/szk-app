@@ -69,6 +69,18 @@ class ProductController extends Controller
         ]);
     }
 
+    public function show(Product $product): Response
+    {
+        abort_if($product->is_deleted, 404);
+
+        return Inertia::render('Products/Show', [
+            'product' => $product,
+            'categories' => Product::CATEGORIES,
+            'taxRates' => Product::TAX_RATES,
+            'statuses' => Product::STATUSES,
+        ]);
+    }
+
     public function store(ProductRequest $request): RedirectResponse
     {
         Product::create($request->validated());

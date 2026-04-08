@@ -23,37 +23,37 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // 所属マスタ
     Route::get('depts/export', [DeptController::class, 'export'])->name('depts.export');
     Route::get('depts/{dept}/replicate', [DeptController::class, 'replicate'])->name('depts.replicate');
-    Route::resource('depts', DeptController::class)->except(['show']);
+    Route::resource('depts', DeptController::class);
 
     // 社員マスタ
     Route::get('employees/export', [EmployeeController::class, 'export'])->name('employees.export');
     Route::get('employees/{employee}/replicate', [EmployeeController::class, 'replicate'])->name('employees.replicate');
-    Route::resource('employees', EmployeeController::class)->except(['show']);
+    Route::resource('employees', EmployeeController::class);
 
     // 得意先マスタ
     Route::get('customers/export', [CustomerController::class, 'export'])->name('customers.export');
     Route::get('customers/{customer}/replicate', [CustomerController::class, 'replicate'])->name('customers.replicate');
-    Route::resource('customers', CustomerController::class)->except(['show']);
+    Route::resource('customers', CustomerController::class);
 
     // 商品マスタ
     Route::get('products/export', [ProductController::class, 'export'])->name('products.export');
     Route::get('products/{product}/replicate', [ProductController::class, 'replicate'])->name('products.replicate');
-    Route::resource('products', ProductController::class)->except(['show']);
+    Route::resource('products', ProductController::class);
 
     // 車両マスタ
     Route::get('vehicles/export', [VehicleController::class, 'export'])->name('vehicles.export');
     Route::get('vehicles/{vehicle}/replicate', [VehicleController::class, 'replicate'])->name('vehicles.replicate');
-    Route::resource('vehicles', VehicleController::class)->except(['show']);
+    Route::resource('vehicles', VehicleController::class);
 
     // 車両機種マスタ
     Route::get('vehicle-models/export', [VehicleModelController::class, 'export'])->name('vehicle-models.export');
     Route::get('vehicle-models/{vehicle_model}/replicate', [VehicleModelController::class, 'replicate'])->name('vehicle-models.replicate');
-    Route::resource('vehicle-models', VehicleModelController::class)->except(['show']);
+    Route::resource('vehicle-models', VehicleModelController::class);
 
     // 請求残高マスタ
     Route::get('billing-balances/export', [BillingBalanceController::class, 'export'])->name('billing-balances.export');
     Route::get('billing-balances/{billing_balance}/replicate', [BillingBalanceController::class, 'replicate'])->name('billing-balances.replicate');
-    Route::resource('billing-balances', BillingBalanceController::class)->except(['show']);
+    Route::resource('billing-balances', BillingBalanceController::class);
 
     // 売上
     Route::get('sales/export', [SaleController::class, 'exportMethod'])->name('sales.export');

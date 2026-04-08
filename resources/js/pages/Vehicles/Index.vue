@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router, Head, Link } from '@inertiajs/vue3';
-import { ArrowUpDown, ArrowUp, ArrowDown, Download, Plus, Pencil, Trash2, Columns3, Search } from 'lucide-vue-next';
+import { ArrowUpDown, ArrowUp, ArrowDown, Download, Plus, Eye, Pencil, Trash2, Columns3, Search } from 'lucide-vue-next';
 import { ref, computed, watch } from 'vue';
 import * as VehicleController from '@/actions/App/Http/Controllers/VehicleController';
 import { Badge } from '@/components/ui/badge';
@@ -259,6 +259,9 @@ function formatDate(val: string | null) { return val ? val : '—'; }
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex gap-1">
+                                    <Button variant="ghost" size="icon" class="h-8 w-8" as-child>
+                                        <Link :href="VehicleController.show.url(v.id)"><Eye class="h-4 w-4" /></Link>
+                                    </Button>
                                     <Button variant="ghost" size="icon" class="h-8 w-8" as-child>
                                         <Link :href="VehicleController.edit.url(v.id)"><Pencil class="h-4 w-4" /></Link>
                                     </Button>

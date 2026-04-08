@@ -72,6 +72,15 @@ class BillingBalanceController extends Controller
         return redirect()->route('billing-balances.index')->with('success', '請求残高を登録しました。');
     }
 
+    public function show(BillingBalance $billingBalance): Response
+    {
+        abort_if($billingBalance->is_deleted, 404);
+
+        return Inertia::render('BillingBalances/Show', [
+            'billingBalance' => $billingBalance->load('customer'),
+        ]);
+    }
+
     public function edit(BillingBalance $billingBalance): Response
     {
         abort_if($billingBalance->is_deleted, 404);

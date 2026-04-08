@@ -77,6 +77,15 @@ class DeptController extends Controller
         return redirect()->route('depts.index')->with('success', '所属を登録しました。');
     }
 
+    public function show(Dept $dept): Response
+    {
+        abort_if($dept->is_deleted, 404);
+
+        return Inertia::render('Depts/Show', [
+            'dept' => $dept->load('parent'),
+        ]);
+    }
+
     public function edit(Dept $dept): Response
     {
         $parents = Dept::active()

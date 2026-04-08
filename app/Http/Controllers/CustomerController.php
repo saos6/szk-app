@@ -71,6 +71,16 @@ class CustomerController extends Controller
         ]);
     }
 
+    public function show(Customer $customer): Response
+    {
+        abort_if($customer->is_deleted, 404);
+
+        return Inertia::render('Customers/Show', [
+            'customer' => $customer->load('employee'),
+            'paymentCycles' => Customer::PAYMENT_CYCLES,
+        ]);
+    }
+
     public function store(CustomerRequest $request): RedirectResponse
     {
         Customer::create($request->validated());

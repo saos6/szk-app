@@ -73,6 +73,15 @@ class EmployeeController extends Controller
         ]);
     }
 
+    public function show(Employee $employee): Response
+    {
+        abort_if($employee->is_deleted, 404);
+
+        return Inertia::render('Employees/Show', [
+            'employee' => $employee->load('dept'),
+        ]);
+    }
+
     public function store(EmployeeRequest $request): RedirectResponse
     {
         Employee::create($request->validated());
