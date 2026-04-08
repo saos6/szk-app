@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             CustomerSeeder::class,
             ProductSeeder::class,
             QuoteSeeder::class,
+            VehicleModelSeeder::class,
         ]);
     }
 }
