@@ -64,6 +64,7 @@ function submit() {
                     :errors="form.errors"
                     :processing="form.processing"
                     submit-label="登録する"
+                    :cancel-href="BillingBalanceController.index.url()"
                     @submit="submit"
                 />
             </div>

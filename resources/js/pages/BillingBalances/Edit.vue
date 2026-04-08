@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useForm, Head, Link } from '@inertiajs/vue3';
+import { Copy } from 'lucide-vue-next';
 import * as BillingBalanceController from '@/actions/App/Http/Controllers/BillingBalanceController';
 import BillingBalanceForm from '@/components/BillingBalanceForm.vue';
 import { Button } from '@/components/ui/button';
@@ -52,20 +53,23 @@ function submit() {
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
         <Head title="請求残高 編集" />
-        <div class="flex flex-col gap-4 p-4">
-            <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold">請求残高 編集</h1>
-                <Button variant="outline" size="sm" as-child>
-                    <Link :href="BillingBalanceController.index.url()">一覧へ戻る</Link>
-                </Button>
-            </div>
-            <div class="rounded-md border p-6">
+        <div class="max-w-4xl p-6">
+            <div class="rounded-lg border bg-card p-6 shadow-sm">
+                <div class="mb-6 flex items-center justify-between">
+                    <h1 class="text-xl font-bold">請求残高 編集</h1>
+                    <Button variant="outline" size="sm" as-child>
+                        <Link :href="BillingBalanceController.replicate.url(billingBalance.id)">
+                            <Copy class="mr-1.5 h-4 w-4" />この請求残高を複製
+                        </Link>
+                    </Button>
+                </div>
                 <BillingBalanceForm
                     v-model="form"
                     :customers="customers"
                     :errors="form.errors"
                     :processing="form.processing"
                     submit-label="更新する"
+                    :cancel-href="BillingBalanceController.show.url(billingBalance.id)"
                     @submit="submit"
                 />
             </div>

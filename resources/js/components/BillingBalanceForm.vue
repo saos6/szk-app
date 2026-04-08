@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { Link } from '@inertiajs/vue3';
 import { Combobox } from '@/components/ui/combobox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +29,7 @@ interface Props {
     errors: Partial<Record<keyof FormData, string>>;
     processing: boolean;
     submitLabel?: string;
+    cancelHref: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -181,7 +183,10 @@ function recalcTotal() {
             </div>
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex justify-end gap-2 pt-2">
+            <Button variant="outline" type="button" as-child>
+                <Link :href="cancelHref">キャンセル</Link>
+            </Button>
             <Button type="submit" :disabled="processing">
                 {{ processing ? '処理中...' : submitLabel }}
             </Button>
