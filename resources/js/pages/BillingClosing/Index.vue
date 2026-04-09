@@ -54,8 +54,8 @@ defineOptions({
 
 const form = useForm({
     closing_date: props.closingDate ?? props.defaultClosingDate,
-    from_code: props.fromCode ?? '0000',
-    to_code: props.toCode ?? '9999',
+    from_code: props.fromCode ?? '',
+    to_code: props.toCode ?? '',
     mode: (props.mode === 'confirm' || props.mode === 'cancel' ? props.mode : 'aggregate') as 'aggregate' | 'confirm' | 'cancel',
 });
 
@@ -129,9 +129,9 @@ const successRows = computed(() => props.results?.filter(r => !r.error) ?? []);
                 <div class="flex flex-col gap-1.5">
                     <Label>得意先コード</Label>
                     <div class="flex items-center gap-2">
-                        <Input v-model="form.from_code" type="text" placeholder="0000" class="w-28" />
+                        <Input v-model="form.from_code" type="text" placeholder="（例: C001）" class="w-32" />
                         <span class="text-muted-foreground">〜</span>
-                        <Input v-model="form.to_code" type="text" placeholder="9999" class="w-28" />
+                        <Input v-model="form.to_code" type="text" placeholder="（例: C999）" class="w-32" />
                     </div>
                 </div>
 

@@ -24,14 +24,14 @@ class BillingClosingController extends Controller
     {
         $request->validate([
             'closing_date' => ['required', 'date'],
-            'from_code'    => ['required', 'string', 'max:20'],
-            'to_code'      => ['required', 'string', 'max:20'],
+            'from_code'    => ['nullable', 'string', 'max:20'],
+            'to_code'      => ['nullable', 'string', 'max:20'],
             'mode'         => ['required', 'in:aggregate,confirm,cancel'],
         ]);
 
         $closingDate = $request->input('closing_date');
-        $fromCode    = $request->input('from_code');
-        $toCode      = $request->input('to_code');
+        $fromCode    = (string) $request->input('from_code', '');
+        $toCode      = (string) $request->input('to_code', '');
         $mode        = $request->input('mode');
 
         return match ($mode) {
@@ -45,8 +45,8 @@ class BillingClosingController extends Controller
     {
         $request->validate([
             'closing_date' => ['required', 'date'],
-            'from_code'    => ['required', 'string'],
-            'to_code'      => ['required', 'string'],
+            'from_code'    => ['nullable', 'string'],
+            'to_code'      => ['nullable', 'string'],
             'mode'         => ['required', 'in:aggregate,confirm'],
         ]);
 

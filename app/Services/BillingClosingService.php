@@ -34,7 +34,8 @@ class BillingClosingService
         $date = Carbon::parse($closingDate);
 
         $customers = Customer::active()
-            ->whereBetween('code', [$fromCode, $toCode])
+            ->when($fromCode !== '', fn ($q) => $q->where('code', '>=', $fromCode))
+            ->when($toCode !== '', fn ($q) => $q->where('code', '<=', $toCode))
             ->orderBy('code')
             ->get();
 
@@ -51,7 +52,8 @@ class BillingClosingService
         $date = Carbon::parse($closingDate);
 
         $customers = Customer::active()
-            ->whereBetween('code', [$fromCode, $toCode])
+            ->when($fromCode !== '', fn ($q) => $q->where('code', '>=', $fromCode))
+            ->when($toCode !== '', fn ($q) => $q->where('code', '<=', $toCode))
             ->orderBy('code')
             ->get();
 
@@ -135,7 +137,10 @@ class BillingClosingService
             ->with('customer')
             ->where('status', 'confirmed')
             ->where('billing_date', $date->toDateString())
-            ->whereHas('customer', fn ($q) => $q->whereBetween('code', [$fromCode, $toCode]))
+            ->whereHas('customer', function ($q) use ($fromCode, $toCode) {
+                $q->when($fromCode !== '', fn ($q2) => $q2->where('code', '>=', $fromCode))
+                  ->when($toCode !== '', fn ($q2) => $q2->where('code', '<=', $toCode));
+            })
             ->get();
 
         $results = collect();
@@ -198,7 +203,10 @@ class BillingClosingService
             ->with('customer')
             ->where('status', 'confirmed')
             ->where('billing_date', $date->toDateString())
-            ->whereHas('customer', fn ($q) => $q->whereBetween('code', [$fromCode, $toCode]))
+            ->whereHas('customer', function ($q) use ($fromCode, $toCode) {
+                $q->when($fromCode !== '', fn ($q2) => $q2->where('code', '>=', $fromCode))
+                  ->when($toCode !== '', fn ($q2) => $q2->where('code', '<=', $toCode));
+            })
             ->get()
             ->map(function (BillingBalance $bb) use ($date) {
                 $hasNewer = BillingBalance::active()
