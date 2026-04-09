@@ -36,7 +36,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const form = useForm({
-    billing_date:   props.billingBalance.billing_date ?? '',
+    billing_date:   String(props.billingBalance.billing_date ?? '').substring(0, 10),
     customer_id:    String(props.billingBalance.customer_id),
     prev_amount:    props.billingBalance.prev_amount,
     sales_amount:   props.billingBalance.sales_amount,
@@ -64,10 +64,8 @@ function submit() {
                     </Button>
                 </div>
                 <BillingBalanceForm
-                    v-model="form"
+                    :form="form"
                     :customers="customers"
-                    :errors="form.errors"
-                    :processing="form.processing"
                     submit-label="更新する"
                     :cancel-href="BillingBalanceController.show.url(billingBalance.id)"
                     @submit="submit"

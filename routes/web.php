@@ -5,11 +5,14 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeptController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\VehicleModelController;
+use App\Http\Controllers\InventoryBalanceController;
+use App\Http\Controllers\WarehouseController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -50,10 +53,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('vehicle-models/{vehicle_model}/replicate', [VehicleModelController::class, 'replicate'])->name('vehicle-models.replicate');
     Route::resource('vehicle-models', VehicleModelController::class);
 
+    // 在庫残高マスタ
+    Route::get('inventory-balances/export', [InventoryBalanceController::class, 'export'])->name('inventory-balances.export');
+    Route::get('inventory-balances/{inventory_balance}/replicate', [InventoryBalanceController::class, 'replicate'])->name('inventory-balances.replicate');
+    Route::resource('inventory-balances', InventoryBalanceController::class);
+
+    // 倉庫マスタ
+    Route::get('warehouses/export', [WarehouseController::class, 'export'])->name('warehouses.export');
+    Route::get('warehouses/{warehouse}/replicate', [WarehouseController::class, 'replicate'])->name('warehouses.replicate');
+    Route::resource('warehouses', WarehouseController::class);
+
     // 請求残高マスタ
     Route::get('billing-balances/export', [BillingBalanceController::class, 'export'])->name('billing-balances.export');
     Route::get('billing-balances/{billing_balance}/replicate', [BillingBalanceController::class, 'replicate'])->name('billing-balances.replicate');
     Route::resource('billing-balances', BillingBalanceController::class);
+
+    // 入金
+    Route::get('payments/export', [PaymentController::class, 'exportMethod'])->name('payments.export');
+    Route::get('payments/{payment}/replicate', [PaymentController::class, 'replicate'])->name('payments.replicate');
+    Route::get('payments/{payment}/pdf', [PaymentController::class, 'pdf'])->name('payments.pdf');
+    Route::resource('payments', PaymentController::class);
 
     // 売上
     Route::get('sales/export', [SaleController::class, 'exportMethod'])->name('sales.export');

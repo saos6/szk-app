@@ -111,6 +111,7 @@ class SaleSeeder extends Seeder
                     'vehicle_id' => $vehicle?->id,
                     'kisyu_cd' => $vehicle?->kisyu_cd,
                     'frame_no' => $itemDef['frame_no'],
+                    'warehouse_code' => $itemDef['warehouse_code'] ?? null,
                     'iro_cd' => $vehicle?->iro_cd,
                     'kisyu_nm' => $vehicle?->kisyu_nm,
                     'quantity' => $qty,

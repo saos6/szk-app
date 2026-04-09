@@ -59,10 +59,8 @@ function submit() {
             </div>
             <div class="rounded-md border p-6">
                 <BillingBalanceForm
-                    v-model="form"
+                    :form="form"
                     :customers="customers"
-                    :errors="form.errors"
-                    :processing="form.processing"
                     submit-label="登録する"
                     :cancel-href="BillingBalanceController.index.url()"
                     @submit="submit"

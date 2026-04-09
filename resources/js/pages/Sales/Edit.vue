@@ -22,10 +22,15 @@ interface VehicleOption {
     sre_tan: string;
     uri_tan: string;
 }
+interface Warehouse {
+    code: string;
+    name: string;
+}
 interface SaleItemData {
     vehicle_id: number | null;
     kisyu_cd: string | null;
     frame_no: string | null;
+    warehouse_code: string | null;
     iro_cd: string | null;
     kisyu_nm: string | null;
     quantity: string;
@@ -55,6 +60,7 @@ const props = defineProps<{
     customers: Customer[];
     employees: Employee[];
     vehicles: VehicleOption[];
+    warehouses: Warehouse[];
     statuses: Record<string, string>;
 }>();
 
@@ -75,9 +81,10 @@ const form = useForm({
     remarks:       props.sale.remarks ?? '',
     items: props.sale.items.map((item) => ({
         vehicle_id:  item.vehicle_id,
-        kisyu_cd:    item.kisyu_cd ?? '',
-        frame_no:    item.frame_no ?? '',
-        iro_cd:      item.iro_cd ?? '',
+        kisyu_cd:       item.kisyu_cd ?? '',
+        frame_no:       item.frame_no ?? '',
+        warehouse_code: item.warehouse_code ?? '',
+        iro_cd:         item.iro_cd ?? '',
         kisyu_nm:    item.kisyu_nm ?? '',
         quantity:    item.quantity,
         unit:        item.unit ?? '台',
@@ -110,6 +117,7 @@ function submit() {
                 :customers="customers"
                 :employees="employees"
                 :vehicles="vehicles"
+                :warehouses="warehouses"
                 :statuses="statuses"
                 :cancel-href="SaleController.index.url()"
                 submit-label="更新"

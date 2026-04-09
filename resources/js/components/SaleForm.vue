@@ -32,10 +32,15 @@ interface VehicleOption {
     sre_tan: string;
     uri_tan: string;
 }
+interface Warehouse {
+    code: string;
+    name: string;
+}
 interface SaleItem {
     vehicle_id: number | null;
     kisyu_cd: string;
     frame_no: string;
+    warehouse_code: string;
     iro_cd: string;
     kisyu_nm: string;
     quantity: string;
@@ -64,6 +69,7 @@ const props = defineProps<{
     customers: Customer[];
     employees: Employee[];
     vehicles: VehicleOption[];
+    warehouses: Warehouse[];
     statuses: Record<string, string>;
     cancelHref: string;
     submitLabel: string;
@@ -95,6 +101,11 @@ const kisyuCdOptions = computed(() =>
     kisyuCdList.value.map((cd) => ({ value: cd, label: cd })),
 );
 
+// 倉庫コードのコンボボックス用選択肢
+const warehouseOptions = computed(() =>
+    props.warehouses.map((w) => ({ value: w.code, label: `${w.code} ${w.name}` })),
+);
+
 // 機種コードで絞り込んだ車両一覧
 function frameNoList(kisyuCd: string): VehicleOption[] {
     return props.vehicles.filter((v) => v.kisyu_cd === kisyuCd);
@@ -113,6 +124,7 @@ function addItem() {
         vehicle_id: null,
         kisyu_cd: '',
         frame_no: '',
+        warehouse_code: '',
         iro_cd: '',
         kisyu_nm: '',
         quantity: '1',
@@ -377,6 +389,9 @@ function getItemError(index: number, field: string): string | undefined {
                                 フレームNo
                             </th>
                             <th class="px-3 py-2 text-left font-medium">
+                                倉庫
+                            </th>
+                            <th class="px-3 py-2 text-left font-medium">
                                 色コード
                             </th>
                             <th class="px-3 py-2 text-left font-medium">
@@ -437,6 +452,16 @@ function getItemError(index: number, field: string): string | undefined {
                                     @update:model-value="
                                         (v) => onFrameNoChange(i, v)
                                     "
+                                />
+                            </td>
+                            <!-- 倉庫コード -->
+                            <td class="px-2 py-1.5">
+                                <Combobox
+                                    :options="warehouseOptions"
+                                    :model-value="item.warehouse_code"
+                                    placeholder="倉庫..."
+                                    class="w-32"
+                                    @update:model-value="(v) => (item.warehouse_code = v)"
                                 />
                             </td>
                             <!-- 色コード（自動） -->
@@ -564,7 +589,7 @@ function getItemError(index: number, field: string): string | undefined {
                     <tfoot class="border-t bg-muted/30 font-medium">
                         <tr>
                             <td
-                                colspan="9"
+                                colspan="10"
                                 class="px-3 py-2 text-right text-muted-foreground"
                             >
                                 合計金額（税抜）
@@ -581,7 +606,7 @@ function getItemError(index: number, field: string): string | undefined {
                         </tr>
                         <tr>
                             <td
-                                colspan="9"
+                                colspan="10"
                                 class="px-3 py-2 text-right text-muted-foreground"
                             >
                                 消費税
@@ -592,7 +617,7 @@ function getItemError(index: number, field: string): string | undefined {
                             <td colspan="3"></td>
                         </tr>
                         <tr class="text-base">
-                            <td colspan="9" class="px-3 py-2 text-right">
+                            <td colspan="10" class="px-3 py-2 text-right">
                                 税込み金額
                             </td>
                             <td

@@ -22,10 +22,15 @@ interface VehicleOption {
     sre_tan: string;
     uri_tan: string;
 }
+interface Warehouse {
+    code: string;
+    name: string;
+}
 interface PrefillItem {
     vehicle_id: number | null;
     kisyu_cd: string;
     frame_no: string;
+    warehouse_code: string;
     iro_cd: string;
     kisyu_nm: string;
     quantity: string;
@@ -50,6 +55,7 @@ const props = defineProps<{
     customers: Customer[];
     employees: Employee[];
     vehicles: VehicleOption[];
+    warehouses: Warehouse[];
     statuses: Record<string, string>;
     prefill?: Prefill;
 }>();
@@ -67,6 +73,7 @@ const defaultItem = {
     vehicle_id: null as number | null,
     kisyu_cd: '',
     frame_no: '',
+    warehouse_code: '',
     iro_cd: '',
     kisyu_nm: '',
     quantity: '1',
@@ -112,6 +119,7 @@ function submit() {
                 :customers="customers"
                 :employees="employees"
                 :vehicles="vehicles"
+                :warehouses="warehouses"
                 :statuses="statuses"
                 :cancel-href="SaleController.index.url()"
                 submit-label="登録"

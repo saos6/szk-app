@@ -10,12 +10,18 @@ import {
     Package,
     Settings2,
     FileText,
+    Banknote,
     Bike,
     Car,
     ShoppingCart,
     Receipt,
+    Warehouse,
+    BoxesIcon,
 } from 'lucide-vue-next';
 import * as BillingBalanceController from '@/actions/App/Http/Controllers/BillingBalanceController';
+import * as PaymentController from '@/actions/App/Http/Controllers/PaymentController';
+import * as InventoryBalanceController from '@/actions/App/Http/Controllers/InventoryBalanceController';
+import * as WarehouseController from '@/actions/App/Http/Controllers/WarehouseController';
 import * as CustomerController from '@/actions/App/Http/Controllers/CustomerController';
 import * as DeptController from '@/actions/App/Http/Controllers/DeptController';
 import * as EmployeeController from '@/actions/App/Http/Controllers/EmployeeController';
@@ -50,6 +56,11 @@ const mainNavItems: NavItem[] = [
         title: '売上',
         href: SaleController.index.url(),
         icon: ShoppingCart,
+    },
+    {
+        title: '入金',
+        href: PaymentController.index.url(),
+        icon: Banknote,
     },
     {
         title: '見積',
@@ -94,6 +105,16 @@ const mainNavItems: NavItem[] = [
                 title: '請求残高マスタ',
                 href: BillingBalanceController.index.url(),
                 icon: Receipt,
+            },
+            {
+                title: '倉庫マスタ',
+                href: WarehouseController.index.url(),
+                icon: Warehouse,
+            },
+            {
+                title: '在庫残高マスタ',
+                href: InventoryBalanceController.index.url(),
+                icon: BoxesIcon,
             },
         ],
     },

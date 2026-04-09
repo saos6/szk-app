@@ -9,6 +9,7 @@ use App\Models\Employee;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\Vehicle;
+use App\Models\Warehouse;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -84,6 +85,7 @@ class SaleController extends Controller
                 'vehicle_id' => $item->vehicle_id,
                 'kisyu_cd' => $item->kisyu_cd ?? '',
                 'frame_no' => $item->frame_no ?? '',
+                'warehouse_code' => $item->warehouse_code ?? '',
                 'iro_cd' => $item->iro_cd ?? '',
                 'kisyu_nm' => $item->kisyu_nm ?? '',
                 'quantity' => $item->quantity,
@@ -197,6 +199,7 @@ class SaleController extends Controller
                 ->orderBy('kisyu_cd')
                 ->orderBy('frame_no')
                 ->get(['id', 'kisyu_cd', 'frame_no', 'iro_cd', 'kisyu_nm', 'sre_tan', 'uri_tan']),
+            'warehouses' => Warehouse::active()->orderBy('code')->get(['code', 'name']),
             'statuses' => Sale::STATUSES,
         ];
     }
@@ -237,6 +240,7 @@ class SaleController extends Controller
                 'vehicle_id' => $item['vehicle_id'] ?: null,
                 'kisyu_cd' => $item['kisyu_cd'] ?? null,
                 'frame_no' => $item['frame_no'] ?? null,
+                'warehouse_code' => $item['warehouse_code'] ?: null,
                 'iro_cd' => $item['iro_cd'] ?? null,
                 'kisyu_nm' => $item['kisyu_nm'] ?? null,
                 'quantity' => $qty,

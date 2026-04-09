@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Sale;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Models\Warehouse;
 
 class SaleRequest extends FormRequest
 {
@@ -28,6 +29,7 @@ class SaleRequest extends FormRequest
             'items.*.vehicle_id' => ['nullable', 'exists:vehicles,id'],
             'items.*.kisyu_cd' => ['nullable', 'string', 'max:8'],
             'items.*.frame_no' => ['nullable', 'string', 'max:30'],
+            'items.*.warehouse_code' => ['nullable', 'string', 'max:20', Rule::exists('warehouses', 'code')->where('is_deleted', false)],
             'items.*.iro_cd' => ['nullable', 'string', 'max:6'],
             'items.*.kisyu_nm' => ['nullable', 'string', 'max:200'],
             'items.*.quantity' => ['required', 'numeric', 'min:0.01'],

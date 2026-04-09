@@ -13,6 +13,7 @@ class SaleItem extends Model
         'vehicle_id',
         'kisyu_cd',
         'frame_no',
+        'warehouse_code',
         'iro_cd',
         'kisyu_nm',
         'quantity',

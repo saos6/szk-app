@@ -12,6 +12,7 @@ interface SaleItem {
     line_no: number;
     kisyu_cd: string | null;
     frame_no: string | null;
+    warehouse_code: string | null;
     iro_cd: string | null;
     kisyu_nm: string | null;
     quantity: string;
@@ -167,6 +168,7 @@ function fmtDate(val: string | null): string {
                                 <th class="px-3 py-2 text-left font-medium">#</th>
                                 <th class="px-3 py-2 text-left font-medium">機種名</th>
                                 <th class="px-3 py-2 text-left font-medium">フレームNo</th>
+                                <th class="px-3 py-2 text-left font-medium">倉庫</th>
                                 <th class="px-3 py-2 text-left font-medium">色コード</th>
                                 <th class="px-3 py-2 text-right font-medium">数量</th>
                                 <th class="px-3 py-2 text-left font-medium">単位</th>
@@ -192,6 +194,9 @@ function fmtDate(val: string | null): string {
                                 </td>
                                 <td class="px-3 py-2 font-mono">
                                     {{ item.frame_no ?? '—' }}
+                                </td>
+                                <td class="px-3 py-2 text-muted-foreground">
+                                    {{ item.warehouse_code ?? '—' }}
                                 </td>
                                 <td class="px-3 py-2 text-muted-foreground">
                                     {{ item.iro_cd ?? '—' }}
@@ -225,7 +230,7 @@ function fmtDate(val: string | null): string {
                         <tfoot class="border-t bg-muted/30 font-medium">
                             <tr>
                                 <td
-                                    colspan="9"
+                                    colspan="10"
                                     class="px-3 py-2 text-right text-muted-foreground"
                                 >
                                     合計金額（税抜）
@@ -240,7 +245,7 @@ function fmtDate(val: string | null): string {
                             </tr>
                             <tr>
                                 <td
-                                    colspan="9"
+                                    colspan="10"
                                     class="px-3 py-2 text-right text-muted-foreground"
                                 >
                                     消費税
@@ -252,7 +257,7 @@ function fmtDate(val: string | null): string {
                             </tr>
                             <tr class="text-base">
                                 <td
-                                    colspan="9"
+                                    colspan="10"
                                     class="px-3 py-2 text-right"
                                 >
                                     税込み金額
