@@ -29,7 +29,7 @@ class BillingClosingService
      *   closing_start_date: string|null,
      * }>
      */
-    public function aggregate(string $closingDate, string $fromCode, string $toCode): Collection
+    public function aggregate(string $closingDate, string $fromCode = '', string $toCode = ''): Collection
     {
         $date = Carbon::parse($closingDate);
 
@@ -47,7 +47,7 @@ class BillingClosingService
     /**
      * 確定：集計結果をDBに保存し、売上・入金に確定フラグをセット
      */
-    public function confirm(string $closingDate, string $fromCode, string $toCode): Collection
+    public function confirm(string $closingDate, string $fromCode = '', string $toCode = ''): Collection
     {
         $date = Carbon::parse($closingDate);
 
@@ -129,7 +129,7 @@ class BillingClosingService
     /**
      * 取消：指定締め日の確定済みBillingBalanceを取り消す
      */
-    public function cancel(string $closingDate, string $fromCode, string $toCode): Collection
+    public function cancel(string $closingDate, string $fromCode = '', string $toCode = ''): Collection
     {
         $date = Carbon::parse($closingDate);
 
@@ -195,7 +195,7 @@ class BillingClosingService
     /**
      * 取消対象の一覧（プレビュー用）
      */
-    public function previewCancel(string $closingDate, string $fromCode, string $toCode): Collection
+    public function previewCancel(string $closingDate, string $fromCode = '', string $toCode = ''): Collection
     {
         $date = Carbon::parse($closingDate);
 

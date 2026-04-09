@@ -52,8 +52,8 @@ class BillingClosingController extends Controller
 
         $rows = $this->service->aggregate(
             $request->input('closing_date'),
-            $request->input('from_code'),
-            $request->input('to_code'),
+            (string) $request->input('from_code', ''),
+            (string) $request->input('to_code', ''),
         );
 
         $billingDate = $request->input('closing_date');
