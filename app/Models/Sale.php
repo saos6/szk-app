@@ -58,6 +58,11 @@ class Sale extends Model
         return $this->hasMany(SaleItem::class)->orderBy('line_no');
     }
 
+    public function billingBalance(): BelongsTo
+    {
+        return $this->belongsTo(BillingBalance::class);
+    }
+
     // ─── Scopes ────────────────────────────────────────────────────────
 
     public function scopeActive(Builder $query): Builder

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BillingBalanceController;
+use App\Http\Controllers\BillingClosingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeptController;
@@ -62,6 +63,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('warehouses/export', [WarehouseController::class, 'export'])->name('warehouses.export');
     Route::get('warehouses/{warehouse}/replicate', [WarehouseController::class, 'replicate'])->name('warehouses.replicate');
     Route::resource('warehouses', WarehouseController::class);
+
+    // 請求締め処理
+    Route::get('billing-closing', [BillingClosingController::class, 'index'])->name('billing-closing.index');
+    Route::post('billing-closing/execute', [BillingClosingController::class, 'execute'])->name('billing-closing.execute');
+    Route::get('billing-closing/pdf', [BillingClosingController::class, 'pdf'])->name('billing-closing.pdf');
+    Route::get('billing-closing/{billing_balance}/pdf', [BillingClosingController::class, 'pdfSingle'])->name('billing-closing.pdf-single');
 
     // 請求残高マスタ
     Route::get('billing-balances/export', [BillingBalanceController::class, 'export'])->name('billing-balances.export');

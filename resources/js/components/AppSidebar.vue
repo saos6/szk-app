@@ -17,8 +17,10 @@ import {
     Receipt,
     Warehouse,
     BoxesIcon,
+    ClipboardList,
 } from 'lucide-vue-next';
 import * as BillingBalanceController from '@/actions/App/Http/Controllers/BillingBalanceController';
+import * as BillingClosingController from '@/actions/App/Http/Controllers/BillingClosingController';
 import * as PaymentController from '@/actions/App/Http/Controllers/PaymentController';
 import * as InventoryBalanceController from '@/actions/App/Http/Controllers/InventoryBalanceController';
 import * as WarehouseController from '@/actions/App/Http/Controllers/WarehouseController';
@@ -61,6 +63,11 @@ const mainNavItems: NavItem[] = [
         title: '入金',
         href: PaymentController.index.url(),
         icon: Banknote,
+    },
+    {
+        title: '請求締め処理',
+        href: BillingClosingController.index.url(),
+        icon: ClipboardList,
     },
     {
         title: '見積',
