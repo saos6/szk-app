@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             VehicleModelSeeder::class,
             VehicleSeeder::class,
             SaleSeeder::class,
+            PurchaseSeeder::class,
             BillingBalanceSeeder::class,
             WarehouseSeeder::class,
             InventoryBalanceSeeder::class,

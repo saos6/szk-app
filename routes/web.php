@@ -9,6 +9,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\VehicleModelController;
@@ -89,6 +90,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('payments/{payment}/replicate', [PaymentController::class, 'replicate'])->name('payments.replicate');
     Route::get('payments/{payment}/pdf', [PaymentController::class, 'pdf'])->name('payments.pdf');
     Route::resource('payments', PaymentController::class);
+
+    // 仕入
+    Route::get('purchases/export', [PurchaseController::class, 'exportMethod'])->name('purchases.export');
+    Route::get('purchases/{purchase}/replicate', [PurchaseController::class, 'replicate'])->name('purchases.replicate');
+    Route::get('purchases/{purchase}/pdf', [PurchaseController::class, 'pdf'])->name('purchases.pdf');
+    Route::resource('purchases', PurchaseController::class);
 
     // 売上
     Route::get('sales/export', [SaleController::class, 'exportMethod'])->name('sales.export');
