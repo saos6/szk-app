@@ -8,10 +8,13 @@ use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\SystemSetting;
 use App\Models\Vehicle;
 use App\Models\Warehouse;
 use App\Services\InventoryService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -55,6 +58,11 @@ class SaleController extends Controller
     public function store(SaleRequest $request)
     {
         $validated = $request->validated();
+
+        if ($msg = $this->storeLockMsg($validated['sale_date'])) {
+            return back()->with('error', $msg);
+        }
+
         $items = $validated['items'];
         unset($validated['items']);
 
@@ -118,14 +126,20 @@ class SaleController extends Controller
         $sale->load(['customer', 'employee', 'items']);
 
         return Inertia::render('Sales/Show', [
-            'sale' => $sale,
+            'sale'     => $sale,
             'statuses' => Sale::STATUSES,
+            'locked'   => $this->lockMsg($sale) !== null,
         ]);
     }
 
-    public function edit(Sale $sale): Response
+    public function edit(Sale $sale): Response|RedirectResponse
     {
         abort_if($sale->is_deleted, 404);
+
+        if ($msg = $this->lockMsg($sale)) {
+            return redirect()->route('sales.show', $sale)->with('error', $msg);
+        }
+
         $sale->load('items');
 
         return Inertia::render('Sales/Edit', array_merge(
@@ -137,6 +151,10 @@ class SaleController extends Controller
     public function update(SaleRequest $request, Sale $sale)
     {
         abort_if($sale->is_deleted, 404);
+
+        if ($msg = $this->lockMsg($sale)) {
+            return back()->with('error', $msg);
+        }
 
         // 更新前の在庫巻き戻し用に旧明細と旧年月を取得
         $sale->load('items');
@@ -167,6 +185,10 @@ class SaleController extends Controller
     public function destroy(Sale $sale)
     {
         abort_if($sale->is_deleted, 404);
+
+        if ($msg = $this->lockMsg($sale)) {
+            return back()->with('error', $msg);
+        }
 
         // 削除前に在庫を巻き戻す
         $sale->load('items');
@@ -215,6 +237,29 @@ class SaleController extends Controller
     }
 
     // ─── Private helpers ───────────────────────────────────────────────
+
+    /** ロック判定（ステータスまたは日付が月次済み）→ エラーメッセージ、問題なければ null */
+    private function lockMsg(Sale $sale): ?string
+    {
+        if (in_array($sale->status, ['completed', 'closed'])) {
+            return 'ステータスが「'.Sale::STATUSES[$sale->status].'」の売上は修正・削除できません。';
+        }
+        $closingYm = SystemSetting::instance()->closing_ym;
+        if ($sale->sale_date->format('Y-m') <= $closingYm) {
+            return '月次更新済みの期間（'.$sale->sale_date->format('Y年n月').'）の売上は修正・削除できません。';
+        }
+        return null;
+    }
+
+    /** 登録時の日付ロック判定 */
+    private function storeLockMsg(string $date): ?string
+    {
+        $closingYm = SystemSetting::instance()->closing_ym;
+        if (Carbon::parse($date)->format('Y-m') <= $closingYm) {
+            return '月次更新済みの期間（'.Carbon::parse($date)->format('Y年n月').'）への売上登録はできません。';
+        }
+        return null;
+    }
 
     private function formData(): array
     {

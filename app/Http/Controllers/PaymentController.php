@@ -8,7 +8,10 @@ use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\Payment;
 use App\Models\PaymentItem;
+use App\Models\SystemSetting;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -52,6 +55,11 @@ class PaymentController extends Controller
     public function store(PaymentRequest $request)
     {
         $validated = $request->validated();
+
+        if ($msg = $this->storeLockMsg($validated['payment_date'])) {
+            return back()->with('error', $msg);
+        }
+
         $items     = $validated['items'];
         unset($validated['items']);
 
@@ -97,12 +105,18 @@ class PaymentController extends Controller
             'payment'      => $payment,
             'statuses'     => Payment::STATUSES,
             'paymentTypes' => Payment::PAYMENT_TYPES,
+            'locked'       => $this->lockMsg($payment) !== null,
         ]);
     }
 
-    public function edit(Payment $payment): Response
+    public function edit(Payment $payment): Response|RedirectResponse
     {
         abort_if($payment->is_deleted, 404);
+
+        if ($msg = $this->lockMsg($payment)) {
+            return redirect()->route('payments.show', $payment)->with('error', $msg);
+        }
+
         $payment->load('items');
 
         return Inertia::render('Payments/Edit', array_merge(
@@ -114,6 +128,10 @@ class PaymentController extends Controller
     public function update(PaymentRequest $request, Payment $payment)
     {
         abort_if($payment->is_deleted, 404);
+
+        if ($msg = $this->lockMsg($payment)) {
+            return back()->with('error', $msg);
+        }
 
         $validated = $request->validated();
         $items     = $validated['items'];
@@ -130,6 +148,11 @@ class PaymentController extends Controller
     public function destroy(Payment $payment)
     {
         abort_if($payment->is_deleted, 404);
+
+        if ($msg = $this->lockMsg($payment)) {
+            return back()->with('error', $msg);
+        }
+
         $payment->is_deleted = true;
         $payment->save();
 
@@ -163,6 +186,28 @@ class PaymentController extends Controller
     }
 
     // ─── Private helpers ───────────────────────────────────────────────
+
+    /** 入金: 請求完了/完了ステータスまたは月次更新済み期間ならロック */
+    private function lockMsg(Payment $payment): ?string
+    {
+        if (in_array($payment->status, ['completed', 'closed'])) {
+            return 'ステータスが「'.Payment::STATUSES[$payment->status].'」の入金は修正・削除できません。';
+        }
+        $closingYm = SystemSetting::instance()->closing_ym;
+        if (Carbon::parse($payment->payment_date)->format('Y-m') <= $closingYm) {
+            return '月次更新済みの期間（'.Carbon::parse($payment->payment_date)->format('Y年n月').'）の入金は修正・削除できません。';
+        }
+        return null;
+    }
+
+    private function storeLockMsg(string $date): ?string
+    {
+        $closingYm = SystemSetting::instance()->closing_ym;
+        if (Carbon::parse($date)->format('Y-m') <= $closingYm) {
+            return '月次更新済みの期間（'.Carbon::parse($date)->format('Y年n月').'）への入金登録はできません。';
+        }
+        return null;
+    }
 
     private function formData(): array
     {

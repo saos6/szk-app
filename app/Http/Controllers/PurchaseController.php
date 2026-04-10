@@ -8,10 +8,13 @@ use App\Models\Employee;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use App\Models\Supplier;
+use App\Models\SystemSetting;
 use App\Models\Vehicle;
 use App\Models\Warehouse;
 use App\Services\InventoryService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -55,6 +58,11 @@ class PurchaseController extends Controller
     public function store(PurchaseRequest $request)
     {
         $validated = $request->validated();
+
+        if ($msg = $this->storeLockMsg($validated['purchase_date'])) {
+            return back()->with('error', $msg);
+        }
+
         $items     = $validated['items'];
         unset($validated['items']);
 
@@ -116,12 +124,18 @@ class PurchaseController extends Controller
         return Inertia::render('Purchases/Show', [
             'purchase' => $purchase,
             'statuses' => Purchase::STATUSES,
+            'locked'   => $this->lockMsg($purchase) !== null,
         ]);
     }
 
-    public function edit(Purchase $purchase): Response
+    public function edit(Purchase $purchase): Response|RedirectResponse
     {
         abort_if($purchase->is_deleted, 404);
+
+        if ($msg = $this->lockMsg($purchase)) {
+            return redirect()->route('purchases.show', $purchase)->with('error', $msg);
+        }
+
         $purchase->load('items');
 
         return Inertia::render('Purchases/Edit', array_merge(
@@ -133,6 +147,10 @@ class PurchaseController extends Controller
     public function update(PurchaseRequest $request, Purchase $purchase)
     {
         abort_if($purchase->is_deleted, 404);
+
+        if ($msg = $this->lockMsg($purchase)) {
+            return back()->with('error', $msg);
+        }
 
         // 更新前の在庫巻き戻し用に旧明細と旧年月を取得
         $purchase->load('items');
@@ -162,6 +180,10 @@ class PurchaseController extends Controller
     public function destroy(Purchase $purchase)
     {
         abort_if($purchase->is_deleted, 404);
+
+        if ($msg = $this->lockMsg($purchase)) {
+            return back()->with('error', $msg);
+        }
 
         // 削除前に在庫を巻き戻す
         $purchase->load('items');
@@ -209,6 +231,28 @@ class PurchaseController extends Controller
     }
 
     // ─── Private helpers ───────────────────────────────────────────────
+
+    /** 仕入: 完了ステータスまたは月次更新済み期間ならロック */
+    private function lockMsg(Purchase $purchase): ?string
+    {
+        if ($purchase->status === 'completed') {
+            return 'ステータスが「'.Purchase::STATUSES['completed'].'」の仕入は修正・削除できません。';
+        }
+        $closingYm = SystemSetting::instance()->closing_ym;
+        if ($purchase->purchase_date->format('Y-m') <= $closingYm) {
+            return '月次更新済みの期間（'.$purchase->purchase_date->format('Y年n月').'）の仕入は修正・削除できません。';
+        }
+        return null;
+    }
+
+    private function storeLockMsg(string $date): ?string
+    {
+        $closingYm = SystemSetting::instance()->closing_ym;
+        if (Carbon::parse($date)->format('Y-m') <= $closingYm) {
+            return '月次更新済みの期間（'.Carbon::parse($date)->format('Y年n月').'）への仕入登録はできません。';
+        }
+        return null;
+    }
 
     private function formData(): array
     {

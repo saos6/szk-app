@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { Copy, FileDown, Pencil } from 'lucide-vue-next';
+import { Copy, FileDown, Lock, Pencil } from 'lucide-vue-next';
 import * as PurchaseController from '@/actions/App/Http/Controllers/PurchaseController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -41,6 +41,7 @@ interface Purchase {
 const props = defineProps<{
     purchase: Purchase;
     statuses: Record<string, string>;
+    locked: boolean;
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -92,12 +93,21 @@ function fmtDate(val: string | null): string {
                             <Copy class="mr-1 h-4 w-4" />この仕入を複製
                         </Link>
                     </Button>
-                    <Button size="sm" as-child>
+                    <Button v-if="!locked" size="sm" as-child>
                         <Link :href="PurchaseController.edit.url(purchase.id)">
                             <Pencil class="mr-1 h-4 w-4" />編集
                         </Link>
                     </Button>
+                    <Button v-else size="sm" disabled>
+                        <Lock class="mr-1 h-4 w-4" />編集不可
+                    </Button>
                 </div>
+            </div>
+
+            <!-- ロック警告 -->
+            <div v-if="locked" class="flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <Lock class="h-4 w-4 shrink-0" />
+                この仕入はロックされています。ステータスまたは月次更新済み期間のため修正・削除できません。
             </div>
 
             <!-- 基本情報 -->
