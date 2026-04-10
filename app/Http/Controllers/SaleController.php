@@ -10,6 +10,7 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\Vehicle;
 use App\Models\Warehouse;
+use App\Services\InventoryService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -66,6 +67,12 @@ class SaleController extends Controller
 
         $sale = Sale::create($validated);
         $this->syncItems($sale, $items);
+
+        InventoryService::applyItems(
+            $sale->sale_date->format('Y-m'),
+            $items,
+            'out'
+        );
 
         return redirect()->route('sales.index')->with('success', '売上を登録しました。');
     }
@@ -131,6 +138,11 @@ class SaleController extends Controller
     {
         abort_if($sale->is_deleted, 404);
 
+        // 更新前の在庫巻き戻し用に旧明細と旧年月を取得
+        $sale->load('items');
+        $oldYm    = $sale->sale_date->format('Y-m');
+        $oldItems = $sale->items->map(fn ($i) => $i->toArray())->toArray();
+
         $validated = $request->validated();
         $items = $validated['items'];
         unset($validated['items']);
@@ -144,12 +156,26 @@ class SaleController extends Controller
         $sale->update($validated);
         $this->syncItems($sale, $items);
 
+        // 旧明細を巻き戻し → 新明細を反映
+        $newYm = \Carbon\Carbon::parse($validated['sale_date'])->format('Y-m');
+        InventoryService::reverseItems($oldYm, $oldItems, 'out');
+        InventoryService::applyItems($newYm, $items, 'out');
+
         return redirect()->route('sales.index')->with('success', '売上を更新しました。');
     }
 
     public function destroy(Sale $sale)
     {
         abort_if($sale->is_deleted, 404);
+
+        // 削除前に在庫を巻き戻す
+        $sale->load('items');
+        InventoryService::reverseItems(
+            $sale->sale_date->format('Y-m'),
+            $sale->items->map(fn ($i) => $i->toArray())->toArray(),
+            'out'
+        );
+
         $sale->is_deleted = true;
         $sale->save();
 

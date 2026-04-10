@@ -10,6 +10,7 @@ use App\Models\PurchaseItem;
 use App\Models\Supplier;
 use App\Models\Vehicle;
 use App\Models\Warehouse;
+use App\Services\InventoryService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -65,6 +66,12 @@ class PurchaseController extends Controller
 
         $purchase = Purchase::create($validated);
         $this->syncItems($purchase, $items);
+
+        InventoryService::applyItems(
+            $purchase->purchase_date->format('Y-m'),
+            $items,
+            'in'
+        );
 
         return redirect()->route('purchases.index')->with('success', '仕入を登録しました。');
     }
@@ -127,6 +134,11 @@ class PurchaseController extends Controller
     {
         abort_if($purchase->is_deleted, 404);
 
+        // 更新前の在庫巻き戻し用に旧明細と旧年月を取得
+        $purchase->load('items');
+        $oldYm    = $purchase->purchase_date->format('Y-m');
+        $oldItems = $purchase->items->map(fn ($i) => $i->toArray())->toArray();
+
         $validated = $request->validated();
         $items     = $validated['items'];
         unset($validated['items']);
@@ -139,12 +151,26 @@ class PurchaseController extends Controller
         $purchase->update($validated);
         $this->syncItems($purchase, $items);
 
+        // 旧明細を巻き戻し → 新明細を反映
+        $newYm = \Carbon\Carbon::parse($validated['purchase_date'])->format('Y-m');
+        InventoryService::reverseItems($oldYm, $oldItems, 'in');
+        InventoryService::applyItems($newYm, $items, 'in');
+
         return redirect()->route('purchases.index')->with('success', '仕入を更新しました。');
     }
 
     public function destroy(Purchase $purchase)
     {
         abort_if($purchase->is_deleted, 404);
+
+        // 削除前に在庫を巻き戻す
+        $purchase->load('items');
+        InventoryService::reverseItems(
+            $purchase->purchase_date->format('Y-m'),
+            $purchase->items->map(fn ($i) => $i->toArray())->toArray(),
+            'in'
+        );
+
         $purchase->is_deleted = true;
         $purchase->save();
 
