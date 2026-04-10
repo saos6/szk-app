@@ -18,11 +18,13 @@ import {
     Warehouse,
     BoxesIcon,
     ClipboardList,
+    SlidersHorizontal,
 } from 'lucide-vue-next';
 import * as BillingBalanceController from '@/actions/App/Http/Controllers/BillingBalanceController';
 import * as BillingClosingController from '@/actions/App/Http/Controllers/BillingClosingController';
 import * as PaymentController from '@/actions/App/Http/Controllers/PaymentController';
 import * as PurchaseController from '@/actions/App/Http/Controllers/PurchaseController';
+import * as SystemSettingController from '@/actions/App/Http/Controllers/SystemSettingController';
 import * as InventoryBalanceController from '@/actions/App/Http/Controllers/InventoryBalanceController';
 import * as SupplierController from '@/actions/App/Http/Controllers/SupplierController';
 import * as WarehouseController from '@/actions/App/Http/Controllers/WarehouseController';
@@ -85,6 +87,11 @@ const mainNavItems: NavItem[] = [
         title: '設定',
         icon: Settings2,
         children: [
+            {
+                title: 'システム設定',
+                href: SystemSettingController.show.url(),
+                icon: SlidersHorizontal,
+            },
             {
                 title: '所属マスタ',
                 href: DeptController.index.url(),

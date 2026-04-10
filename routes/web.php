@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SystemSettingController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\VehicleModelController;
 use App\Http\Controllers\InventoryBalanceController;
@@ -90,6 +91,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('payments/{payment}/replicate', [PaymentController::class, 'replicate'])->name('payments.replicate');
     Route::get('payments/{payment}/pdf', [PaymentController::class, 'pdf'])->name('payments.pdf');
     Route::resource('payments', PaymentController::class);
+
+    // システム設定
+    Route::get('system-settings', [SystemSettingController::class, 'show'])->name('system-settings.show');
+    Route::get('system-settings/edit', [SystemSettingController::class, 'edit'])->name('system-settings.edit');
+    Route::put('system-settings', [SystemSettingController::class, 'update'])->name('system-settings.update');
 
     // 仕入
     Route::get('purchases/export', [PurchaseController::class, 'exportMethod'])->name('purchases.export');
