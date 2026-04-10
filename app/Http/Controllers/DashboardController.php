@@ -52,9 +52,9 @@ class DashboardController extends Controller
             ->selectRaw('count(*) as count, coalesce(sum(total_amount), 0) as total, coalesce(sum(cogs_total), 0) as cogs')
             ->first();
 
-        // 未納品件数（下書き or 請求済み以外で納品が完了していないもの）
+        // 請求未確定件数（請求中のもの）
         $pendingDeliveryCount = Sale::active()
-            ->whereNotIn('status', ['delivered', 'completed', 'cancelled'])
+            ->where('status', 'invoiced')
             ->count();
 
         $recentSales = Sale::active()

@@ -11,7 +11,8 @@ class Payment extends Model
 {
     public const STATUSES = [
         'draft'     => '下書き',
-        'confirmed' => '確認済み',
+        'confirmed' => '請求中',
+        'completed' => '完了',
         'cancelled' => 'キャンセル',
     ];
 

@@ -10,9 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Sale extends Model
 {
     public const STATUSES = [
-        'draft' => '下書き',
-        'delivered' => '納品済み',
-        'invoiced' => '請求済み',
+        'draft'     => '下書き',
+        'invoiced'  => '請求中',
         'completed' => '完了',
         'cancelled' => 'キャンセル',
     ];

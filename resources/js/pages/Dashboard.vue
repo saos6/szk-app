@@ -124,8 +124,7 @@ const SALE_STATUS_VARIANT: Record<
     'default' | 'secondary' | 'outline' | 'destructive'
 > = {
     draft:     'secondary',
-    delivered: 'outline',
-    invoiced:  'default',
+    invoiced:  'outline',
     completed: 'default',
     cancelled: 'destructive',
 };
@@ -135,7 +134,8 @@ const PAYMENT_STATUS_VARIANT: Record<
     'default' | 'secondary' | 'outline' | 'destructive'
 > = {
     draft:     'secondary',
-    confirmed: 'default',
+    confirmed: 'outline',
+    completed: 'default',
     cancelled: 'destructive',
 };
 
@@ -289,10 +289,10 @@ const horizontalChartOptions = {
                     </p>
                 </div>
 
-                <!-- 未納品件数 -->
+                <!-- 請求未確定件数 -->
                 <div class="rounded-xl border bg-card p-5">
                     <div class="flex items-center justify-between">
-                        <p class="text-sm text-muted-foreground">未納品件数</p>
+                        <p class="text-sm text-muted-foreground">請求未確定件数</p>
                         <PackageCheck class="h-4 w-4 text-amber-500" />
                     </div>
                     <p class="mt-2 text-3xl font-bold tabular-nums">

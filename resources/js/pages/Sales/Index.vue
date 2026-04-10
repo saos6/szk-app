@@ -235,8 +235,7 @@ const STATUS_VARIANT: Record<
     'default' | 'secondary' | 'outline' | 'destructive'
 > = {
     draft:     'secondary',
-    delivered: 'outline',
-    invoiced:  'default',
+    invoiced:  'outline',
     completed: 'default',
     cancelled: 'destructive',
 };

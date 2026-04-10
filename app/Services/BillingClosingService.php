@@ -110,16 +110,19 @@ class BillingClosingService
                     'status'             => 'confirmed',
                 ]);
 
-                // 売上に確定フラグをセット (仕様8)
+                // 売上に確定フラグをセット・ステータスを完了に (仕様8)
                 Sale::whereIn('id', $row['sales']->pluck('id'))
                     ->update([
                         'billing_balance_id' => $bb->id,
-                        'status'             => 'invoiced',
+                        'status'             => 'completed',
                     ]);
 
-                // 入金に確定フラグをセット (仕様8)
+                // 入金に確定フラグをセット・ステータスを完了に (仕様8)
                 Payment::whereIn('id', $row['payments']->pluck('id'))
-                    ->update(['billing_balance_id' => $bb->id]);
+                    ->update([
+                        'billing_balance_id' => $bb->id,
+                        'status'             => 'completed',
+                    ]);
 
                 $row['billing_balance'] = $bb;
                 $results->push($row);
@@ -214,16 +217,19 @@ class BillingClosingService
                     continue;
                 }
 
-                // 売上の確定フラグをリセット（未に戻す）(仕様9)
+                // 売上の確定フラグをリセット・ステータスを請求中に戻す (仕様9)
                 Sale::where('billing_balance_id', $bb->id)
                     ->update([
                         'billing_balance_id' => null,
-                        'status'             => 'delivered',
+                        'status'             => 'invoiced',
                     ]);
 
-                // 入金の確定フラグをリセット（未に戻す）(仕様9)
+                // 入金の確定フラグをリセット・ステータスを請求中に戻す (仕様9)
                 Payment::where('billing_balance_id', $bb->id)
-                    ->update(['billing_balance_id' => null]);
+                    ->update([
+                        'billing_balance_id' => null,
+                        'status'             => 'confirmed',
+                    ]);
 
                 // 請求残高を削除（論理削除）(仕様9)
                 $bb->is_deleted   = true;
@@ -249,11 +255,11 @@ class BillingClosingService
      */
     private function calcForCustomer(Customer $customer, Carbon $date): ?array
     {
-        // 対象売上（未確定・納品済以上・請求日以内）
+        // 対象売上：請求確定フラグ=未（billing_balance_id IS NULL）かつ status=invoiced（請求中）(仕様3)
         $sales = Sale::active()
             ->where('customer_id', $customer->id)
             ->whereNull('billing_balance_id')
-            ->whereIn('status', ['delivered', 'invoiced', 'completed'])
+            ->where('status', 'invoiced')
             ->where('sale_date', '<=', $date->toDateString())
             ->get();
 
