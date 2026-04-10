@@ -11,8 +11,9 @@ class Sale extends Model
 {
     public const STATUSES = [
         'draft'     => '下書き',
+        'recorded'  => '計上',
         'invoiced'  => '請求中',
-        'completed' => '完了',
+        'completed' => '請求完了',
         'cancelled' => 'キャンセル',
     ];
 

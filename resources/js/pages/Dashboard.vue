@@ -124,7 +124,8 @@ const SALE_STATUS_VARIANT: Record<
     'default' | 'secondary' | 'outline' | 'destructive'
 > = {
     draft:     'secondary',
-    invoiced:  'outline',
+    recorded:  'outline',
+    invoiced:  'default',
     completed: 'default',
     cancelled: 'destructive',
 };
@@ -134,7 +135,8 @@ const PAYMENT_STATUS_VARIANT: Record<
     'default' | 'secondary' | 'outline' | 'destructive'
 > = {
     draft:     'secondary',
-    confirmed: 'outline',
+    recorded:  'outline',
+    confirmed: 'default',
     completed: 'default',
     cancelled: 'destructive',
 };

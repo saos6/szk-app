@@ -25,7 +25,7 @@ class SaleSeeder extends Seeder
                 'sale_date' => '2026-03-25',
                 'delivery_date' => '2026-03-28',
                 'subject' => 'CB400スーパーフォア 販売',
-                'status' => 'invoiced',
+                'status' => 'completed',
                 'remarks' => null,
                 'items' => [
                     ['frame_no' => 'NC31100001', 'quantity' => 1, 'tax_rate' => '10'],
@@ -38,7 +38,7 @@ class SaleSeeder extends Seeder
                 'sale_date' => '2026-03-28',
                 'delivery_date' => '2026-04-02',
                 'subject' => 'Ninja ZX-10R 販売',
-                'status' => 'invoiced',
+                'status' => 'completed',
                 'remarks' => '特別カラー限定モデル',
                 'items' => [
                     ['frame_no' => 'ZXT00E0001', 'quantity' => 1, 'tax_rate' => '10'],
@@ -65,7 +65,7 @@ class SaleSeeder extends Seeder
                 'sale_date' => '2026-04-07',
                 'delivery_date' => '2026-04-07',
                 'subject' => 'GSX-R1000R 販売',
-                'status' => 'invoiced',
+                'status' => 'recorded',
                 'remarks' => 'レース仕様オプション取付',
                 'items' => [
                     ['frame_no' => 'GT79A100001', 'quantity' => 1, 'tax_rate' => '10'],

@@ -22,7 +22,7 @@ class PaymentSeeder extends Seeder
                 'employee_code'  => 'E001',
                 'payment_date'   => '2026-03-31',
                 'subject'        => 'CB400SF 販売代金 入金',
-                'status'         => 'confirmed',
+                'status'         => 'completed',
                 'remarks'        => null,
                 'items'          => [
                     ['payment_type' => 'transfer', 'amount' => 825000, 'bank_info' => '○○銀行 △△支店 普通 1234567', 'remarks' => null],
@@ -34,7 +34,7 @@ class PaymentSeeder extends Seeder
                 'employee_code'  => 'E003',
                 'payment_date'   => '2026-04-05',
                 'subject'        => 'Ninja ZX-10R 入金',
-                'status'         => 'confirmed',
+                'status'         => 'recorded',
                 'remarks'        => null,
                 'items'          => [
                     ['payment_type' => 'transfer', 'amount' => 1980000, 'bank_info' => '□□銀行 ××支店 普通 7654321', 'remarks' => null],

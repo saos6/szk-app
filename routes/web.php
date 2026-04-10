@@ -67,6 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // 請求締め処理
     Route::get('billing-closing', [BillingClosingController::class, 'index'])->name('billing-closing.index');
     Route::post('billing-closing/search', [BillingClosingController::class, 'search'])->name('billing-closing.search');
+    Route::post('billing-closing/aggregate', [BillingClosingController::class, 'doAggregate'])->name('billing-closing.aggregate');
     Route::post('billing-closing/confirm', [BillingClosingController::class, 'doConfirm'])->name('billing-closing.confirm');
     Route::post('billing-closing/cancel', [BillingClosingController::class, 'doCancel'])->name('billing-closing.cancel');
     Route::get('billing-closing/pdf', [BillingClosingController::class, 'pdf'])->name('billing-closing.pdf');

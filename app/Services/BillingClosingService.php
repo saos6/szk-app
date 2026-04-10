@@ -14,57 +14,69 @@ use Illuminate\Support\Facades\DB;
 class BillingClosingService
 {
     /**
-     * 集計・確定プレビュー：各得意先の請求金額を計算して返す（DBへの変更なし）
+     * 集計プレビュー：計上（recorded）の売上・入金を集計して返す（DBへの変更なし）
      *
-     * @return Collection<int, array{
-     *   customer: Customer,
-     *   prev_amount: float,
-     *   sales_amount: float,
-     *   tax_amount: float,
-     *   total_amount: float,
-     *   payment_amount: float,
-     *   balance_amount: float,
-     *   sales: Collection,
-     *   payments: Collection,
-     *   closing_start_date: string|null,
-     *   error: string|null,
-     * }>
+     * @return Collection<int, array{...}>
      */
     public function aggregate(string $billingDate, int $closingDay, string $fromCode = '', string $toCode = ''): Collection
     {
-        $date = Carbon::parse($billingDate);
+        $date      = Carbon::parse($billingDate);
+        $customers = $this->getCustomers($closingDay, $fromCode, $toCode);
 
-        $customers = Customer::active()
-            ->where('closing_day', $closingDay)
-            ->when($fromCode !== '', fn ($q) => $q->where('code', '>=', $fromCode))
-            ->when($toCode !== '', fn ($q) => $q->where('code', '<=', $toCode))
-            ->orderBy('code')
-            ->get();
-
-        return $customers->map(function (Customer $customer) use ($date) {
-            return $this->calcForCustomer($customer, $date);
-        })->filter(fn ($row) => $row !== null)->values();
+        return $customers->map(fn (Customer $c) => $this->calcForCustomer($c, $date, 'recorded', 'recorded'))
+            ->filter()->values();
     }
 
     /**
-     * 確定：集計結果をDBに保存し、売上・入金に確定フラグをセット (仕様8)
+     * 確定プレビュー：請求中（invoiced）の売上・入金を集計して返す（DBへの変更なし）
+     */
+    public function previewConfirm(string $billingDate, int $closingDay, string $fromCode = '', string $toCode = ''): Collection
+    {
+        $date      = Carbon::parse($billingDate);
+        $customers = $this->getCustomers($closingDay, $fromCode, $toCode);
+
+        return $customers->map(fn (Customer $c) => $this->calcForCustomer($c, $date, 'invoiced', 'confirmed'))
+            ->filter()->values();
+    }
+
+    /**
+     * 集計実行：計上→請求中へステータスを更新（BillingBalanceは作成しない）
+     */
+    public function executeAggregate(string $billingDate, int $closingDay, string $fromCode = '', string $toCode = ''): int
+    {
+        $date        = Carbon::parse($billingDate);
+        $customerIds = $this->getCustomers($closingDay, $fromCode, $toCode)->pluck('id');
+
+        $saleCount = Sale::active()
+            ->whereIn('customer_id', $customerIds)
+            ->whereNull('billing_balance_id')
+            ->where('status', 'recorded')
+            ->where('sale_date', '<=', $date->toDateString())
+            ->update(['status' => 'invoiced']);
+
+        $paymentCount = Payment::active()
+            ->whereIn('customer_id', $customerIds)
+            ->whereNull('billing_balance_id')
+            ->where('status', 'recorded')
+            ->where('payment_date', '<=', $date->toDateString())
+            ->update(['status' => 'confirmed']);
+
+        return $saleCount + $paymentCount;
+    }
+
+    /**
+     * 確定：BillingBalance を作成し売上・入金を請求完了にセット (仕様8)
      */
     public function confirm(string $billingDate, int $closingDay, string $fromCode = '', string $toCode = ''): Collection
     {
-        $date = Carbon::parse($billingDate);
-
-        $customers = Customer::active()
-            ->where('closing_day', $closingDay)
-            ->when($fromCode !== '', fn ($q) => $q->where('code', '>=', $fromCode))
-            ->when($toCode !== '', fn ($q) => $q->where('code', '<=', $toCode))
-            ->orderBy('code')
-            ->get();
+        $date      = Carbon::parse($billingDate);
+        $customers = $this->getCustomers($closingDay, $fromCode, $toCode);
 
         $results = collect();
 
         DB::transaction(function () use ($customers, $date, &$results) {
             foreach ($customers as $customer) {
-                $row = $this->calcForCustomer($customer, $date);
+                $row = $this->calcForCustomer($customer, $date, 'invoiced', 'confirmed');
                 if ($row === null) {
                     continue;
                 }
@@ -143,11 +155,9 @@ class BillingClosingService
             ->with('customer')
             ->where('status', 'confirmed')
             ->where('billing_date', $date->toDateString())
-            ->whereHas('customer', function ($q) use ($fromCode, $toCode, $closingDay) {
-                $q->where('closing_day', $closingDay)
-                  ->when($fromCode !== '', fn ($q2) => $q2->where('code', '>=', $fromCode))
-                  ->when($toCode !== '', fn ($q2) => $q2->where('code', '<=', $toCode));
-            })
+            ->whereHas('customer', fn ($q) => $q->where('closing_day', $closingDay)
+                ->when($fromCode !== '', fn ($q2) => $q2->where('code', '>=', $fromCode))
+                ->when($toCode !== '', fn ($q2) => $q2->where('code', '<=', $toCode)))
             ->get()
             ->map(function (BillingBalance $bb) use ($date) {
                 $hasNewer = BillingBalance::active()
@@ -174,7 +184,7 @@ class BillingClosingService
     }
 
     /**
-     * 取消：確定済みBillingBalanceを取り消し、売上・入金の確定フラグを未に戻す (仕様9)
+     * 取消：確定済みBillingBalanceを取り消し、売上・入金を請求中に戻す (仕様9)
      */
     public function cancel(string $billingDate, int $closingDay, string $fromCode = '', string $toCode = ''): Collection
     {
@@ -184,11 +194,9 @@ class BillingClosingService
             ->with('customer')
             ->where('status', 'confirmed')
             ->where('billing_date', $date->toDateString())
-            ->whereHas('customer', function ($q) use ($fromCode, $toCode, $closingDay) {
-                $q->where('closing_day', $closingDay)
-                  ->when($fromCode !== '', fn ($q2) => $q2->where('code', '>=', $fromCode))
-                  ->when($toCode !== '', fn ($q2) => $q2->where('code', '<=', $toCode));
-            })
+            ->whereHas('customer', fn ($q) => $q->where('closing_day', $closingDay)
+                ->when($fromCode !== '', fn ($q2) => $q2->where('code', '>=', $fromCode))
+                ->when($toCode !== '', fn ($q2) => $q2->where('code', '<=', $toCode)))
             ->get();
 
         $results = collect();
@@ -247,27 +255,35 @@ class BillingClosingService
 
     // ─── Private Helpers ────────────────────────────────────────────────
 
+    private function getCustomers(int $closingDay, string $fromCode, string $toCode): \Illuminate\Support\Collection
+    {
+        return Customer::active()
+            ->where('closing_day', $closingDay)
+            ->when($fromCode !== '', fn ($q) => $q->where('code', '>=', $fromCode))
+            ->when($toCode !== '', fn ($q) => $q->where('code', '<=', $toCode))
+            ->orderBy('code')
+            ->get();
+    }
+
     /**
      * 得意先1件分の請求集計を計算する
-     * 売上：請求確定フラグ=未 かつ 売上日<=請求日 (仕様3)
-     * 入金：請求確定フラグ=未 かつ 入金日<=請求日 (仕様3)
-     * 前月繰越：請求日より前の直近確定済み請求残高のbalance_amount (仕様3)
+     *
+     * @param string $saleStatus    対象売上ステータス ('recorded' or 'invoiced')
+     * @param string $paymentStatus 対象入金ステータス ('recorded' or 'confirmed')
      */
-    private function calcForCustomer(Customer $customer, Carbon $date): ?array
+    private function calcForCustomer(Customer $customer, Carbon $date, string $saleStatus = 'recorded', string $paymentStatus = 'recorded'): ?array
     {
-        // 対象売上：請求確定フラグ=未（billing_balance_id IS NULL）かつ status=invoiced（請求中）(仕様3)
         $sales = Sale::active()
             ->where('customer_id', $customer->id)
             ->whereNull('billing_balance_id')
-            ->where('status', 'invoiced')
+            ->where('status', $saleStatus)
             ->where('sale_date', '<=', $date->toDateString())
             ->get();
 
-        // 対象入金（未確定・確認済・請求日以内）
         $payments = Payment::active()
             ->where('customer_id', $customer->id)
             ->whereNull('billing_balance_id')
-            ->where('status', 'confirmed')
+            ->where('status', $paymentStatus)
             ->where('payment_date', '<=', $date->toDateString())
             ->get();
 

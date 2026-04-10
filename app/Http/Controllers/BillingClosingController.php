@@ -75,8 +75,11 @@ class BillingClosingController extends Controller
             ]));
         }
 
-        // 集計・確定：どちらも同じプレビューデータを返す (仕様3, 4)
-        $rows = $this->service->aggregate($billingDate, $closingDay, $fromCode, $toCode);
+        // 集計：計上（recorded）を対象にプレビュー
+        // 確定：請求中（invoiced）を対象にプレビュー
+        $rows = $mode === 'confirm'
+            ? $this->service->previewConfirm($billingDate, $closingDay, $fromCode, $toCode)
+            : $this->service->aggregate($billingDate, $closingDay, $fromCode, $toCode);
 
         return Inertia::render('BillingClosing/Index', array_merge($baseProps, [
             'results' => $this->formatRows($rows),
@@ -84,7 +87,30 @@ class BillingClosingController extends Controller
     }
 
     /**
-     * 確定実行：売上・入金の請求確定フラグを済みにセットし請求残高を作成 (仕様8)
+     * 集計実行：計上→請求中へステータスを更新（BillingBalance未作成）
+     */
+    public function doAggregate(Request $request)
+    {
+        $validated = $request->validate([
+            'billing_date' => ['required', 'date'],
+            'closing_day'  => ['required', 'integer', 'min:1', 'max:31'],
+            'from_code'    => ['nullable', 'string', 'max:20'],
+            'to_code'      => ['nullable', 'string', 'max:20'],
+        ]);
+
+        $count = $this->service->executeAggregate(
+            $validated['billing_date'],
+            (int) $validated['closing_day'],
+            (string) ($validated['from_code'] ?? ''),
+            (string) ($validated['to_code'] ?? ''),
+        );
+
+        return redirect()->route('billing-closing.index')
+            ->with('success', "集計が完了しました（{$count}件を請求中に更新）");
+    }
+
+    /**
+     * 確定実行：請求中の売上・入金をBillingBalanceに確定 (仕様8)
      */
     public function doConfirm(Request $request)
     {

@@ -43,7 +43,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'outline' | 'destructive'> = {
     draft:     'secondary',
+    recorded:  'outline',
     confirmed: 'default',
+    completed: 'default',
     cancelled: 'destructive',
 };
 

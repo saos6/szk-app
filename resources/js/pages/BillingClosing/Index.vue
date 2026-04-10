@@ -76,12 +76,28 @@ watch(() => form.closing_day, (newDay) => {
     form.billing_date = `${y}-${m}-${dd}`;
 });
 
-const confirming = ref(false);
-const cancelling = ref(false);
+const aggregating = ref(false);
+const confirming  = ref(false);
+const cancelling  = ref(false);
 
 /** 検索（DB変更なし、プレビュー表示）(仕様6) */
 function search() {
     form.post(BillingClosingController.search.url());
+}
+
+/** 集計実行：計上→請求中へ更新 */
+function doAggregate() {
+    if (!confirm(`請求日 ${form.billing_date} の集計処理を実行します。対象の売上・入金を「請求中」に変更します。よろしいですか？`)) return;
+    aggregating.value = true;
+    const f = useForm({
+        billing_date: form.billing_date,
+        closing_day: form.closing_day,
+        from_code: form.from_code,
+        to_code: form.to_code,
+    });
+    f.post(BillingClosingController.doAggregate.url(), {
+        onFinish: () => { aggregating.value = false; },
+    });
 }
 
 /** 確定実行 (仕様8) */
@@ -224,10 +240,20 @@ const successRows = computed(() => props.results?.filter(r => !r.error) ?? []);
                         </p>
                     </div>
                     <div class="flex gap-2">
-                        <!-- 集計モード: PDF一括ボタン (仕様7) -->
-                        <Button v-if="mode === 'aggregate'" variant="outline" size="sm" @click="downloadPdf">
-                            <FileDown class="mr-1.5 h-4 w-4" />請求書PDF（一括）
-                        </Button>
+                        <!-- 集計モード: PDF一括ボタン + 集計実行ボタン (仕様7) -->
+                        <template v-if="mode === 'aggregate'">
+                            <Button variant="outline" size="sm" @click="downloadPdf">
+                                <FileDown class="mr-1.5 h-4 w-4" />請求書PDF（一括）
+                            </Button>
+                            <Button
+                                size="sm"
+                                @click="doAggregate"
+                                :disabled="aggregating || successRows.length === 0"
+                            >
+                                <Loader2 v-if="aggregating" class="mr-1.5 h-4 w-4 animate-spin" />
+                                集計を実行する
+                            </Button>
+                        </template>
                         <!-- 確定モード: 確定ボタン (仕様8) -->
                         <Button
                             v-if="mode === 'confirm'"
