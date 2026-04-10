@@ -14,6 +14,7 @@ class Sale extends Model
         'recorded'  => '計上',
         'invoiced'  => '請求中',
         'completed' => '請求完了',
+        'closed'    => '完了',
         'cancelled' => 'キャンセル',
     ];
 

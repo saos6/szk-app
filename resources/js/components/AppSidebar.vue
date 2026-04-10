@@ -22,6 +22,7 @@ import {
 } from 'lucide-vue-next';
 import * as BillingBalanceController from '@/actions/App/Http/Controllers/BillingBalanceController';
 import * as BillingClosingController from '@/actions/App/Http/Controllers/BillingClosingController';
+import * as MonthlyClosingController from '@/actions/App/Http/Controllers/MonthlyClosingController';
 import * as PaymentController from '@/actions/App/Http/Controllers/PaymentController';
 import * as PurchaseController from '@/actions/App/Http/Controllers/PurchaseController';
 import * as SystemSettingController from '@/actions/App/Http/Controllers/SystemSettingController';
@@ -76,6 +77,11 @@ const mainNavItems: NavItem[] = [
     {
         title: '請求締め処理',
         href: BillingClosingController.index.url(),
+        icon: ClipboardList,
+    },
+    {
+        title: '月次繰越処理',
+        href: MonthlyClosingController.index.url(),
         icon: ClipboardList,
     },
     {

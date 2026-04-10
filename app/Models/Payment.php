@@ -14,6 +14,7 @@ class Payment extends Model
         'recorded'  => '計上',
         'confirmed' => '請求中',
         'completed' => '請求完了',
+        'closed'    => '完了',
         'cancelled' => 'キャンセル',
     ];
 

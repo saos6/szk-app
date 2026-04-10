@@ -238,6 +238,7 @@ const STATUS_VARIANT: Record<
     recorded:  'outline',
     invoiced:  'default',
     completed: 'default',
+    closed:    'default',
     cancelled: 'destructive',
 };
 </script>

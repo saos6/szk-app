@@ -127,6 +127,7 @@ const SALE_STATUS_VARIANT: Record<
     recorded:  'outline',
     invoiced:  'default',
     completed: 'default',
+    closed:    'default',
     cancelled: 'destructive',
 };
 
@@ -138,6 +139,7 @@ const PAYMENT_STATUS_VARIANT: Record<
     recorded:  'outline',
     confirmed: 'default',
     completed: 'default',
+    closed:    'default',
     cancelled: 'destructive',
 };
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BillingBalanceController;
 use App\Http\Controllers\BillingClosingController;
+use App\Http\Controllers\MonthlyClosingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeptController;
@@ -71,6 +72,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('warehouses/export', [WarehouseController::class, 'export'])->name('warehouses.export');
     Route::get('warehouses/{warehouse}/replicate', [WarehouseController::class, 'replicate'])->name('warehouses.replicate');
     Route::resource('warehouses', WarehouseController::class);
+
+    // 月次繰越処理
+    Route::get('monthly-closing', [MonthlyClosingController::class, 'index'])->name('monthly-closing.index');
+    Route::post('monthly-closing/confirm', [MonthlyClosingController::class, 'confirm'])->name('monthly-closing.confirm');
+    Route::post('monthly-closing/cancel', [MonthlyClosingController::class, 'cancel'])->name('monthly-closing.cancel');
 
     // 請求締め処理
     Route::get('billing-closing', [BillingClosingController::class, 'index'])->name('billing-closing.index');

@@ -225,6 +225,7 @@ const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'outline' | 'dest
     recorded:  'outline',
     confirmed: 'default',
     completed: 'default',
+    closed:    'default',
     cancelled: 'destructive',
 };
 </script>
