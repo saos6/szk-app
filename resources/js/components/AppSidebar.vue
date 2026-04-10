@@ -23,6 +23,7 @@ import * as BillingBalanceController from '@/actions/App/Http/Controllers/Billin
 import * as BillingClosingController from '@/actions/App/Http/Controllers/BillingClosingController';
 import * as PaymentController from '@/actions/App/Http/Controllers/PaymentController';
 import * as InventoryBalanceController from '@/actions/App/Http/Controllers/InventoryBalanceController';
+import * as SupplierController from '@/actions/App/Http/Controllers/SupplierController';
 import * as WarehouseController from '@/actions/App/Http/Controllers/WarehouseController';
 import * as CustomerController from '@/actions/App/Http/Controllers/CustomerController';
 import * as DeptController from '@/actions/App/Http/Controllers/DeptController';
@@ -92,6 +93,11 @@ const mainNavItems: NavItem[] = [
                 title: '得意先マスタ',
                 href: CustomerController.index.url(),
                 icon: Building,
+            },
+            {
+                title: '仕入先マスタ',
+                href: SupplierController.index.url(),
+                icon: Building2,
             },
             {
                 title: '商品マスタ',

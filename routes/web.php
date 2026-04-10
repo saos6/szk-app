@@ -13,6 +13,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\VehicleModelController;
 use App\Http\Controllers\InventoryBalanceController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\WarehouseController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -60,6 +61,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('inventory-balances', InventoryBalanceController::class);
 
     // 倉庫マスタ
+    // 仕入先マスタ
+    Route::get('suppliers/export', [SupplierController::class, 'export'])->name('suppliers.export');
+    Route::get('suppliers/{supplier}/replicate', [SupplierController::class, 'replicate'])->name('suppliers.replicate');
+    Route::resource('suppliers', SupplierController::class);
+
     Route::get('warehouses/export', [WarehouseController::class, 'export'])->name('warehouses.export');
     Route::get('warehouses/{warehouse}/replicate', [WarehouseController::class, 'replicate'])->name('warehouses.replicate');
     Route::resource('warehouses', WarehouseController::class);
