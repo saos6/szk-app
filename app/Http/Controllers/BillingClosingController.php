@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BillingBalance;
+use App\Models\Customer;
 use App\Services\BillingClosingService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -15,48 +16,149 @@ class BillingClosingController extends Controller
 
     public function index(): Response
     {
+        $closingDays = $this->getClosingDays()->toArray();
+        $defaultClosingDay  = $this->computeDefaultClosingDay($closingDays);
+        $defaultBillingDate = $this->computeDefaultBillingDate($defaultClosingDay);
+
         return Inertia::render('BillingClosing/Index', [
-            'defaultClosingDate' => now()->endOfMonth()->toDateString(),
+            'defaultBillingDate' => $defaultBillingDate,
+            'defaultClosingDay'  => $defaultClosingDay,
+            'closingDays'        => $closingDays,
         ]);
     }
 
-    public function execute(Request $request)
+    /**
+     * 検索：処理区分に応じたプレビューを返す（DBへの変更なし）(仕様6)
+     */
+    public function search(Request $request): Response
     {
-        $request->validate([
-            'closing_date' => ['required', 'date'],
+        $validated = $request->validate([
+            'billing_date' => ['required', 'date'],
+            'closing_day'  => ['required', 'integer', 'min:1', 'max:31'],
             'from_code'    => ['nullable', 'string', 'max:20'],
             'to_code'      => ['nullable', 'string', 'max:20'],
             'mode'         => ['required', 'in:aggregate,confirm,cancel'],
         ]);
 
-        $closingDate = $request->input('closing_date');
-        $fromCode    = (string) $request->input('from_code', '');
-        $toCode      = (string) $request->input('to_code', '');
-        $mode        = $request->input('mode');
+        $billingDate = $validated['billing_date'];
+        $closingDay  = (int) $validated['closing_day'];
+        $fromCode    = (string) ($validated['from_code'] ?? '');
+        $toCode      = (string) ($validated['to_code'] ?? '');
+        $mode        = $validated['mode'];
 
-        return match ($mode) {
-            'aggregate' => $this->handleAggregate($closingDate, $fromCode, $toCode),
-            'confirm'   => $this->handleConfirm($closingDate, $fromCode, $toCode),
-            'cancel'    => $this->handleCancel($closingDate, $fromCode, $toCode),
-        };
+        $closingDays        = $this->getClosingDays()->toArray();
+        $defaultClosingDay  = $this->computeDefaultClosingDay($closingDays);
+        $baseProps = [
+            'defaultBillingDate' => $this->computeDefaultBillingDate($defaultClosingDay),
+            'defaultClosingDay'  => $defaultClosingDay,
+            'closingDays'        => $closingDays,
+            'mode'               => $mode,
+            'billingDate'        => $billingDate,
+            'closingDay'         => $closingDay,
+            'fromCode'           => $fromCode,
+            'toCode'             => $toCode,
+        ];
+
+        if ($mode === 'cancel') {
+            $preview = $this->service->previewCancel($billingDate, $closingDay, $fromCode, $toCode);
+
+            return Inertia::render('BillingClosing/Index', array_merge($baseProps, [
+                'cancelPreview' => $preview->map(fn ($r) => [
+                    'billing_number'  => $r['billing_balance']->billing_number,
+                    'customer_code'   => $r['billing_balance']->customer->code,
+                    'customer_name'   => $r['billing_balance']->customer->name,
+                    'billing_date'    => $r['billing_balance']->billing_date->toDateString(),
+                    'balance_amount'  => (float) $r['billing_balance']->balance_amount,
+                    'cancelable'      => $r['cancelable'],
+                    'newer_number'    => $r['newer_number'],
+                ])->values(),
+            ]));
+        }
+
+        // 集計・確定：どちらも同じプレビューデータを返す (仕様3, 4)
+        $rows = $this->service->aggregate($billingDate, $closingDay, $fromCode, $toCode);
+
+        return Inertia::render('BillingClosing/Index', array_merge($baseProps, [
+            'results' => $this->formatRows($rows),
+        ]));
     }
 
+    /**
+     * 確定実行：売上・入金の請求確定フラグを済みにセットし請求残高を作成 (仕様8)
+     */
+    public function doConfirm(Request $request)
+    {
+        $validated = $request->validate([
+            'billing_date' => ['required', 'date'],
+            'closing_day'  => ['required', 'integer', 'min:1', 'max:31'],
+            'from_code'    => ['nullable', 'string', 'max:20'],
+            'to_code'      => ['nullable', 'string', 'max:20'],
+        ]);
+
+        $billingDate = $validated['billing_date'];
+        $closingDay  = (int) $validated['closing_day'];
+        $fromCode    = (string) ($validated['from_code'] ?? '');
+        $toCode      = (string) ($validated['to_code'] ?? '');
+
+        $rows    = $this->service->confirm($billingDate, $closingDay, $fromCode, $toCode);
+        $success = $rows->where('error', null)->count();
+        $errors  = $rows->where('error', '!=', null)->count();
+
+        $msg = "確定が完了しました（{$success}件）";
+        if ($errors > 0) {
+            $msg .= "（スキップ: {$errors}件）";
+        }
+
+        return redirect()->route('billing-closing.index')->with('success', $msg);
+    }
+
+    /**
+     * 取消実行：売上・入金の確定フラグを未に戻し請求残高を削除 (仕様9)
+     */
+    public function doCancel(Request $request)
+    {
+        $validated = $request->validate([
+            'billing_date' => ['required', 'date'],
+            'closing_day'  => ['required', 'integer', 'min:1', 'max:31'],
+            'from_code'    => ['nullable', 'string', 'max:20'],
+            'to_code'      => ['nullable', 'string', 'max:20'],
+        ]);
+
+        $billingDate = $validated['billing_date'];
+        $closingDay  = (int) $validated['closing_day'];
+        $fromCode    = (string) ($validated['from_code'] ?? '');
+        $toCode      = (string) ($validated['to_code'] ?? '');
+
+        $rows    = $this->service->cancel($billingDate, $closingDay, $fromCode, $toCode);
+        $success = $rows->where('error', null)->count();
+        $errors  = $rows->where('error', '!=', null)->count();
+
+        $msg = "取消が完了しました（{$success}件）";
+        if ($errors > 0) {
+            $msg .= "（スキップ: {$errors}件）";
+        }
+
+        return redirect()->route('billing-closing.index')->with('success', $msg);
+    }
+
+    /**
+     * 請求書PDF一括出力 (仕様7)
+     */
     public function pdf(Request $request)
     {
         $request->validate([
-            'closing_date' => ['required', 'date'],
+            'billing_date' => ['required', 'date'],
+            'closing_day'  => ['required', 'integer', 'min:1', 'max:31'],
             'from_code'    => ['nullable', 'string'],
             'to_code'      => ['nullable', 'string'],
-            'mode'         => ['required', 'in:aggregate,confirm'],
         ]);
 
-        $rows = $this->service->aggregate(
-            $request->input('closing_date'),
-            (string) $request->input('from_code', ''),
-            (string) $request->input('to_code', ''),
-        );
+        $billingDate = $request->input('billing_date');
+        $closingDay  = (int) $request->input('closing_day');
+        $fromCode    = (string) $request->input('from_code', '');
+        $toCode      = (string) $request->input('to_code', '');
 
-        $billingDate = $request->input('closing_date');
+        $rows = $this->service->aggregate($billingDate, $closingDay, $fromCode, $toCode);
 
         $pdf = Pdf::loadView('pdf.billing', compact('rows', 'billingDate'))
             ->setPaper('a4', 'portrait');
@@ -93,60 +195,51 @@ class BillingClosingController extends Controller
 
     // ─── Private ────────────────────────────────────────────────────────
 
-    private function handleAggregate(string $closingDate, string $fromCode, string $toCode)
+    private function getClosingDays(): \Illuminate\Support\Collection
     {
-        $rows = $this->service->aggregate($closingDate, $fromCode, $toCode);
-
-        return Inertia::render('BillingClosing/Index', [
-            'defaultClosingDate' => now()->endOfMonth()->toDateString(),
-            'results'            => $this->formatRows($rows),
-            'mode'               => 'aggregate',
-            'closingDate'        => $closingDate,
-            'fromCode'           => $fromCode,
-            'toCode'             => $toCode,
-        ]);
+        return Customer::active()
+            ->whereNotNull('closing_day')
+            ->distinct()
+            ->orderBy('closing_day')
+            ->pluck('closing_day');
     }
 
-    private function handleConfirm(string $closingDate, string $fromCode, string $toCode)
+    /**
+     * 現在日付より未来直近の締め日を返す (仕様10)
+     */
+    private function computeDefaultClosingDay(array $closingDays): int
     {
-        $rows = $this->service->confirm($closingDate, $fromCode, $toCode);
-
-        return redirect()->route('billing-closing.index')
-            ->with('success', "締め処理（確定）が完了しました（{$rows->where('error', null)->count()}件）");
-    }
-
-    private function handleCancel(string $closingDate, string $fromCode, string $toCode)
-    {
-        $preview = $this->service->previewCancel($closingDate, $fromCode, $toCode);
-
-        if ($preview->isEmpty()) {
-            return Inertia::render('BillingClosing/Index', [
-                'defaultClosingDate' => now()->endOfMonth()->toDateString(),
-                'results'            => [],
-                'mode'               => 'cancel',
-                'closingDate'        => $closingDate,
-                'fromCode'           => $fromCode,
-                'toCode'             => $toCode,
-                'flash'              => ['error' => '取消対象の確定済み締めが見つかりませんでした'],
-            ]);
+        if (empty($closingDays)) {
+            return 31;
         }
 
-        return Inertia::render('BillingClosing/Index', [
-            'defaultClosingDate' => now()->endOfMonth()->toDateString(),
-            'cancelPreview'      => $preview->map(fn ($r) => [
-                'billing_number'  => $r['billing_balance']->billing_number,
-                'customer_code'   => $r['billing_balance']->customer->code,
-                'customer_name'   => $r['billing_balance']->customer->name,
-                'billing_date'    => $r['billing_balance']->billing_date->toDateString(),
-                'balance_amount'  => (float) $r['billing_balance']->balance_amount,
-                'cancelable'      => $r['cancelable'],
-                'newer_number'    => $r['newer_number'],
-            ])->values(),
-            'mode'        => 'cancel',
-            'closingDate' => $closingDate,
-            'fromCode'    => $fromCode,
-            'toCode'      => $toCode,
-        ]);
+        $today       = now();
+        $todayDay    = (int) $today->day;
+        $lastDayOfMonth = (int) $today->daysInMonth;
+
+        foreach ($closingDays as $day) {
+            $actualDay = (int) $day === 31 ? $lastDayOfMonth : min((int) $day, $lastDayOfMonth);
+            if ($actualDay >= $todayDay) {
+                return (int) $day;
+            }
+        }
+
+        // 当月の締め日がすべて過去 → 最後の締め日を返す
+        return (int) end($closingDays);
+    }
+
+    /**
+     * 締め日プルダウンの値から当月の請求日を返す (仕様11)
+     */
+    private function computeDefaultBillingDate(int $closingDay): string
+    {
+        $today = now();
+        if ($closingDay === 31) {
+            return $today->copy()->endOfMonth()->toDateString();
+        }
+        $day = min($closingDay, (int) $today->daysInMonth);
+
+        return $today->copy()->setDay($day)->toDateString();
     }
 
     private function formatRows(\Illuminate\Support\Collection $rows): array

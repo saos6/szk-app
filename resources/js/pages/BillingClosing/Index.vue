@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { ref, computed, watch } from 'vue';
+import { Head, useForm } from '@inertiajs/vue3';
 import { FileDown, Loader2 } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,11 +34,14 @@ interface CancelRow {
 }
 
 const props = defineProps<{
-    defaultClosingDate: string;
+    defaultBillingDate: string;
+    defaultClosingDay: number;
+    closingDays: number[];
     results?: ResultRow[];
     cancelPreview?: CancelRow[];
     mode?: 'aggregate' | 'confirm' | 'cancel';
-    closingDate?: string;
+    billingDate?: string;
+    closingDay?: number;
     fromCode?: string;
     toCode?: string;
 }>();
@@ -53,43 +56,71 @@ defineOptions({
 });
 
 const form = useForm({
-    closing_date: props.closingDate ?? props.defaultClosingDate,
+    billing_date: props.billingDate ?? props.defaultBillingDate,
+    closing_day: props.closingDay ?? props.defaultClosingDay,
     from_code: props.fromCode ?? '',
     to_code: props.toCode ?? '',
-    mode: (props.mode === 'confirm' || props.mode === 'cancel' ? props.mode : 'aggregate') as 'aggregate' | 'confirm' | 'cancel',
+    mode: (props.mode ?? 'aggregate') as 'aggregate' | 'confirm' | 'cancel',
+});
+
+/** 締め日（プルダウン）変更時に請求日を連動 (仕様11) */
+watch(() => form.closing_day, (newDay) => {
+    // 検索結果表示中は変更しない
+    if (props.billingDate) return;
+    const today = new Date();
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const d = newDay === 31 ? lastDay : Math.min(newDay, lastDay);
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(d).padStart(2, '0');
+    form.billing_date = `${y}-${m}-${dd}`;
 });
 
 const confirming = ref(false);
 const cancelling = ref(false);
 
-function execute() {
-    form.post(BillingClosingController.execute.url());
+/** 検索（DB変更なし、プレビュー表示）(仕様6) */
+function search() {
+    form.post(BillingClosingController.search.url());
 }
 
-function confirmExecute() {
-    if (!confirm(`締め日 ${form.closing_date} の確定処理を実行します。よろしいですか？`)) return;
+/** 確定実行 (仕様8) */
+function doConfirm() {
+    if (!confirm(`請求日 ${form.billing_date} の確定処理を実行します。よろしいですか？`)) return;
     confirming.value = true;
-    const f = useForm({ ...form.data(), mode: 'confirm' });
-    f.post(BillingClosingController.execute.url(), {
+    const f = useForm({
+        billing_date: form.billing_date,
+        closing_day: form.closing_day,
+        from_code: form.from_code,
+        to_code: form.to_code,
+    });
+    f.post(BillingClosingController.doConfirm.url(), {
         onFinish: () => { confirming.value = false; },
     });
 }
 
-function cancelExecute() {
-    if (!confirm(`締め日 ${form.closing_date} の取消処理を実行します。よろしいですか？`)) return;
+/** 取消実行 (仕様9) */
+function doCancel() {
+    if (!confirm(`請求日 ${form.billing_date} の取消処理を実行します。よろしいですか？`)) return;
     cancelling.value = true;
-    const f = useForm({ ...form.data(), mode: 'cancel' });
-    f.post(BillingClosingController.execute.url(), {
+    const f = useForm({
+        billing_date: form.billing_date,
+        closing_day: form.closing_day,
+        from_code: form.from_code,
+        to_code: form.to_code,
+    });
+    f.post(BillingClosingController.doCancel.url(), {
         onFinish: () => { cancelling.value = false; },
     });
 }
 
+/** 請求書PDF一括出力 (仕様7) */
 function downloadPdf() {
     const params = new URLSearchParams({
-        closing_date: form.closing_date,
+        billing_date: form.billing_date,
+        closing_day: String(form.closing_day),
         from_code: form.from_code,
         to_code: form.to_code,
-        mode: 'aggregate',
     });
     window.open(BillingClosingController.pdf.url() + '?' + params.toString(), '_blank');
 }
@@ -103,10 +134,13 @@ function fmtDate(val: string | null): string {
     return new Date(val).toLocaleDateString('ja-JP');
 }
 
+function closingDayLabel(day: number): string {
+    return day === 31 ? '末日' : `${day}日`;
+}
+
 const hasResults = computed(() => props.results && props.results.length > 0);
 const hasCancelPreview = computed(() => props.cancelPreview && props.cancelPreview.length > 0);
 const cancelableCount = computed(() => props.cancelPreview?.filter(r => r.cancelable).length ?? 0);
-const errorRows = computed(() => props.results?.filter(r => r.error) ?? []);
 const successRows = computed(() => props.results?.filter(r => !r.error) ?? []);
 </script>
 
@@ -118,11 +152,26 @@ const successRows = computed(() => props.results?.filter(r => !r.error) ?? []);
         <!-- 条件フォーム -->
         <div class="rounded-xl border bg-card p-6">
             <h1 class="mb-5 text-lg font-semibold">請求締め処理</h1>
-            <form @submit.prevent="execute" class="flex flex-wrap items-end gap-4">
-                <!-- 締め日 -->
+            <form @submit.prevent="search" class="flex flex-wrap items-end gap-4">
+
+                <!-- 締め日（プルダウン）(仕様1) -->
                 <div class="flex flex-col gap-1.5">
                     <Label>締め日</Label>
-                    <Input v-model="form.closing_date" type="date" class="w-44" />
+                    <select
+                        v-model.number="form.closing_day"
+                        class="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                        <option v-for="day in closingDays" :key="day" :value="day">
+                            {{ closingDayLabel(day) }}
+                        </option>
+                        <option v-if="closingDays.length === 0" :value="31">（未設定）</option>
+                    </select>
+                </div>
+
+                <!-- 請求日（仕様2: 旧「締め日」のラベルを変更） -->
+                <div class="flex flex-col gap-1.5">
+                    <Label>請求日</Label>
+                    <Input v-model="form.billing_date" type="date" class="w-44" />
                 </div>
 
                 <!-- 得意先コード範囲 -->
@@ -154,28 +203,38 @@ const successRows = computed(() => props.results?.filter(r => !r.error) ?? []);
                     </div>
                 </div>
 
+                <!-- 検索ボタン（仕様6: 旧「実行」→「検索」） -->
                 <Button type="submit" :disabled="form.processing">
                     <Loader2 v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
-                    実行
+                    検索
                 </Button>
             </form>
         </div>
 
-        <!-- 集計結果 -->
-        <template v-if="hasResults && mode === 'aggregate'">
+        <!-- 集計・確定 プレビュー結果 (仕様3, 4) -->
+        <template v-if="hasResults && (mode === 'aggregate' || mode === 'confirm')">
             <div class="rounded-xl border bg-card">
                 <div class="flex items-center justify-between border-b px-5 py-3">
                     <div>
-                        <h2 class="font-semibold">集計結果</h2>
+                        <h2 class="font-semibold">
+                            {{ mode === 'confirm' ? '確定プレビュー' : '集計結果' }}
+                        </h2>
                         <p class="text-xs text-muted-foreground mt-0.5">
-                            締め日: {{ fmtDate(closingDate!) }} ／ {{ successRows.length }} 件
+                            請求日: {{ fmtDate(billingDate!) }} ／ 締め日: {{ closingDayLabel(closingDay!) }} ／ {{ successRows.length }} 件
                         </p>
                     </div>
                     <div class="flex gap-2">
-                        <Button variant="outline" size="sm" @click="downloadPdf">
+                        <!-- 集計モード: PDF一括ボタン (仕様7) -->
+                        <Button v-if="mode === 'aggregate'" variant="outline" size="sm" @click="downloadPdf">
                             <FileDown class="mr-1.5 h-4 w-4" />請求書PDF（一括）
                         </Button>
-                        <Button size="sm" @click="confirmExecute" :disabled="confirming || successRows.length === 0">
+                        <!-- 確定モード: 確定ボタン (仕様8) -->
+                        <Button
+                            v-if="mode === 'confirm'"
+                            size="sm"
+                            @click="doConfirm"
+                            :disabled="confirming || successRows.length === 0"
+                        >
                             <Loader2 v-if="confirming" class="mr-1.5 h-4 w-4 animate-spin" />
                             この内容で確定する
                         </Button>
@@ -206,7 +265,7 @@ const successRows = computed(() => props.results?.filter(r => !r.error) ?? []);
                                 <td class="px-4 py-2.5 font-mono text-xs text-muted-foreground">{{ row.customer_code }}</td>
                                 <td class="px-4 py-2.5">{{ row.customer_name }}</td>
                                 <td class="px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">
-                                    {{ fmtDate(row.closing_start_date) }} 〜 {{ fmtDate(closingDate!) }}
+                                    {{ fmtDate(row.closing_start_date) }} 〜 {{ fmtDate(billingDate!) }}
                                 </td>
                                 <td class="px-4 py-2.5 text-right tabular-nums">{{ fmtAmount(row.prev_amount) }}</td>
                                 <td class="px-4 py-2.5 text-right tabular-nums">{{ fmtAmount(row.sales_amount) }}</td>
@@ -247,20 +306,21 @@ const successRows = computed(() => props.results?.filter(r => !r.error) ?? []);
             </div>
         </template>
 
-        <!-- 取消プレビュー -->
+        <!-- 取消プレビュー (仕様5, 9) -->
         <template v-if="hasCancelPreview && mode === 'cancel'">
             <div class="rounded-xl border bg-card">
                 <div class="flex items-center justify-between border-b px-5 py-3">
                     <div>
                         <h2 class="font-semibold">取消対象</h2>
                         <p class="text-xs text-muted-foreground mt-0.5">
-                            締め日: {{ fmtDate(closingDate!) }} ／ 取消可能 {{ cancelableCount }} 件
+                            請求日: {{ fmtDate(billingDate!) }} ／ 締め日: {{ closingDayLabel(closingDay!) }} ／ 取消可能 {{ cancelableCount }} 件
                         </p>
                     </div>
+                    <!-- 取消ボタン (仕様9) -->
                     <Button
                         variant="destructive"
                         size="sm"
-                        @click="cancelExecute"
+                        @click="doCancel"
                         :disabled="cancelling || cancelableCount === 0"
                     >
                         <Loader2 v-if="cancelling" class="mr-1.5 h-4 w-4 animate-spin" />
@@ -274,7 +334,7 @@ const successRows = computed(() => props.results?.filter(r => !r.error) ?? []);
                                 <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">請求番号</th>
                                 <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">CD</th>
                                 <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">得意先</th>
-                                <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">締め日</th>
+                                <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">請求日</th>
                                 <th class="px-4 py-2.5 text-right font-medium text-muted-foreground">残高</th>
                                 <th class="px-4 py-2.5 text-center font-medium text-muted-foreground">状態</th>
                             </tr>
@@ -306,6 +366,7 @@ const successRows = computed(() => props.results?.filter(r => !r.error) ?? []);
 
         <!-- 空メッセージ -->
         <template v-if="(mode === 'aggregate' && results && results.length === 0) ||
+                        (mode === 'confirm' && results && results.length === 0) ||
                         (mode === 'cancel' && cancelPreview && cancelPreview.length === 0)">
             <div class="rounded-xl border bg-card px-5 py-12 text-center text-muted-foreground">
                 対象データが見つかりませんでした
