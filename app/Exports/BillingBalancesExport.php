@@ -13,6 +13,8 @@ class BillingBalancesExport implements FromCollection, WithHeadings, WithMapping
 {
     public function __construct(
         private string $search = '',
+        private string $dateFrom = '',
+        private string $dateTo = '',
         private string $sort = 'billing_date',
         private string $direction = 'desc',
     ) {}
@@ -25,7 +27,7 @@ class BillingBalancesExport implements FromCollection, WithHeadings, WithMapping
 
         return BillingBalance::with('customer')
             ->active()
-            ->filtered($this->search)
+            ->filtered($this->search, $this->dateFrom, $this->dateTo)
             ->orderBy($sortField, $sortDir)
             ->get();
     }

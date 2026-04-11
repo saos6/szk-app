@@ -27,6 +27,7 @@ interface InventoryBalance {
     prev_stock: number;
     in_stock: number;
     out_stock: number;
+    current_stock: number;
     created_at: string;
     updated_at: string;
 }
@@ -44,7 +45,7 @@ interface Props {
         from: number | null;
         to: number | null;
     };
-    filters: { search: string; sort: string; direction: string; per_page: string; };
+    filters: { search: string; ym_from: string; ym_to: string; sort: string; direction: string; per_page: string; };
 }
 
 const props = defineProps<Props>();
@@ -55,22 +56,27 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const search  = ref(props.filters.search ?? '');
+const ymFrom  = ref(props.filters.ym_from ?? '');
+const ymTo    = ref(props.filters.ym_to ?? '');
 const perPage = ref(props.filters.per_page ?? '10');
 const sortField = ref(props.filters.sort ?? 'stock_ym');
 const sortDir   = ref(props.filters.direction ?? 'desc');
 
-type ColumnKey = 'stock_ym' | 'warehouse_code' | 'vehicle_model_code' | 'frame_no' | 'prev_stock' | 'in_stock' | 'out_stock' | 'created_at' | 'updated_at';
+type ColumnKey = 'stock_ym' | 'warehouse_code' | 'vehicle_model_code' | 'frame_no' | 'prev_stock' | 'in_stock' | 'out_stock' | 'current_stock' | 'created_at' | 'updated_at';
+
+const nonSortable: ColumnKey[] = ['current_stock'];
 
 const COLUMNS_STORAGE_KEY = 'inventory-balances.columns';
 
 const defaultColumns: Record<ColumnKey, { label: string; visible: boolean }> = {
     stock_ym:            { label: '年月',           visible: true  },
     warehouse_code:      { label: '倉庫コード',     visible: true  },
-    vehicle_model_code:  { label: '機種コード',     visible: true  },
-    frame_no:            { label: 'フレームNo',      visible: true  },
+    vehicle_model_code:  { label: '機種コード（商品）',     visible: true  },
+    frame_no:            { label: 'フレームNo（品番）',      visible: true  },
     prev_stock:          { label: '前月繰越',        visible: true  },
     in_stock:            { label: '当月入庫',        visible: true  },
     out_stock:           { label: '当月出庫',        visible: true  },
+    current_stock:       { label: '当月在庫数',      visible: true  },
     created_at:          { label: '作成日時',        visible: false },
     updated_at:          { label: '更新日時',        visible: false },
 };
@@ -103,7 +109,7 @@ const visibleColumns = computed(() =>
 function applyFilters() {
     router.get(
         InventoryBalanceController.index.url(),
-        { search: search.value, sort: sortField.value, direction: sortDir.value, per_page: perPage.value },
+        { search: search.value, ym_from: ymFrom.value, ym_to: ymTo.value, sort: sortField.value, direction: sortDir.value, per_page: perPage.value },
         { preserveState: true, replace: true },
     );
 }
@@ -123,7 +129,7 @@ function toggleSort(field: string) {
 function handlePerPageChange(value: string) { perPage.value = value; applyFilters(); }
 
 function exportExcel() {
-    const params = new URLSearchParams({ search: search.value, sort: sortField.value, direction: sortDir.value });
+    const params = new URLSearchParams({ search: search.value, ym_from: ymFrom.value, ym_to: ymTo.value, sort: sortField.value, direction: sortDir.value });
     window.location.href = `${InventoryBalanceController.exportMethod.url()}?${params}`;
 }
 
@@ -183,13 +189,19 @@ function paginationLabel(label: string): string {
             </div>
 
             <!-- 検索バー -->
-            <div class="flex items-center gap-2">
-                <div class="relative max-w-sm flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+                <div class="flex items-center gap-1">
+                    <span class="text-sm text-muted-foreground whitespace-nowrap">年月：</span>
+                    <Input v-model="ymFrom" type="month" class="h-8 w-36" @change="handleSearch" />
+                    <span class="text-muted-foreground">〜</span>
+                    <Input v-model="ymTo" type="month" class="h-8 w-36" @change="handleSearch" />
+                </div>
+                <div class="relative max-w-sm flex-1 min-w-48">
                     <Search class="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input v-model="search" placeholder="年月・倉庫・機種・フレームNoで検索..." class="pl-8" @keyup.enter="handleSearch" />
+                    <Input v-model="search" placeholder="倉庫・機種（商品）・フレームNo（品番）で検索..." class="pl-8" @keyup.enter="handleSearch" />
                 </div>
                 <Button variant="secondary" size="sm" @click="handleSearch">検索</Button>
-                <Button variant="ghost" size="sm" @click="() => { search = ''; handleSearch(); }">クリア</Button>
+                <Button variant="ghost" size="sm" @click="() => { search = ''; ymFrom = ''; ymTo = ''; handleSearch(); }">クリア</Button>
             </div>
 
             <!-- 件数・表示数 -->
@@ -219,17 +231,17 @@ function paginationLabel(label: string): string {
                 <table class="w-full text-sm">
                     <thead class="bg-muted/50">
                         <tr>
-                            <th v-for="col in (['stock_ym', 'warehouse_code', 'vehicle_model_code', 'frame_no', 'prev_stock', 'in_stock', 'out_stock', 'created_at', 'updated_at'] as ColumnKey[])"
+                            <th v-for="col in (['stock_ym', 'warehouse_code', 'vehicle_model_code', 'frame_no', 'prev_stock', 'in_stock', 'out_stock', 'current_stock', 'created_at', 'updated_at'] as ColumnKey[])"
                                 :key="col"
                                 v-show="columns[col].visible"
-                                class="cursor-pointer px-4 py-3 text-left font-medium whitespace-nowrap select-none"
-                                @click="toggleSort(col)"
+                                :class="['px-4 py-3 text-left font-medium whitespace-nowrap select-none', nonSortable.includes(col) ? '' : 'cursor-pointer']"
+                                @click="nonSortable.includes(col) ? undefined : toggleSort(col)"
                             >
                                 <span class="flex items-center gap-1">
                                     {{ columns[col].label }}
                                     <ArrowUp v-if="sortIcon(col) === 'asc'" class="h-3.5 w-3.5" />
                                     <ArrowDown v-else-if="sortIcon(col) === 'desc'" class="h-3.5 w-3.5" />
-                                    <ArrowUpDown v-else class="h-3.5 w-3.5 opacity-40" />
+                                    <ArrowUpDown v-else-if="!nonSortable.includes(col)" class="h-3.5 w-3.5 opacity-40" />
                                 </span>
                             </th>
                             <th class="px-4 py-3 text-left font-medium whitespace-nowrap">操作</th>
@@ -248,6 +260,7 @@ function paginationLabel(label: string): string {
                             <td v-show="columns.prev_stock.visible" class="px-4 py-3 text-right">{{ row.prev_stock.toLocaleString() }}</td>
                             <td v-show="columns.in_stock.visible" class="px-4 py-3 text-right">{{ row.in_stock.toLocaleString() }}</td>
                             <td v-show="columns.out_stock.visible" class="px-4 py-3 text-right">{{ row.out_stock.toLocaleString() }}</td>
+                            <td v-show="columns.current_stock.visible" class="px-4 py-3 text-right font-semibold">{{ row.current_stock.toLocaleString() }}</td>
                             <td v-show="columns.created_at.visible" class="px-4 py-3 whitespace-nowrap text-muted-foreground">
                                 {{ row.created_at ? new Date(row.created_at).toLocaleString('ja-JP') : '—' }}
                             </td>

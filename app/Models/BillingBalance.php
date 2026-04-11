@@ -73,14 +73,17 @@ class BillingBalance extends Model
         return $query->where('is_deleted', false);
     }
 
-    public function scopeFiltered(Builder $query, string $search): Builder
+    public function scopeFiltered(Builder $query, string $search, string $dateFrom = '', string $dateTo = ''): Builder
     {
-        return $query->when($search !== '', function ($q) use ($search) {
-            $q->whereHas('customer', function ($c) use ($search) {
-                $c->where('code', 'like', "%{$search}%")
-                    ->orWhere('name', 'like', "%{$search}%");
-            });
-        });
+        return $query
+            ->when($search !== '', function ($q) use ($search) {
+                $q->whereHas('customer', function ($c) use ($search) {
+                    $c->where('code', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%");
+                });
+            })
+            ->when($dateFrom !== '', fn ($q) => $q->where('billing_date', '>=', $dateFrom))
+            ->when($dateTo !== '', fn ($q) => $q->where('billing_date', '<=', $dateTo));
     }
 
     // ─── Business Logic ────────────────────────────────────────────────

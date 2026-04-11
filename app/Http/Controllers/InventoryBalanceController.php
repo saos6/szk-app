@@ -22,10 +22,12 @@ class InventoryBalanceController extends Controller
         $sort = in_array($request->get('sort'), $allowedSorts) ? $request->get('sort') : 'stock_ym';
         $direction = $request->get('direction') === 'asc' ? 'asc' : 'desc';
         $perPage = in_array((int) $request->get('per_page'), [10, 25, 50, 100]) ? (int) $request->get('per_page') : 10;
-        $search = (string) $request->get('search', '');
+        $search  = (string) $request->get('search', '');
+        $ymFrom  = (string) $request->get('ym_from', '');
+        $ymTo    = (string) $request->get('ym_to', '');
 
         $inventoryBalances = InventoryBalance::active()
-            ->filtered($search)
+            ->filtered($search, $ymFrom, $ymTo)
             ->orderBy($sort, $direction)
             ->paginate($perPage)
             ->withQueryString();
@@ -34,6 +36,8 @@ class InventoryBalanceController extends Controller
             'inventoryBalances' => $inventoryBalances,
             'filters' => [
                 'search'    => $search,
+                'ym_from'   => $ymFrom,
+                'ym_to'     => $ymTo,
                 'sort'      => $sort,
                 'direction' => $direction,
                 'per_page'  => (string) $perPage,
@@ -109,8 +113,10 @@ class InventoryBalanceController extends Controller
     public function export(Request $request): BinaryFileResponse
     {
         $export = new InventoryBalancesExport(
-            search: $request->string('search')->toString(),
-            sort: $request->string('sort', 'stock_ym')->toString(),
+            search:    $request->string('search')->toString(),
+            ymFrom:    $request->string('ym_from')->toString(),
+            ymTo:      $request->string('ym_to')->toString(),
+            sort:      $request->string('sort', 'stock_ym')->toString(),
             direction: $request->string('direction', 'desc')->toString(),
         );
 

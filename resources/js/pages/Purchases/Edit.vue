@@ -34,11 +34,14 @@ interface PurchaseData {
     items: PurchaseItemData[];
 }
 
+interface VehicleModelOption { kisyu_cd: string; iro_cd: string | null; kisyu_nm: string | null; sre_tan: string; }
+
 const props = defineProps<{
     purchase: PurchaseData;
     suppliers: Supplier[];
     employees: Employee[];
     vehicles: VehicleOption[];
+    vehicleModels: VehicleModelOption[];
     warehouses: Warehouse[];
     statuses: Record<string, string>;
 }>();
@@ -98,6 +101,7 @@ function submit() {
                 :suppliers="suppliers"
                 :employees="employees"
                 :vehicles="vehicles"
+                :vehicle-models="vehicleModels"
                 :warehouses="warehouses"
                 :statuses="statuses"
                 :cancel-href="PurchaseController.show.url(purchase.id)"

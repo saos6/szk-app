@@ -87,7 +87,7 @@ const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '車両機種マスタ', href: VehicleModelController.index.url() },
+    { title: '車両機種（商品）マスタ', href: VehicleModelController.index.url() },
 ];
 
 const search = ref(props.filters.search ?? '');
@@ -119,7 +119,7 @@ const COLUMNS_STORAGE_KEY = 'vehicle-models.columns';
 
 const defaultColumns: Record<ColumnKey, { label: string; visible: boolean }> = {
     id:         { label: 'ID',            visible: false },
-    kisyu_cd:   { label: '機種コード',    visible: true  },
+    kisyu_cd:   { label: '機種コード（商品）',    visible: true  },
     iro_cd:     { label: '色コード',      visible: true  },
     kisyu_nm_h: { label: '機種名(漢字)',  visible: true  },
     kisyu_nm:   { label: '営業機種記号',  visible: true  },
@@ -226,11 +226,11 @@ function formatPrice(val: string | null): string {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="車両機種マスタ" />
+        <Head title="車両機種（商品）マスタ" />
         <div class="flex flex-col gap-4 p-4">
             <!-- ヘッダー -->
             <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold">車両機種マスタ</h1>
+                <h1 class="text-2xl font-bold">車両機種（商品）マスタ</h1>
                 <div class="flex gap-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger as-child>
@@ -266,7 +266,7 @@ function formatPrice(val: string | null): string {
                     <Search class="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         v-model="search"
-                        placeholder="機種コード・色コード・機種名で検索..."
+                        placeholder="機種コード（商品）・色コード・機種名で検索..."
                         class="pl-8"
                         @keyup.enter="handleSearch"
                     />

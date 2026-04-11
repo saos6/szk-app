@@ -21,11 +21,13 @@ class BillingBalanceController extends Controller
         $sort = in_array($request->get('sort'), $allowedSorts) ? $request->get('sort') : 'billing_date';
         $direction = $request->get('direction') === 'asc' ? 'asc' : 'desc';
         $perPage = in_array((int) $request->get('per_page'), [10, 25, 50, 100]) ? (int) $request->get('per_page') : 10;
-        $search = (string) $request->get('search', '');
+        $search    = (string) $request->get('search', '');
+        $dateFrom  = (string) $request->get('date_from', '');
+        $dateTo    = (string) $request->get('date_to', '');
 
         $billingBalances = BillingBalance::with('customer:id,code,name')
             ->active()
-            ->filtered($search)
+            ->filtered($search, $dateFrom, $dateTo)
             ->orderBy($sort, $direction)
             ->paginate($perPage)
             ->withQueryString();
@@ -33,10 +35,12 @@ class BillingBalanceController extends Controller
         return Inertia::render('BillingBalances/Index', [
             'billingBalances' => $billingBalances,
             'filters' => [
-                'search' => $search,
-                'sort' => $sort,
+                'search'    => $search,
+                'date_from' => $dateFrom,
+                'date_to'   => $dateTo,
+                'sort'      => $sort,
                 'direction' => $direction,
-                'per_page' => (string) $perPage,
+                'per_page'  => (string) $perPage,
             ],
         ]);
     }
@@ -116,8 +120,10 @@ class BillingBalanceController extends Controller
     public function export(Request $request): BinaryFileResponse
     {
         $export = new BillingBalancesExport(
-            search: $request->string('search')->toString(),
-            sort: $request->string('sort', 'billing_date')->toString(),
+            search:    $request->string('search')->toString(),
+            dateFrom:  $request->string('date_from')->toString(),
+            dateTo:    $request->string('date_to')->toString(),
+            sort:      $request->string('sort', 'billing_date')->toString(),
             direction: $request->string('direction', 'desc')->toString(),
         );
 

@@ -36,7 +36,7 @@ const props = defineProps<{
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '車両マスタ', href: VehicleController.index.url() },
+    { title: '車両（品番）マスタ', href: VehicleController.index.url() },
     { title: '編集', href: VehicleController.edit.url(props.vehicle.id) },
 ];
 
@@ -71,11 +71,11 @@ function submit() {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head :title="`車両マスタ 編集 - ${vehicle.frame_no}`" />
+        <Head :title="`車両（品番）マスタ 編集 - ${vehicle.frame_no}`" />
         <div class="max-w-4xl p-6">
             <div class="rounded-lg border bg-card p-6 shadow-sm">
                 <div class="mb-6 flex items-center justify-between">
-                    <h1 class="text-xl font-bold">車両 編集</h1>
+                    <h1 class="text-xl font-bold">車両（品番） 編集</h1>
                     <Button variant="outline" size="sm" as-child>
                         <Link :href="VehicleController.replicate.url(vehicle.id)">
                             <Copy class="mr-1.5 h-4 w-4" />この車両を複製

@@ -56,7 +56,7 @@ const props = defineProps<{
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '車両マスタ', href: VehicleController.index.url() },
+    { title: '車両（品番）マスタ', href: VehicleController.index.url() },
     {
         title: props.vehicle.kisyu_cd ?? String(props.vehicle.id),
         href: VehicleController.show.url(props.vehicle.id),
@@ -76,10 +76,10 @@ function fmt(val: string | number | null): string {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head :title="`車両 ${vehicle.kisyu_cd ?? vehicle.id}`" />
+        <Head :title="`車両（品番） ${vehicle.kisyu_cd ?? vehicle.id}`" />
         <div class="flex flex-col gap-4 p-4">
             <div class="flex flex-wrap items-center justify-between gap-2">
-                <h1 class="text-2xl font-bold">車両 参照</h1>
+                <h1 class="text-2xl font-bold">車両（品番） 参照</h1>
                 <div class="flex flex-wrap gap-2">
                     <Button variant="outline" size="sm" as-child>
                         <Link :href="VehicleController.index.url()">一覧へ戻る</Link>
@@ -105,7 +105,7 @@ function fmt(val: string | number | null): string {
                         <h2 class="mb-3 text-sm font-semibold text-muted-foreground">機種情報</h2>
                         <div class="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-3">
                             <div>
-                                <dt class="text-muted-foreground">機種コード</dt>
+                                <dt class="text-muted-foreground">機種コード（商品）</dt>
                                 <dd class="mt-0.5 font-mono font-medium">{{ vehicle.kisyu_cd ?? '—' }}</dd>
                             </div>
                             <div>
@@ -117,7 +117,7 @@ function fmt(val: string | number | null): string {
                                 <dd class="mt-0.5 font-medium">{{ vehicle.iro_cd ?? '—' }}</dd>
                             </div>
                             <div>
-                                <dt class="text-muted-foreground">機種名</dt>
+                                <dt class="text-muted-foreground">機種名（商品名）</dt>
                                 <dd class="mt-0.5 font-medium">{{ vehicle.kisyu_nm ?? '—' }}</dd>
                             </div>
                             <div>

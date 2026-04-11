@@ -13,6 +13,8 @@ class InventoryBalancesExport implements FromCollection, WithHeadings, WithMappi
 {
     public function __construct(
         private string $search = '',
+        private string $ymFrom = '',
+        private string $ymTo = '',
         private string $sort = 'stock_ym',
         private string $direction = 'desc',
     ) {}
@@ -24,14 +26,14 @@ class InventoryBalancesExport implements FromCollection, WithHeadings, WithMappi
         $sortDir = $this->direction === 'asc' ? 'asc' : 'desc';
 
         return InventoryBalance::active()
-            ->filtered($this->search)
+            ->filtered($this->search, $this->ymFrom, $this->ymTo)
             ->orderBy($sortField, $sortDir)
             ->get();
     }
 
     public function headings(): array
     {
-        return ['年月', '倉庫コード', '機種コード', 'フレームNo', '前月繰越在庫数', '当月入庫数', '当月出庫数', '作成日時', '更新日時'];
+        return ['年月', '倉庫コード', '機種コード（商品）', 'フレームNo（品番）', '前月繰越在庫数', '当月入庫数', '当月出庫数', '当月在庫数', '作成日時', '更新日時'];
     }
 
     public function map($row): array
@@ -44,6 +46,7 @@ class InventoryBalancesExport implements FromCollection, WithHeadings, WithMappi
             $row->prev_stock,
             $row->in_stock,
             $row->out_stock,
+            $row->current_stock,
             $row->created_at?->format('Y-m-d H:i:s') ?? '',
             $row->updated_at?->format('Y-m-d H:i:s') ?? '',
         ];

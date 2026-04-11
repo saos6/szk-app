@@ -66,6 +66,8 @@ interface Props {
     };
     filters: {
         search: string;
+        date_from: string;
+        date_to: string;
         sort: string;
         direction: string;
         per_page: string;
@@ -80,6 +82,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const search    = ref(props.filters.search    ?? '');
+const dateFrom  = ref(props.filters.date_from ?? '');
+const dateTo    = ref(props.filters.date_to   ?? '');
 const perPage   = ref(props.filters.per_page  ?? '10');
 const sortField = ref(props.filters.sort      ?? 'billing_date');
 const sortDir   = ref(props.filters.direction ?? 'desc');
@@ -158,10 +162,12 @@ function applyFilters() {
     router.get(
         BillingBalanceController.index.url(),
         {
-            search:    search.value,
-            sort:      sortField.value,
-            direction: sortDir.value,
-            per_page:  perPage.value,
+            search:     search.value,
+            date_from:  dateFrom.value,
+            date_to:    dateTo.value,
+            sort:       sortField.value,
+            direction:  sortDir.value,
+            per_page:   perPage.value,
         },
         { preserveState: true, replace: true },
     );
@@ -190,6 +196,8 @@ function handlePerPageChange(value: string) {
 function exportExcel() {
     const params = new URLSearchParams({
         search:    search.value,
+        date_from: dateFrom.value,
+        date_to:   dateTo.value,
         sort:      sortField.value,
         direction: sortDir.value,
     });
@@ -263,11 +271,15 @@ function fmtDate(val: string | null): string {
             </div>
 
             <!-- 検索 -->
-            <div class="flex items-center gap-2">
-                <div class="relative max-w-sm flex-1">
-                    <Search
-                        class="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                    />
+            <div class="flex flex-wrap items-center gap-2">
+                <div class="flex items-center gap-1">
+                    <span class="text-sm text-muted-foreground whitespace-nowrap">請求日：</span>
+                    <Input v-model="dateFrom" type="date" class="h-8 w-36" @change="handleSearch" />
+                    <span class="text-muted-foreground">〜</span>
+                    <Input v-model="dateTo" type="date" class="h-8 w-36" @change="handleSearch" />
+                </div>
+                <div class="relative max-w-sm flex-1 min-w-48">
+                    <Search class="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         v-model="search"
                         placeholder="得意先コード・得意先名で検索..."
@@ -276,11 +288,7 @@ function fmtDate(val: string | null): string {
                     />
                 </div>
                 <Button variant="secondary" size="sm" @click="handleSearch">検索</Button>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    @click="() => { search = ''; handleSearch(); }"
-                >クリア</Button>
+                <Button variant="ghost" size="sm" @click="() => { search = ''; dateFrom = ''; dateTo = ''; handleSearch(); }">クリア</Button>
             </div>
 
             <!-- 件数 -->

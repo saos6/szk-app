@@ -89,7 +89,7 @@ const vehicleModelOptions = computed(() =>
             <!-- フレームNo -->
             <div class="flex flex-col gap-1.5">
                 <Label for="frame_no">
-                    フレームNo
+                    フレームNo（品番）
                     <span class="ml-1 text-xs text-destructive">*必須</span>
                 </Label>
                 <Input
@@ -120,7 +120,7 @@ const vehicleModelOptions = computed(() =>
             <!-- 機種コード -->
             <div class="flex flex-col gap-1.5">
                 <Label>
-                    機種コード
+                    機種コード（商品）
                     <span class="ml-1 text-xs text-destructive">*必須</span>
                 </Label>
                 <Combobox

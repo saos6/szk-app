@@ -31,6 +31,12 @@ interface VehicleOption {
     kisyu_nm: string | null;
     sre_tan: string;
 }
+interface VehicleModelOption {
+    kisyu_cd: string;
+    iro_cd: string | null;
+    kisyu_nm: string | null;
+    sre_tan: string;
+}
 interface Warehouse {
     code: string;
     name: string;
@@ -65,6 +71,7 @@ const props = defineProps<{
     suppliers: Supplier[];
     employees: Employee[];
     vehicles: VehicleOption[];
+    vehicleModels: VehicleModelOption[];
     warehouses: Warehouse[];
     statuses: Record<string, string>;
     cancelHref: string;
@@ -81,11 +88,11 @@ const supplierOptions = computed(() =>
 const kisyuCdOptions = computed(() => {
     const seen = new Set<string>();
     const list: { value: string; label: string }[] = [];
+    for (const m of props.vehicleModels) {
+        if (!seen.has(m.kisyu_cd)) { seen.add(m.kisyu_cd); list.push({ value: m.kisyu_cd, label: m.kisyu_cd }); }
+    }
     for (const v of props.vehicles) {
-        if (!seen.has(v.kisyu_cd)) {
-            seen.add(v.kisyu_cd);
-            list.push({ value: v.kisyu_cd, label: v.kisyu_cd });
-        }
+        if (!seen.has(v.kisyu_cd)) { seen.add(v.kisyu_cd); list.push({ value: v.kisyu_cd, label: v.kisyu_cd }); }
     }
     return list;
 });
@@ -94,10 +101,8 @@ const warehouseOptions = computed(() =>
     props.warehouses.map((w) => ({ value: w.code, label: `${w.code} ${w.name}` })),
 );
 
-function frameNoOptions(kisyuCd: string) {
-    return props.vehicles
-        .filter((v) => v.kisyu_cd === kisyuCd)
-        .map((v) => ({ value: v.frame_no, label: v.frame_no }));
+function frameNoList(kisyuCd: string) {
+    return props.vehicles.filter((v) => v.kisyu_cd === kisyuCd);
 }
 
 function addItem() {
@@ -121,6 +126,14 @@ function removeItem(index: number) {
     props.form.items.splice(index, 1);
 }
 
+function iroCdOptions(kisyuCd: string) {
+    const seen = new Set<string>();
+    return props.vehicleModels
+        .filter((m) => m.kisyu_cd === kisyuCd && m.iro_cd)
+        .filter((m) => { if (seen.has(m.iro_cd!)) return false; seen.add(m.iro_cd!); return true; })
+        .map((m) => ({ value: m.iro_cd!, label: m.iro_cd! }));
+}
+
 function onKisyuCdChange(i: number, val: string) {
     props.form.items[i].kisyu_cd = val;
     props.form.items[i].frame_no = '';
@@ -131,12 +144,22 @@ function onKisyuCdChange(i: number, val: string) {
     recalcItem(i);
 }
 
-function onFrameNoChange(i: number, val: string) {
-    props.form.items[i].frame_no = val;
+function onIroCdChange(i: number, val: string) {
+    props.form.items[i].iro_cd = val;
+    const vm = props.vehicleModels.find(
+        (m) => m.kisyu_cd === props.form.items[i].kisyu_cd && m.iro_cd === val,
+    );
+    if (vm) {
+        props.form.items[i].kisyu_nm = vm.kisyu_nm ?? '';
+        props.form.items[i].sre_tan = vm.sre_tan ?? '0';
+    }
+    recalcItem(i);
+}
+
+function onFrameNoChange(i: number) {
+    const frameNo = props.form.items[i].frame_no;
     const vehicle = props.vehicles.find(
-        (v) =>
-            v.kisyu_cd === props.form.items[i].kisyu_cd &&
-            v.frame_no === props.form.items[i].frame_no,
+        (v) => v.kisyu_cd === props.form.items[i].kisyu_cd && v.frame_no === frameNo,
     );
     if (vehicle) {
         props.form.items[i].iro_cd = vehicle.iro_cd ?? '';
@@ -300,11 +323,11 @@ function getItemError(index: number, field: string): string | undefined {
                 <table class="w-full text-sm">
                     <thead class="bg-muted/50">
                         <tr>
-                            <th class="px-3 py-2 text-left font-medium">機種コード</th>
-                            <th class="px-3 py-2 text-left font-medium">フレームNo</th>
-                            <th class="px-3 py-2 text-left font-medium">倉庫</th>
+                            <th class="px-3 py-2 text-left font-medium">機種コード（商品）</th>
+                            <th class="px-3 py-2 text-left font-medium">フレームNo（品番）</th>
                             <th class="px-3 py-2 text-left font-medium">色コード</th>
-                            <th class="px-3 py-2 text-left font-medium">機種名</th>
+                            <th class="px-3 py-2 text-left font-medium">倉庫</th>
+                            <th class="px-3 py-2 text-left font-medium">機種名（商品名）</th>
                             <th class="px-3 py-2 text-right font-medium">数量 <span class="text-destructive">*</span></th>
                             <th class="px-3 py-2 text-left font-medium">単位</th>
                             <th class="px-3 py-2 text-right font-medium">仕入単価</th>
@@ -321,19 +344,32 @@ function getItemError(index: number, field: string): string | undefined {
                                 <Combobox
                                     :options="kisyuCdOptions"
                                     :model-value="item.kisyu_cd"
-                                    placeholder="機種コード..."
+                                    placeholder="機種コード（商品）..."
                                     class="w-36"
                                     @update:model-value="(v) => onKisyuCdChange(i, v)"
                                 />
                             </td>
                             <!-- フレームNo -->
                             <td class="px-2 py-1.5">
+                                <Input
+                                    v-model="item.frame_no"
+                                    :list="`frame-no-${i}`"
+                                    placeholder="フレームNo（品番）..."
+                                    class="h-8 w-40"
+                                    @change="onFrameNoChange(i)"
+                                />
+                                <datalist :id="`frame-no-${i}`">
+                                    <option v-for="v in frameNoList(item.kisyu_cd)" :key="v.frame_no" :value="v.frame_no" />
+                                </datalist>
+                            </td>
+                            <!-- 色コード -->
+                            <td class="px-2 py-1.5">
                                 <Combobox
-                                    :options="frameNoOptions(item.kisyu_cd)"
-                                    :model-value="item.frame_no"
-                                    placeholder="フレームNo..."
-                                    class="w-40"
-                                    @update:model-value="(v) => onFrameNoChange(i, v)"
+                                    :options="iroCdOptions(item.kisyu_cd)"
+                                    :model-value="item.iro_cd"
+                                    placeholder="色..."
+                                    class="w-24"
+                                    @update:model-value="(v) => onIroCdChange(i, v)"
                                 />
                             </td>
                             <!-- 倉庫コード -->
@@ -345,10 +381,6 @@ function getItemError(index: number, field: string): string | undefined {
                                     class="w-32"
                                     @update:model-value="(v) => (item.warehouse_code = v)"
                                 />
-                            </td>
-                            <!-- 色コード（自動） -->
-                            <td class="px-2 py-1.5">
-                                <Input v-model="item.iro_cd" class="h-8 w-20" readonly tabindex="-1" />
                             </td>
                             <!-- 機種名（自動） -->
                             <td class="px-2 py-1.5">

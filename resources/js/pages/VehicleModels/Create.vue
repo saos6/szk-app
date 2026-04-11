@@ -33,7 +33,7 @@ const props = defineProps<{
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '車両機種マスタ', href: VehicleModelController.index.url() },
+    { title: '車両機種（商品）マスタ', href: VehicleModelController.index.url() },
     { title: '新規登録', href: VehicleModelController.create.url() },
 ];
 
@@ -64,11 +64,11 @@ function submit() {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="車両機種マスタ 新規登録" />
+        <Head title="車両機種（商品）マスタ 新規登録" />
         <div class="max-w-4xl p-6">
             <div class="rounded-lg border bg-card p-6 shadow-sm">
                 <div class="mb-6 flex items-center gap-3">
-                    <h1 class="text-xl font-bold">車両機種 新規登録</h1>
+                    <h1 class="text-xl font-bold">車両機種（商品） 新規登録</h1>
                     <span
                         v-if="prefill"
                         class="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900 dark:text-amber-200"

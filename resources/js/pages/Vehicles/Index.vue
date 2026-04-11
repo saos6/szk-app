@@ -43,7 +43,7 @@ const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '車両マスタ', href: VehicleController.index.url() },
+    { title: '車両（品番）マスタ', href: VehicleController.index.url() },
 ];
 
 const search = ref(props.filters.search ?? '');
@@ -61,9 +61,9 @@ const COLUMNS_STORAGE_KEY = 'vehicles.columns';
 
 const defaultColumns: Record<ColumnKey, { label: string; visible: boolean }> = {
     id:                  { label: 'ID',           visible: false },
-    kisyu_cd:            { label: '機種コード',   visible: true  },
-    frame_no:            { label: 'フレームNo',   visible: true  },
-    kisyu_nm:            { label: '機種名',        visible: true  },
+    kisyu_cd:            { label: '機種コード（商品）',   visible: true  },
+    frame_no:            { label: 'フレームNo（品番）',   visible: true  },
+    kisyu_nm:            { label: '機種名（商品名）',      visible: true  },
     iro_cd:              { label: '色コード',      visible: false },
     vehicle_no:          { label: '車両番号',      visible: true  },
     owner_name:          { label: '氏名',          visible: true  },
@@ -137,11 +137,11 @@ function formatDate(val: string | null) { return val ? val : '—'; }
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="車両マスタ" />
+        <Head title="車両（品番）マスタ" />
         <div class="flex flex-col gap-4 p-4">
             <!-- ヘッダー -->
             <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold">車両マスタ</h1>
+                <h1 class="text-2xl font-bold">車両（品番）マスタ</h1>
                 <div class="flex gap-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger as-child>
@@ -169,7 +169,7 @@ function formatDate(val: string | null) { return val ? val : '—'; }
             <div class="flex items-center gap-2">
                 <div class="relative max-w-sm flex-1">
                     <Search class="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input v-model="search" placeholder="機種コード・フレームNo・機種名・氏名・販売店で検索..."
+                    <Input v-model="search" placeholder="機種コード（商品）・フレームNo（品番）・機種名（商品名）・氏名・販売店で検索..."
                         class="pl-8" @keyup.enter="handleSearch" />
                 </div>
                 <Button variant="secondary" size="sm" @click="handleSearch">検索</Button>

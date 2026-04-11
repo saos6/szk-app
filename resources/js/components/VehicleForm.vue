@@ -109,7 +109,7 @@ watch(
                 <!-- 機種コード・フレームNo -->
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="flex flex-col gap-1.5">
-                        <Label>機種コード <span class="ml-1 text-xs text-destructive">*必須</span></Label>
+                        <Label>機種コード（商品） <span class="ml-1 text-xs text-destructive">*必須</span></Label>
                         <Select
                             :model-value="form.kisyu_cd || '__none__'"
                             @update:model-value="(v) => (form.kisyu_cd = v === '__none__' ? '' : v)"
@@ -127,7 +127,7 @@ watch(
                         <InputError :message="form.errors.kisyu_cd" />
                     </div>
                     <div class="flex flex-col gap-1.5">
-                        <Label for="frame_no">フレームNo <span class="ml-1 text-xs text-destructive">*必須</span></Label>
+                        <Label for="frame_no">フレームNo（品番） <span class="ml-1 text-xs text-destructive">*必須</span></Label>
                         <Input id="frame_no" v-model="form.frame_no" maxlength="10" class="font-mono"
                             :class="{ 'border-destructive': form.errors.frame_no }" />
                         <InputError :message="form.errors.frame_no" />
@@ -168,7 +168,7 @@ watch(
                 </div>
                 <!-- 機種名 -->
                 <div class="flex flex-col gap-1.5">
-                    <Label for="kisyu_nm">機種名</Label>
+                    <Label for="kisyu_nm">機種名（商品名）</Label>
                     <Input id="kisyu_nm" v-model="form.kisyu_nm" maxlength="1000"
                         :class="{ 'border-destructive': form.errors.kisyu_nm }" />
                     <InputError :message="form.errors.kisyu_nm" />

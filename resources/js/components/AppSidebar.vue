@@ -124,12 +124,12 @@ const mainNavItems: NavItem[] = [
                 icon: Package,
             },
             {
-                title: '車両マスタ',
+                title: '車両（品番）マスタ',
                 href: VehicleController.index.url(),
                 icon: Car,
             },
             {
-                title: '車両機種マスタ',
+                title: '車両機種（商品）マスタ',
                 href: VehicleModelController.index.url(),
                 icon: Bike,
             },

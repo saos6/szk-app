@@ -55,11 +55,14 @@ interface SaleData {
     items: SaleItemData[];
 }
 
+interface VehicleModelOption { kisyu_cd: string; iro_cd: string | null; kisyu_nm: string | null; sre_tan: string; uri_tan: string; }
+
 const props = defineProps<{
     sale: SaleData;
     customers: Customer[];
     employees: Employee[];
     vehicles: VehicleOption[];
+    vehicleModels: VehicleModelOption[];
     warehouses: Warehouse[];
     statuses: Record<string, string>;
 }>();
@@ -117,6 +120,7 @@ function submit() {
                 :customers="customers"
                 :employees="employees"
                 :vehicles="vehicles"
+                :vehicle-models="vehicleModels"
                 :warehouses="warehouses"
                 :statuses="statuses"
                 :cancel-href="SaleController.index.url()"

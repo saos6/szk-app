@@ -66,16 +66,16 @@ const breadcrumbs: BreadcrumbItem[] = [
                         <dd class="mt-0.5 font-medium">{{ inventoryBalance.warehouse_code }}</dd>
                     </div>
                     <div>
-                        <dt class="text-muted-foreground">機種コード</dt>
+                        <dt class="text-muted-foreground">機種コード（商品）</dt>
                         <dd class="mt-0.5 font-medium">{{ inventoryBalance.vehicle_model_code }}</dd>
                     </div>
                     <div>
-                        <dt class="text-muted-foreground">フレームNo</dt>
+                        <dt class="text-muted-foreground">フレームNo（品番）</dt>
                         <dd class="mt-0.5 font-medium">{{ inventoryBalance.frame_no }}</dd>
                     </div>
 
                     <div class="sm:col-span-2 border-t pt-4">
-                        <div class="grid grid-cols-3 gap-x-8 gap-y-4 text-sm">
+                        <div class="grid grid-cols-4 gap-x-8 gap-y-4 text-sm">
                             <div>
                                 <dt class="text-muted-foreground">前月繰越在庫数</dt>
                                 <dd class="mt-0.5 font-medium text-right">{{ inventoryBalance.prev_stock.toLocaleString() }}</dd>
@@ -87,6 +87,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                             <div>
                                 <dt class="text-muted-foreground">当月出庫数</dt>
                                 <dd class="mt-0.5 font-medium text-right">{{ inventoryBalance.out_stock.toLocaleString() }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-muted-foreground font-semibold">当月在庫数</dt>
+                                <dd class="mt-0.5 font-bold text-right text-lg">{{ inventoryBalance.current_stock.toLocaleString() }}</dd>
                             </div>
                         </div>
                     </div>

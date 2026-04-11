@@ -10,6 +10,7 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\SystemSetting;
 use App\Models\Vehicle;
+use App\Models\VehicleModel;
 use App\Models\Warehouse;
 use App\Services\InventoryService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -286,6 +287,7 @@ class SaleController extends Controller
                 ->orderBy('kisyu_cd')
                 ->orderBy('frame_no')
                 ->get(['id', 'kisyu_cd', 'frame_no', 'iro_cd', 'kisyu_nm', 'sre_tan', 'uri_tan']),
+            'vehicleModels' => VehicleModel::active()->orderBy('kisyu_cd')->orderBy('iro_cd')->get(['kisyu_cd', 'iro_cd', 'kisyu_nm', 'sre_tan', 'uri_tan']),
             'warehouses' => Warehouse::active()->orderBy('code')->get(['code', 'name']),
             'statuses' => Sale::STATUSES,
         ];
@@ -315,6 +317,7 @@ class SaleController extends Controller
     private function syncItems(Sale $sale, array $items): void
     {
         $sale->items()->delete();
+        $sale->loadMissing('customer');
 
         foreach ($items as $i => $item) {
             $qty = (float) ($item['quantity'] ?? 0);
@@ -339,6 +342,36 @@ class SaleController extends Controller
                 'cogs_amount' => round($qty * $sre, 2),
                 'remarks' => $item['remarks'] ?? null,
             ]);
+
+            $this->syncVehicleFromSaleItem($item, $sale);
+        }
+    }
+
+    /** 売上明細から車両マスタを自動登録・更新 */
+    private function syncVehicleFromSaleItem(array $item, Sale $sale): void
+    {
+        $kisyuCd = ($item['kisyu_cd'] ?? '') ?: null;
+        $frameNo = ($item['frame_no'] ?? '') ?: null;
+        if (! $kisyuCd || ! $frameNo) {
+            return;
+        }
+
+        $data = [
+            'kisyu_cd'  => $kisyuCd,
+            'kisyu_nm'  => ($item['kisyu_nm'] ?? '') ?: null,
+            'iro_cd'    => ($item['iro_cd'] ?? '') ?: null,
+            'sre_tan'   => ($item['sre_tan'] ?? 0) ?: null,
+            'uri_tan'   => ($item['uri_tan'] ?? 0) ?: null,
+            'unit'      => ($item['unit'] ?? '') ?: null,
+            'shop_name' => $sale->customer?->name,
+            'sale_date' => $sale->sale_date,
+        ];
+
+        $vehicle = Vehicle::where('frame_no', $frameNo)->where('is_deleted', false)->first();
+        if ($vehicle) {
+            $vehicle->update($data);
+        } else {
+            Vehicle::create(array_merge(['frame_no' => $frameNo], $data));
         }
     }
 }
