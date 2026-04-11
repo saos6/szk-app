@@ -16,7 +16,7 @@ class BillingBalanceRequest extends FormRequest
                 'required', 'date',
                 Rule::unique('billing_balances')
                     ->where('customer_id', $this->input('customer_id'))
-                    ->where('is_deleted', false)
+                    ->where('is_deleted', 0)
                     ->ignore($billing?->id),
             ],
             'customer_id' => 'required|exists:customers,id',

@@ -76,11 +76,13 @@ class SaleController extends Controller
         $sale = Sale::create($validated);
         $this->syncItems($sale, $items);
 
-        InventoryService::applyItems(
-            $sale->sale_date->format('Y-m'),
-            $items,
-            'out'
-        );
+        if (! in_array($sale->status, ['draft', 'cancelled'])) {
+            InventoryService::applyItems(
+                $sale->sale_date->format('Y-m'),
+                $items,
+                'out'
+            );
+        }
 
         return redirect()->route('sales.index')->with('success', '売上を登録しました。');
     }
@@ -156,12 +158,19 @@ class SaleController extends Controller
             return back()->with('error', $msg);
         }
 
-        // 更新前の在庫巻き戻し用に旧明細と旧年月を取得
+        // 更新前の在庫巻き戻し用に旧明細・旧年月・旧ステータスを取得
         $sale->load('items');
-        $oldYm    = $sale->sale_date->format('Y-m');
-        $oldItems = $sale->items->map(fn ($i) => $i->toArray())->toArray();
+        $oldYm     = $sale->sale_date->format('Y-m');
+        $oldStatus = $sale->status;
+        $oldItems  = $sale->items->map(fn ($i) => $i->toArray())->toArray();
 
         $validated = $request->validated();
+
+        if ($oldStatus === 'recorded' && $validated['status'] === 'draft') {
+            return back()->with('error', '計上済みの売上は下書きに戻せません。');
+        }
+
+        $noInventory = ['draft', 'cancelled'];
         $items = $validated['items'];
         unset($validated['items']);
 
@@ -174,10 +183,15 @@ class SaleController extends Controller
         $sale->update($validated);
         $this->syncItems($sale, $items);
 
-        // 旧明細を巻き戻し → 新明細を反映
-        $newYm = \Carbon\Carbon::parse($validated['sale_date'])->format('Y-m');
-        InventoryService::reverseItems($oldYm, $oldItems, 'out');
-        InventoryService::applyItems($newYm, $items, 'out');
+        // 旧明細を巻き戻し → 新明細を反映（下書き・キャンセルはスキップ）
+        $newYm     = \Carbon\Carbon::parse($validated['sale_date'])->format('Y-m');
+        $newStatus = $validated['status'];
+        if (! in_array($oldStatus, $noInventory)) {
+            InventoryService::reverseItems($oldYm, $oldItems, 'out');
+        }
+        if (! in_array($newStatus, $noInventory)) {
+            InventoryService::applyItems($newYm, $items, 'out');
+        }
 
         return redirect()->route('sales.index')->with('success', '売上を更新しました。');
     }
@@ -190,13 +204,15 @@ class SaleController extends Controller
             return back()->with('error', $msg);
         }
 
-        // 削除前に在庫を巻き戻す
+        // 削除前に在庫を巻き戻す（下書きはスキップ）
         $sale->load('items');
-        InventoryService::reverseItems(
-            $sale->sale_date->format('Y-m'),
-            $sale->items->map(fn ($i) => $i->toArray())->toArray(),
-            'out'
-        );
+        if ($sale->status !== 'draft') {
+            InventoryService::reverseItems(
+                $sale->sale_date->format('Y-m'),
+                $sale->items->map(fn ($i) => $i->toArray())->toArray(),
+                'out'
+            );
+        }
 
         $sale->is_deleted = true;
         $sale->save();
@@ -241,7 +257,7 @@ class SaleController extends Controller
     /** ロック判定（ステータスまたは日付が月次済み）→ エラーメッセージ、問題なければ null */
     private function lockMsg(Sale $sale): ?string
     {
-        if (in_array($sale->status, ['completed', 'closed'])) {
+        if (in_array($sale->status, ['completed', 'closed', 'cancelled'])) {
             return 'ステータスが「'.Sale::STATUSES[$sale->status].'」の売上は修正・削除できません。';
         }
         $closingYm = SystemSetting::instance()->closing_ym;

@@ -18,7 +18,7 @@ class WarehouseRequest extends FormRequest
                 'required',
                 'string',
                 'max:20',
-                Rule::unique('warehouses', 'code')->where('is_deleted', false),
+                Rule::unique('warehouses', 'code')->where('is_deleted', 0),
             ];
         }
 

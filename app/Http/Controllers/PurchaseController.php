@@ -75,11 +75,13 @@ class PurchaseController extends Controller
         $purchase = Purchase::create($validated);
         $this->syncItems($purchase, $items);
 
-        InventoryService::applyItems(
-            $purchase->purchase_date->format('Y-m'),
-            $items,
-            'in'
-        );
+        if (! in_array($purchase->status, ['draft', 'cancelled'])) {
+            InventoryService::applyItems(
+                $purchase->purchase_date->format('Y-m'),
+                $items,
+                'in'
+            );
+        }
 
         return redirect()->route('purchases.index')->with('success', '仕入を登録しました。');
     }
@@ -152,12 +154,19 @@ class PurchaseController extends Controller
             return back()->with('error', $msg);
         }
 
-        // 更新前の在庫巻き戻し用に旧明細と旧年月を取得
+        // 更新前の在庫巻き戻し用に旧明細・旧年月・旧ステータスを取得
         $purchase->load('items');
-        $oldYm    = $purchase->purchase_date->format('Y-m');
-        $oldItems = $purchase->items->map(fn ($i) => $i->toArray())->toArray();
+        $oldYm     = $purchase->purchase_date->format('Y-m');
+        $oldStatus = $purchase->status;
+        $oldItems  = $purchase->items->map(fn ($i) => $i->toArray())->toArray();
 
         $validated = $request->validated();
+
+        if ($oldStatus === 'recorded' && $validated['status'] === 'draft') {
+            return back()->with('error', '計上済みの仕入は下書きに戻せません。');
+        }
+
+        $noInventory = ['draft', 'cancelled'];
         $items     = $validated['items'];
         unset($validated['items']);
 
@@ -169,10 +178,15 @@ class PurchaseController extends Controller
         $purchase->update($validated);
         $this->syncItems($purchase, $items);
 
-        // 旧明細を巻き戻し → 新明細を反映
-        $newYm = \Carbon\Carbon::parse($validated['purchase_date'])->format('Y-m');
-        InventoryService::reverseItems($oldYm, $oldItems, 'in');
-        InventoryService::applyItems($newYm, $items, 'in');
+        // 旧明細を巻き戻し → 新明細を反映（下書き・キャンセルはスキップ）
+        $newYm     = \Carbon\Carbon::parse($validated['purchase_date'])->format('Y-m');
+        $newStatus = $validated['status'];
+        if (! in_array($oldStatus, $noInventory)) {
+            InventoryService::reverseItems($oldYm, $oldItems, 'in');
+        }
+        if (! in_array($newStatus, $noInventory)) {
+            InventoryService::applyItems($newYm, $items, 'in');
+        }
 
         return redirect()->route('purchases.index')->with('success', '仕入を更新しました。');
     }
@@ -185,13 +199,15 @@ class PurchaseController extends Controller
             return back()->with('error', $msg);
         }
 
-        // 削除前に在庫を巻き戻す
+        // 削除前に在庫を巻き戻す（下書きはスキップ）
         $purchase->load('items');
-        InventoryService::reverseItems(
-            $purchase->purchase_date->format('Y-m'),
-            $purchase->items->map(fn ($i) => $i->toArray())->toArray(),
-            'in'
-        );
+        if ($purchase->status !== 'draft') {
+            InventoryService::reverseItems(
+                $purchase->purchase_date->format('Y-m'),
+                $purchase->items->map(fn ($i) => $i->toArray())->toArray(),
+                'in'
+            );
+        }
 
         $purchase->is_deleted = true;
         $purchase->save();
@@ -235,8 +251,8 @@ class PurchaseController extends Controller
     /** 仕入: 完了ステータスまたは月次更新済み期間ならロック */
     private function lockMsg(Purchase $purchase): ?string
     {
-        if ($purchase->status === 'completed') {
-            return 'ステータスが「'.Purchase::STATUSES['completed'].'」の仕入は修正・削除できません。';
+        if (in_array($purchase->status, ['completed', 'cancelled'])) {
+            return 'ステータスが「'.Purchase::STATUSES[$purchase->status].'」の仕入は修正・削除できません。';
         }
         $closingYm = SystemSetting::instance()->closing_ym;
         if ($purchase->purchase_date->format('Y-m') <= $closingYm) {

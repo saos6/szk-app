@@ -134,6 +134,11 @@ class PaymentController extends Controller
         }
 
         $validated = $request->validated();
+
+        if ($payment->status === 'recorded' && $validated['status'] === 'draft') {
+            return back()->with('error', '計上済みの入金は下書きに戻せません。');
+        }
+
         $items     = $validated['items'];
         unset($validated['items']);
 
@@ -190,7 +195,7 @@ class PaymentController extends Controller
     /** 入金: 請求完了/完了ステータスまたは月次更新済み期間ならロック */
     private function lockMsg(Payment $payment): ?string
     {
-        if (in_array($payment->status, ['completed', 'closed'])) {
+        if (in_array($payment->status, ['completed', 'closed', 'cancelled'])) {
             return 'ステータスが「'.Payment::STATUSES[$payment->status].'」の入金は修正・削除できません。';
         }
         $closingYm = SystemSetting::instance()->closing_ym;

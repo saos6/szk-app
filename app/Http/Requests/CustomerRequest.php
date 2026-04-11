@@ -15,7 +15,7 @@ class CustomerRequest extends FormRequest
         return [
             'code' => [
                 'required', 'string', 'max:20',
-                Rule::unique('customers', 'code')->ignore($customer?->id)->where('is_deleted', false),
+                Rule::unique('customers', 'code')->ignore($customer?->id)->where('is_deleted', 0),
             ],
             'name' => 'required|string|max:100',
             'name_kana' => 'nullable|string|max:200|regex:/^[ァ-ヶー　 ]+$/u',

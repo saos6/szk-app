@@ -15,7 +15,7 @@ class ProductRequest extends FormRequest
         return [
             'code' => [
                 'required', 'string', 'max:20',
-                Rule::unique('products', 'code')->ignore($product?->id)->where('is_deleted', false),
+                Rule::unique('products', 'code')->ignore($product?->id)->where('is_deleted', 0),
             ],
             'name' => 'required|string|max:100',
             'name_kana' => 'nullable|string|max:200|regex:/^[ァ-ヶー　 ]+$/u',
@@ -24,7 +24,7 @@ class ProductRequest extends FormRequest
             'maker' => 'nullable|string|max:100',
             'jan_code' => [
                 'nullable', 'string', 'digits:13',
-                Rule::unique('products', 'jan_code')->ignore($product?->id)->where('is_deleted', false),
+                Rule::unique('products', 'jan_code')->ignore($product?->id)->where('is_deleted', 0),
             ],
             'unit' => 'nullable|string|max:20',
             'price' => 'nullable|numeric|min:0',

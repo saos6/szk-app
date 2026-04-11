@@ -20,16 +20,16 @@ class InventoryBalanceRequest extends FormRequest
                     ->where('warehouse_code', $this->input('warehouse_code'))
                     ->where('vehicle_model_code', $this->input('vehicle_model_code'))
                     ->where('frame_no', $this->input('frame_no'))
-                    ->where('is_deleted', false)
+                    ->where('is_deleted', 0)
                     ->ignore($model?->id),
             ],
             'warehouse_code' => [
                 'required', 'string', 'max:20',
-                Rule::exists('warehouses', 'code')->where('is_deleted', false),
+                Rule::exists('warehouses', 'code')->where('is_deleted', 0),
             ],
             'vehicle_model_code' => [
                 'required', 'string', 'max:8',
-                Rule::exists('vehicle_models', 'kisyu_cd')->where('is_deleted', false),
+                Rule::exists('vehicle_models', 'kisyu_cd')->where('is_deleted', 0),
             ],
             'frame_no'   => 'required|string|max:10',
             'prev_stock' => 'required|integer|min:0',

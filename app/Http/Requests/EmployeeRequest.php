@@ -16,7 +16,7 @@ class EmployeeRequest extends FormRequest
                 'required',
                 'string',
                 'max:20',
-                Rule::unique('employees', 'code')->ignore($employee?->id)->whereNull('deleted_at')->where('is_deleted', false),
+                Rule::unique('employees', 'code')->ignore($employee?->id)->whereNull('deleted_at')->where('is_deleted', 0),
             ],
             'name' => 'required|string|max:50',
             'name_kana' => 'nullable|string|max:100|regex:/^[ァ-ヶー　 ]+$/u',
@@ -25,7 +25,7 @@ class EmployeeRequest extends FormRequest
                 'nullable',
                 'email',
                 'max:255',
-                Rule::unique('employees', 'email')->ignore($employee?->id)->where('is_deleted', false),
+                Rule::unique('employees', 'email')->ignore($employee?->id)->where('is_deleted', 0),
             ],
         ];
     }
