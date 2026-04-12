@@ -60,6 +60,10 @@
     .detail-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
     .detail-table th { background: #f5f5f5; font-weight: bold; padding: 5px 6px; border: 1px solid #ccc; font-size: 10px; text-align: left; }
     .detail-table td { padding: 4px 6px; border: 1px solid #e0e0e0; font-size: 10px; }
+    .detail-header-row { background: #eef2f7; }
+    .detail-header-row td { font-weight: bold; font-size: 10px; border-top: 1px solid #aac; border-bottom: 1px solid #aac; }
+    .item-row td { background: #fafbfd; font-size: 9px; padding-left: 14px; }
+    th.item-header-row { background: #e8ecf5; font-size: 9px; padding: 3px 6px 3px 14px; border: 1px solid #ccc; }
     .text-right { text-align: right; }
     .text-center { text-align: center; }
     /* ─── 振込先 ─── */
@@ -171,16 +175,37 @@
         </thead>
         <tbody>
             @foreach($sales as $sale)
-            <tr>
-                <td class="text-center" style="font-size:9px;">{{ $sale->sale_number ?? $sale['sale_number'] }}</td>
-                <td class="text-center">
-                    {{ \Carbon\Carbon::parse($sale->sale_date ?? $sale['sale_date'])->format('Y/m/d') }}
-                </td>
-                <td>{{ $sale->subject ?? $sale['subject'] }}</td>
-                <td class="text-right">{{ $fmtAmt($sale->subtotal ?? $sale['subtotal']) }}</td>
-                <td class="text-right">{{ $fmtAmt($sale->tax_amount ?? $sale['tax_amount']) }}</td>
-                <td class="text-right">{{ $fmtAmt($sale->total_amount ?? $sale['total_amount']) }}</td>
+            @php $saleItems = $sale->relationLoaded('items') ? $sale->items : collect(); @endphp
+            <tr class="detail-header-row">
+                <td class="text-center" style="font-size:9px;">{{ $sale->sale_number }}</td>
+                <td class="text-center">{{ \Carbon\Carbon::parse($sale->sale_date)->format('Y/m/d') }}</td>
+                <td>{{ $sale->subject }}</td>
+                <td class="text-right">{{ $fmtAmt($sale->subtotal) }}</td>
+                <td class="text-right">{{ $fmtAmt($sale->tax_amount) }}</td>
+                <td class="text-right">{{ $fmtAmt($sale->total_amount) }}</td>
             </tr>
+            @if($saleItems->isNotEmpty())
+            <tr>
+                <th class="item-header-row" style="width:18%;padding-left:14px">機種コード</th>
+                <th class="item-header-row" style="width:22%">フレームNo</th>
+                <th class="item-header-row" style="width:6%">色</th>
+                <th class="item-header-row">機種名</th>
+                <th class="item-header-row" style="width:8%;text-align:right">数量</th>
+                <th class="item-header-row" style="width:14%;text-align:right">売上単価</th>
+                <th class="item-header-row" style="width:14%;text-align:right">売上金額</th>
+            </tr>
+            @foreach($saleItems as $si)
+            <tr class="item-row">
+                <td>{{ $si->kisyu_cd }}</td>
+                <td>{{ $si->frame_no }}</td>
+                <td class="text-center">{{ $si->iro_cd }}</td>
+                <td>{{ $si->kisyu_nm }}</td>
+                <td class="text-right">{{ rtrim(rtrim(number_format((float)$si->quantity, 2), '0'), '.') }}{{ $si->unit ? ' '.$si->unit : '' }}</td>
+                <td class="text-right">{{ $fmtAmt($si->uri_tan) }}</td>
+                <td class="text-right">{{ $fmtAmt($si->sale_amount) }}</td>
+            </tr>
+            @endforeach
+            @endif
             @endforeach
         </tbody>
     </table>
@@ -200,14 +225,27 @@
         </thead>
         <tbody>
             @foreach($payments as $payment)
-            <tr>
-                <td class="text-center" style="font-size:9px;">{{ $payment->payment_number ?? $payment['payment_number'] }}</td>
-                <td class="text-center">
-                    {{ \Carbon\Carbon::parse($payment->payment_date ?? $payment['payment_date'])->format('Y/m/d') }}
-                </td>
-                <td>{{ $payment->subject ?? $payment['subject'] }}</td>
-                <td class="text-right">{{ $fmtAmt($payment->total_amount ?? $payment['total_amount']) }}</td>
+            @php $paymentItems = $payment->relationLoaded('items') ? $payment->items : collect(); @endphp
+            <tr class="detail-header-row">
+                <td class="text-center" style="font-size:9px;">{{ $payment->payment_number }}</td>
+                <td class="text-center">{{ \Carbon\Carbon::parse($payment->payment_date)->format('Y/m/d') }}</td>
+                <td>{{ $payment->subject }}</td>
+                <td class="text-right">{{ $fmtAmt($payment->total_amount) }}</td>
             </tr>
+            @if($paymentItems->isNotEmpty())
+            <tr>
+                <th class="item-header-row" colspan="2" style="padding-left:14px">入金区分</th>
+                <th class="item-header-row">銀行情報</th>
+                <th class="item-header-row" style="text-align:right">金額</th>
+            </tr>
+            @foreach($paymentItems as $pi)
+            <tr class="item-row">
+                <td colspan="2">{{ $pi->payment_type }}</td>
+                <td>{{ $pi->bank_info }}</td>
+                <td class="text-right">{{ $fmtAmt($pi->amount) }}</td>
+            </tr>
+            @endforeach
+            @endif
             @endforeach
         </tbody>
     </table>

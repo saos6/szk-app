@@ -3,13 +3,12 @@
 namespace App\Exports;
 
 use App\Models\Payment;
-use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class PaymentsExport implements FromQuery, WithHeadings, WithMapping, WithStyles
+class PaymentsExport implements FromCollection, WithHeadings, WithStyles
 {
     public function __construct(
         private string $search,
@@ -18,29 +17,62 @@ class PaymentsExport implements FromQuery, WithHeadings, WithMapping, WithStyles
         private string $direction,
     ) {}
 
-    public function query()
+    public function collection()
     {
-        return Payment::active()
-            ->with(['customer:id,name', 'employee:id,name'])
+        $allowedSorts = ['payment_number', 'payment_date', 'subject', 'status', 'total_amount', 'created_at', 'updated_at'];
+        $sortField = in_array($this->sort, $allowedSorts) ? $this->sort : 'payment_date';
+        $sortDir   = $this->direction === 'asc' ? 'asc' : 'desc';
+
+        $payments = Payment::with(['customer:id,code,name', 'employee:id,name', 'items'])
+            ->active()
             ->filtered($this->search, $this->status)
-            ->orderBy($this->sort, $this->direction);
+            ->orderBy($sortField, $sortDir)
+            ->get();
+
+        $rows = collect();
+
+        foreach ($payments as $payment) {
+            $header = [
+                $payment->payment_number,
+                $payment->customer?->code ?? '',
+                $payment->customer?->name ?? '',
+                $payment->employee?->name ?? '',
+                $payment->payment_date?->format('Y/m/d') ?? '',
+                $payment->subject,
+                Payment::STATUSES[$payment->status] ?? $payment->status,
+                $payment->remarks ?? '',
+                $payment->total_amount,
+                $payment->created_at?->format('Y-m-d H:i:s') ?? '',
+                $payment->updated_at?->format('Y-m-d H:i:s') ?? '',
+            ];
+
+            if ($payment->items->isEmpty()) {
+                $rows->push(array_merge($header, ['', '', '', '', '']));
+            } else {
+                foreach ($payment->items as $item) {
+                    $rows->push(array_merge($header, [
+                        $item->line_no,
+                        $item->payment_type ?? '',
+                        $item->amount,
+                        $item->bank_info ?? '',
+                        $item->remarks ?? '',
+                    ]));
+                }
+            }
+        }
+
+        return $rows;
     }
 
     public function headings(): array
     {
-        return ['入金番号', '得意先', '担当者', '入金日', '件名', 'ステータス', '合計入金額'];
-    }
-
-    public function map($payment): array
-    {
         return [
-            $payment->payment_number,
-            $payment->customer?->name ?? '',
-            $payment->employee?->name ?? '',
-            $payment->payment_date?->format('Y/m/d') ?? '',
-            $payment->subject,
-            Payment::STATUSES[$payment->status] ?? $payment->status,
-            $payment->total_amount,
+            // ヘッダ
+            '入金番号', '得意先コード', '得意先名', '担当者',
+            '入金日', '件名', 'ステータス', '備考', '合計入金額',
+            '登録日時', '更新日時',
+            // 明細
+            '行番号', '入金区分', '金額', '銀行情報', '明細備考',
         ];
     }
 

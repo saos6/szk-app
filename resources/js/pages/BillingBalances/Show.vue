@@ -36,6 +36,10 @@ function fmt(val: string | number): string {
     return '¥' + Number(val).toLocaleString('ja-JP');
 }
 
+function calcBillingAmount(b: BillingBalance): number {
+    return Number(b.prev_amount) + Number(b.sales_amount) + Number(b.tax_amount) - Number(b.payment_amount);
+}
+
 function fmtDate(val: string | null): string {
     if (!val) return '—';
     return new Date(val).toLocaleDateString('ja-JP');
@@ -139,6 +143,18 @@ function fmtDate(val: string | null): string {
                                         )
                                     }}
                                 </dd>
+                            </div>
+                            <div class="sm:col-span-3 border-t pt-3">
+                                <dt class="text-muted-foreground">当月請求額</dt>
+                                <dd
+                                    class="mt-0.5 tabular-nums text-lg font-bold"
+                                    :class="{ 'text-destructive': calcBillingAmount(billingBalance) > 0 }"
+                                >
+                                    {{ fmt(calcBillingAmount(billingBalance)) }}
+                                </dd>
+                                <p class="mt-0.5 text-xs text-muted-foreground">
+                                    前月繰越額 + 当月税込金額 − 当月入金額
+                                </p>
                             </div>
                         </div>
                     </div>

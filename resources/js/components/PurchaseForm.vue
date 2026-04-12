@@ -323,8 +323,8 @@ function getItemError(index: number, field: string): string | undefined {
                 <table class="w-full text-sm">
                     <thead class="bg-muted/50">
                         <tr>
-                            <th class="px-3 py-2 text-left font-medium">機種コード（商品）</th>
-                            <th class="px-3 py-2 text-left font-medium">フレームNo（品番）</th>
+                            <th class="px-3 py-2 text-left font-medium">機種コード（商品）<span class="text-destructive">*</span></th>
+                            <th class="px-3 py-2 text-left font-medium">フレームNo（品番）<span class="text-destructive">*</span></th>
                             <th class="px-3 py-2 text-left font-medium">色コード</th>
                             <th class="px-3 py-2 text-left font-medium">倉庫</th>
                             <th class="px-3 py-2 text-left font-medium">機種名（商品名）</th>
@@ -345,9 +345,10 @@ function getItemError(index: number, field: string): string | undefined {
                                     :options="kisyuCdOptions"
                                     :model-value="item.kisyu_cd"
                                     placeholder="機種コード（商品）..."
-                                    class="w-36"
+                                    :class="['w-36', getItemError(i, 'kisyu_cd') ? '[&_input]:border-destructive' : '']"
                                     @update:model-value="(v) => onKisyuCdChange(i, v)"
                                 />
+                                <p v-if="getItemError(i, 'kisyu_cd')" class="mt-0.5 text-xs text-destructive">{{ getItemError(i, 'kisyu_cd') }}</p>
                             </td>
                             <!-- フレームNo -->
                             <td class="px-2 py-1.5">
@@ -355,12 +356,13 @@ function getItemError(index: number, field: string): string | undefined {
                                     v-model="item.frame_no"
                                     :list="`frame-no-${i}`"
                                     placeholder="フレームNo（品番）..."
-                                    class="h-8 w-40"
+                                    :class="['h-8 w-40', getItemError(i, 'frame_no') ? 'border-destructive' : '']"
                                     @change="onFrameNoChange(i)"
                                 />
                                 <datalist :id="`frame-no-${i}`">
                                     <option v-for="v in frameNoList(item.kisyu_cd)" :key="v.frame_no" :value="v.frame_no" />
                                 </datalist>
+                                <p v-if="getItemError(i, 'frame_no')" class="mt-0.5 text-xs text-destructive">{{ getItemError(i, 'frame_no') }}</p>
                             </td>
                             <!-- 色コード -->
                             <td class="px-2 py-1.5">

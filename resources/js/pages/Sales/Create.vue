@@ -95,7 +95,7 @@ const form = useForm({
     sale_date:     today,
     delivery_date: p?.delivery_date ?? '',
     subject:       p?.subject ?? '',
-    status:        'draft',
+    status:        'recorded',
     remarks:       p?.remarks ?? '',
     items: p?.items?.length ? p.items : [{ ...defaultItem }],
 });

@@ -273,14 +273,16 @@ class BillingClosingService
      */
     private function calcForCustomer(Customer $customer, Carbon $date, string $saleStatus = 'recorded', string $paymentStatus = 'recorded'): ?array
     {
-        $sales = Sale::active()
+        $sales = Sale::with('items')
+            ->active()
             ->where('customer_id', $customer->id)
             ->whereNull('billing_balance_id')
             ->where('status', $saleStatus)
             ->where('sale_date', '<=', $date->toDateString())
             ->get();
 
-        $payments = Payment::active()
+        $payments = Payment::with('items')
+            ->active()
             ->where('customer_id', $customer->id)
             ->whereNull('billing_balance_id')
             ->where('status', $paymentStatus)

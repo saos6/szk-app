@@ -61,7 +61,7 @@ const form = useForm({
     employee_id:   p?.employee_id ?? '',
     purchase_date: today,
     subject:       p?.subject ?? '',
-    status:        'draft',
+    status:        'recorded',
     remarks:       p?.remarks ?? '',
     items: p?.items?.length ? p.items : [{ ...defaultItem }],
 });

@@ -195,7 +195,7 @@ class BillingClosingController extends Controller
     public function pdfSingle(BillingBalance $billingBalance)
     {
         abort_if($billingBalance->is_deleted, 404);
-        $billingBalance->load(['customer', 'sales', 'payments']);
+        $billingBalance->load(['customer', 'sales.items', 'payments.items']);
 
         $rows = collect([[
             'customer'           => $billingBalance->customer,

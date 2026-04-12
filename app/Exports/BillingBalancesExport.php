@@ -36,13 +36,18 @@ class BillingBalancesExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             'ID', '請求日', '得意先コード', '得意先名',
-            '前月繰越額', '売上金額', '消費税', '税込金額', '入金額',
+            '前月繰越額', '売上金額', '消費税', '税込金額', '入金額', '当月請求額',
             '作成日時', '更新日時',
         ];
     }
 
     public function map($billing): array
     {
+        $billingAmount = (float) $billing->prev_amount
+            + (float) $billing->sales_amount
+            + (float) $billing->tax_amount
+            - (float) $billing->payment_amount;
+
         return [
             $billing->id,
             $billing->billing_date?->format('Y-m-d') ?? '',
@@ -53,6 +58,7 @@ class BillingBalancesExport implements FromCollection, WithHeadings, WithMapping
             $billing->tax_amount,
             $billing->total_amount,
             $billing->payment_amount,
+            $billingAmount,
             $billing->created_at?->format('Y-m-d H:i:s') ?? '',
             $billing->updated_at?->format('Y-m-d H:i:s') ?? '',
         ];

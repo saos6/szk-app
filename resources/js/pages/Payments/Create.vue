@@ -50,7 +50,7 @@ const form = useForm({
     employee_id:  p?.employee_id ?? '',
     payment_date: today,
     subject:      p?.subject ?? '',
-    status:       'draft',
+    status:       'recorded',
     remarks:      p?.remarks ?? '',
     items: p?.items?.length
         ? p.items.map((i) => ({ ...i, amount: String(i.amount) }))

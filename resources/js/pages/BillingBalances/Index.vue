@@ -96,6 +96,7 @@ type ColumnKey =
     | 'tax_amount'
     | 'total_amount'
     | 'payment_amount'
+    | 'billing_amount'
     | 'created_at'
     | 'updated_at';
 
@@ -109,6 +110,7 @@ const defaultColumns: Record<ColumnKey, { label: string; visible: boolean }> = {
     tax_amount:     { label: '消費税',       visible: true  },
     total_amount:   { label: '税込金額',     visible: true  },
     payment_amount: { label: '入金額',       visible: true  },
+    billing_amount: { label: '当月請求額',   visible: true  },
     created_at:     { label: '作成日時',     visible: false },
     updated_at:     { label: '更新日時',     visible: false },
 };
@@ -156,7 +158,7 @@ const visibleColumns = computed(() =>
     ),
 );
 
-const nonSortable: ColumnKey[] = ['customer'];
+const nonSortable: ColumnKey[] = ['customer', 'billing_amount'];
 
 function applyFilters() {
     router.get(
@@ -219,9 +221,13 @@ function paginationLabel(label: string): string {
     return label.replace(/&laquo;\s*/g, '«').replace(/\s*&raquo;/g, '»');
 }
 
-function fmt(val: string | null): string {
-    if (!val) return '¥0';
+function fmt(val: string | number | null): string {
+    if (val === null || val === undefined) return '¥0';
     return '¥' + Number(val).toLocaleString('ja-JP');
+}
+
+function calcBillingAmount(b: BillingBalance): number {
+    return Number(b.prev_amount) + Number(b.sales_amount) + Number(b.tax_amount) - Number(b.payment_amount);
 }
 
 function fmtDate(val: string | null): string {
@@ -399,6 +405,13 @@ function fmtDate(val: string | null): string {
                                 class="px-4 py-3 text-right tabular-nums"
                             >
                                 {{ fmt(billing.payment_amount) }}
+                            </td>
+                            <td
+                                v-if="columns.billing_amount.visible"
+                                class="px-4 py-3 text-right tabular-nums font-bold"
+                                :class="{ 'text-destructive': calcBillingAmount(billing) > 0 }"
+                            >
+                                {{ fmt(calcBillingAmount(billing)) }}
                             </td>
                             <td
                                 v-if="columns.created_at.visible"
