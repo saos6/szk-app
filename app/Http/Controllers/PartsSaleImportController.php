@@ -452,7 +452,7 @@ class PartsSaleImportController extends Controller
 
         DB::transaction(function () use (
             $works, $ym, $closingYm,
-            $validPartnerCodes, $validModelCodes, $validVehicleCodes, $existingKeys,
+            $validPartnerCodes, $validModelCodes, &$validVehicleCodes, $existingKeys,
             &$errorCount
         ) {
             foreach ($works as $work) {
@@ -473,14 +473,26 @@ class PartsSaleImportController extends Controller
                     $messages[] = "販売店コード[{$work->partner_code}]の得意先が見つかりません";
                 }
 
-                // 4. 機種マスタ存在チェック（品番1-5桁）
+                // 4. 車両機種（商品）マスタ存在チェック（品番1-5桁）― 存在しない場合はエラー
                 if (! $work->model_kisyu_cd || ! array_key_exists($work->model_kisyu_cd, $validModelCodes)) {
                     $messages[] = "品番先頭5桁[{$work->model_kisyu_cd}]が車両機種マスタに存在しません";
                 }
 
-                // 5. 車両マスタ存在チェック（品番6-10桁）
-                if (! $work->vehicle_kisyu_cd || ! array_key_exists($work->vehicle_kisyu_cd, $validVehicleCodes)) {
-                    $messages[] = "品番6-10桁[{$work->vehicle_kisyu_cd}]が車両マスタに存在しません";
+                // 5. 車両（品番）マスタ自動作成（品番6-10桁）― 存在しない場合は自動作成しエラーにしない
+                if (! $work->vehicle_kisyu_cd) {
+                    $messages[] = '品番が10桁未満のため車両コードを取得できません';
+                } elseif (! array_key_exists($work->vehicle_kisyu_cd, $validVehicleCodes)) {
+                    Vehicle::create([
+                        'kisyu_cd' => $work->vehicle_kisyu_cd,
+                        'frame_no' => $work->vehicle_kisyu_cd,
+                        'kisyu_nm' => $work->item_name,
+                        'sre_tan'  => ($work->cost_price !== null && (float) $work->cost_price > 0)
+                                         ? (float) $work->cost_price : null,
+                        'uri_tan'  => ($work->unit_price !== null && (float) $work->unit_price > 0)
+                                         ? (float) $work->unit_price : null,
+                    ]);
+                    // 同一コードの重複作成を防ぐためキャッシュに追加
+                    $validVehicleCodes[$work->vehicle_kisyu_cd] = true;
                 }
 
                 // 6. 重複チェック（伝票NO + 売上日）
