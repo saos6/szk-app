@@ -12,6 +12,8 @@ interface Prefill {
     kisyu_nm_h?: string;
     sre_tan?: string | null;
     uri_tan?: string | null;
+    terminal_price?: string | null;
+    standard_retail_price?: string | null;
     g1?: string | null;
     g2?: string | null;
     g3?: string | null;
@@ -46,8 +48,10 @@ const form = useForm({
     kisyu_nm_r: p.kisyu_nm_r ?? '',
     kihon:      p.kihon ?? '',
     kisyu_nm_h: p.kisyu_nm_h ?? '',
-    sre_tan:    p.sre_tan ?? '',
-    uri_tan:    p.uri_tan ?? '',
+    sre_tan:               p.sre_tan ?? '',
+    uri_tan:               p.uri_tan ?? '',
+    terminal_price:        p.terminal_price ?? '',
+    standard_retail_price: p.standard_retail_price ?? '',
     g1:         p.g1 ?? (null as string | null),
     g2:         p.g2 ?? (null as string | null),
     g3:         p.g3 ?? (null as string | null),

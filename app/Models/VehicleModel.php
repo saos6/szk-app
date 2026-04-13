@@ -9,13 +9,16 @@ class VehicleModel extends Model
 {
     protected $fillable = [
         'kisyu_cd', 'iro_cd', 'kisyu_nm', 'kisyu_nm_r', 'kihon', 'kisyu_nm_h',
-        'sre_tan', 'uri_tan', 'g1', 'g2', 'g3', 'g4', 'g5', 'order_no', 'zei_kbn',
+        'sre_tan', 'uri_tan', 'terminal_price', 'standard_retail_price',
+        'g1', 'g2', 'g3', 'g4', 'g5', 'order_no', 'zei_kbn',
     ];
 
     protected $casts = [
         'is_deleted' => 'boolean',
         'sre_tan' => 'decimal:2',
         'uri_tan' => 'decimal:2',
+        'terminal_price' => 'decimal:2',
+        'standard_retail_price' => 'decimal:2',
         'zei_kbn' => 'string',
     ];
 

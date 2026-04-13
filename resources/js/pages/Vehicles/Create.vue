@@ -13,6 +13,7 @@ interface Prefill {
     keishiki?: string; kisyu_no?: string;
     iro_cd?: string | null;
     sre_tan?: string | null; uri_tan?: string | null;
+    terminal_price?: string | null; standard_retail_price?: string | null;
     maker_code?: string; unit?: string; shop_name?: string;
     note1?: string; note2?: string; note3?: string;
 }
@@ -38,6 +39,7 @@ const form = useForm({
     kisyu_nm: p.kisyu_nm ?? '', keishiki: p.keishiki ?? '', kisyu_no: p.kisyu_no ?? '',
     iro_cd: p.iro_cd ?? (null as string | null),
     sre_tan: p.sre_tan ?? '', uri_tan: p.uri_tan ?? '',
+    terminal_price: p.terminal_price ?? '', standard_retail_price: p.standard_retail_price ?? '',
     maker_code: p.maker_code ?? '', unit: p.unit ?? '',
     note1: p.note1 ?? '', note2: p.note2 ?? '', note3: p.note3 ?? '',
     first_reg_date: '', second_reg_date: '', vehicle_no: '',

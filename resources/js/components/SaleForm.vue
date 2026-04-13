@@ -31,6 +31,7 @@ interface VehicleOption {
     kisyu_nm: string | null;
     sre_tan: string;
     uri_tan: string;
+    terminal_price: string | null;
 }
 interface VehicleModelOption {
     kisyu_cd: string;
@@ -38,6 +39,7 @@ interface VehicleModelOption {
     kisyu_nm: string | null;
     sre_tan: string;
     uri_tan: string;
+    terminal_price: string | null;
 }
 interface Warehouse {
     code: string;
@@ -54,6 +56,7 @@ interface SaleItem {
     unit: string;
     sre_tan: string;
     uri_tan: string;
+    terminal_price: string;
     tax_rate: string;
     sale_amount: number;
     cogs_amount: number;
@@ -128,6 +131,7 @@ function addItem() {
         unit: '台',
         sre_tan: '0',
         uri_tan: '0',
+        terminal_price: '',
         tax_rate: '10',
         sale_amount: 0,
         cogs_amount: 0,
@@ -154,6 +158,7 @@ function onKisyuCdChange(i: number, val: string) {
     props.form.items[i].kisyu_nm = '';
     props.form.items[i].sre_tan = '0';
     props.form.items[i].uri_tan = '0';
+    props.form.items[i].terminal_price = '';
     props.form.items[i].vehicle_id = null;
     recalcItem(i);
 }
@@ -167,6 +172,7 @@ function onIroCdChange(i: number, val: string) {
         props.form.items[i].kisyu_nm = vm.kisyu_nm ?? '';
         props.form.items[i].sre_tan = vm.sre_tan ?? '0';
         props.form.items[i].uri_tan = vm.uri_tan ?? '0';
+        props.form.items[i].terminal_price = vm.terminal_price ?? '';
     }
     recalcItem(i);
 }
@@ -181,6 +187,7 @@ function onFrameNoChange(i: number) {
         props.form.items[i].kisyu_nm = vehicle.kisyu_nm ?? '';
         props.form.items[i].sre_tan = vehicle.sre_tan ?? '0';
         props.form.items[i].uri_tan = vehicle.uri_tan ?? '0';
+        props.form.items[i].terminal_price = vehicle.terminal_price ?? '';
         props.form.items[i].vehicle_id = vehicle.id;
     }
     recalcItem(i);
@@ -462,6 +469,9 @@ function getItemError(index: number, field: string): string | undefined {
                             <th class="px-3 py-2 text-right font-medium">
                                 売上単価
                             </th>
+                            <th class="px-3 py-2 text-right font-medium">
+                                末端価格
+                            </th>
                             <th class="px-3 py-2 text-center font-medium">
                                 税率
                             </th>
@@ -586,6 +596,16 @@ function getItemError(index: number, field: string): string | undefined {
                                     @input="recalcItem(i)"
                                 />
                             </td>
+                            <!-- 末端価格 -->
+                            <td class="px-2 py-1.5">
+                                <Input
+                                    v-model="item.terminal_price"
+                                    type="number"
+                                    step="1"
+                                    min="0"
+                                    class="h-8 w-24 text-right tabular-nums"
+                                />
+                            </td>
                             <!-- 税率 -->
                             <td class="px-2 py-1.5">
                                 <Select
@@ -644,7 +664,7 @@ function getItemError(index: number, field: string): string | undefined {
                     <tfoot class="border-t bg-muted/30 font-medium">
                         <tr>
                             <td
-                                colspan="10"
+                                colspan="11"
                                 class="px-3 py-2 text-right text-muted-foreground"
                             >
                                 合計金額（税抜）
@@ -661,7 +681,7 @@ function getItemError(index: number, field: string): string | undefined {
                         </tr>
                         <tr>
                             <td
-                                colspan="10"
+                                colspan="11"
                                 class="px-3 py-2 text-right text-muted-foreground"
                             >
                                 消費税
@@ -672,7 +692,7 @@ function getItemError(index: number, field: string): string | undefined {
                             <td colspan="3"></td>
                         </tr>
                         <tr class="text-base">
-                            <td colspan="10" class="px-3 py-2 text-right">
+                            <td colspan="11" class="px-3 py-2 text-right">
                                 税込み金額
                             </td>
                             <td

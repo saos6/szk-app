@@ -9,7 +9,7 @@ class Vehicle extends Model
 {
     protected $fillable = [
         'kisyu_cd', 'frame_no', 'name1', 'name2', 'kisyu_nm', 'keishiki', 'kisyu_no',
-        'iro_cd', 'sre_tan', 'uri_tan', 'maker_code', 'unit',
+        'iro_cd', 'sre_tan', 'uri_tan', 'terminal_price', 'standard_retail_price', 'maker_code', 'unit',
         'note1', 'note2', 'note3',
         'first_reg_date', 'second_reg_date', 'vehicle_no',
         'owner_name', 'owner_kana', 'birth_date', 'zip_code', 'gender',
@@ -24,6 +24,8 @@ class Vehicle extends Model
         'is_deleted' => 'boolean',
         'sre_tan' => 'decimal:2',
         'uri_tan' => 'decimal:2',
+        'terminal_price' => 'decimal:2',
+        'standard_retail_price' => 'decimal:2',
         'has_security_reg' => 'boolean',
         'has_theft_insurance' => 'boolean',
         'has_warranty' => 'boolean',

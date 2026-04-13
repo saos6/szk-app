@@ -62,8 +62,8 @@ class VehicleModelController extends Controller
 
         $prefill = $vehicleModel->only([
             'kisyu_nm', 'kisyu_nm_r', 'kihon', 'kisyu_nm_h',
-            'sre_tan', 'uri_tan', 'g1', 'g2', 'g3', 'g4', 'g5',
-            'order_no', 'zei_kbn',
+            'sre_tan', 'uri_tan', 'terminal_price', 'standard_retail_price',
+            'g1', 'g2', 'g3', 'g4', 'g5', 'order_no', 'zei_kbn',
         ]);
 
         return Inertia::render('VehicleModels/Create', array_merge(

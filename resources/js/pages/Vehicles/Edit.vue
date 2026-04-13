@@ -16,6 +16,7 @@ interface Vehicle {
     kisyu_nm: string | null; keishiki: string | null; kisyu_no: string | null;
     iro_cd: string | null;
     sre_tan: string | null; uri_tan: string | null;
+    terminal_price: string | null; standard_retail_price: string | null;
     maker_code: string | null; unit: string | null;
     note1: string | null; note2: string | null; note3: string | null;
     first_reg_date: string | null; second_reg_date: string | null; vehicle_no: string | null;
@@ -47,6 +48,7 @@ const form = useForm({
     kisyu_nm: v.kisyu_nm ?? '', keishiki: v.keishiki ?? '', kisyu_no: v.kisyu_no ?? '',
     iro_cd: v.iro_cd ?? (null as string | null),
     sre_tan: v.sre_tan ?? '', uri_tan: v.uri_tan ?? '',
+    terminal_price: v.terminal_price ?? '', standard_retail_price: v.standard_retail_price ?? '',
     maker_code: v.maker_code ?? '', unit: v.unit ?? '',
     note1: v.note1 ?? '', note2: v.note2 ?? '', note3: v.note3 ?? '',
     first_reg_date: v.first_reg_date ?? '', second_reg_date: v.second_reg_date ?? '',

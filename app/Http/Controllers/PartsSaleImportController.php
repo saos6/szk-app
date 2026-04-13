@@ -345,11 +345,15 @@ class PartsSaleImportController extends Controller
                     $lineNo      = 1;
 
                     foreach ($slipWorks as $work) {
-                        $qty     = (float) $work->quantity;
-                        $uriTan  = (float) $work->unit_price;
-                        $sreTan  = (float) $work->cost_price;
-                        $saleAmt = round($qty * $uriTan, 2);
-                        $cogsAmt = round($qty * $sreTan, 2);
+                        $qty              = (float) $work->quantity;
+                        $uriTan           = (float) $work->unit_price;
+                        $sreTan           = (float) $work->cost_price;
+                        $terminalPrice    = ($work->terminal_price !== null && $work->terminal_price !== '')
+                                               ? (float) $work->terminal_price : null;
+                        $stdRetailPrice   = ($work->standard_retail_price !== null && $work->standard_retail_price !== '')
+                                               ? (float) $work->standard_retail_price : null;
+                        $saleAmt          = round($qty * $uriTan, 2);
+                        $cogsAmt          = round($qty * $sreTan, 2);
 
                         $items[] = [
                             'line_no'        => $lineNo++,
@@ -363,11 +367,36 @@ class PartsSaleImportController extends Controller
                             'unit'           => '個',
                             'sre_tan'        => $sreTan,
                             'uri_tan'        => $uriTan,
+                            'terminal_price' => $terminalPrice,
                             'tax_rate'       => 10,
                             'sale_amount'    => $saleAmt,
                             'cogs_amount'    => $cogsAmt,
                             'remarks'        => $work->maintenance_no,
                         ];
+
+                        // 車両（品番）マスタの単価を上書き更新
+                        if ($work->vehicle_kisyu_cd) {
+                            Vehicle::where('frame_no', $work->vehicle_kisyu_cd)
+                                ->where('is_deleted', false)
+                                ->update([
+                                    'sre_tan'              => $sreTan ?: null,
+                                    'uri_tan'              => $uriTan ?: null,
+                                    'terminal_price'        => $terminalPrice,
+                                    'standard_retail_price' => $stdRetailPrice,
+                                ]);
+                        }
+
+                        // 車両機種（商品）マスタの単価を上書き更新
+                        if ($work->model_kisyu_cd) {
+                            VehicleModel::where('kisyu_cd', $work->model_kisyu_cd)
+                                ->where('is_deleted', false)
+                                ->update([
+                                    'sre_tan'              => $sreTan ?: null,
+                                    'uri_tan'              => $uriTan ?: null,
+                                    'terminal_price'        => $terminalPrice,
+                                    'standard_retail_price' => $stdRetailPrice,
+                                ]);
+                        }
 
                         $subtotal  += $saleAmt;
                         $cogsTotal += $cogsAmt;
@@ -516,13 +545,17 @@ class PartsSaleImportController extends Controller
                     $messages[] = '品番が10桁未満のため車両コードを取得できません';
                 } elseif (! array_key_exists($work->vehicle_kisyu_cd, $validVehicleCodes)) {
                     Vehicle::create([
-                        'kisyu_cd' => $work->vehicle_kisyu_cd,
-                        'frame_no' => $work->vehicle_kisyu_cd,
-                        'kisyu_nm' => $work->item_name,
-                        'sre_tan'  => ($work->cost_price !== null && (float) $work->cost_price > 0)
-                                         ? (float) $work->cost_price : null,
-                        'uri_tan'  => ($work->unit_price !== null && (float) $work->unit_price > 0)
-                                         ? (float) $work->unit_price : null,
+                        'kisyu_cd'             => $work->vehicle_kisyu_cd,
+                        'frame_no'             => $work->vehicle_kisyu_cd,
+                        'kisyu_nm'             => $work->item_name,
+                        'sre_tan'              => ($work->cost_price !== null && (float) $work->cost_price > 0)
+                                                     ? (float) $work->cost_price : null,
+                        'uri_tan'              => ($work->unit_price !== null && (float) $work->unit_price > 0)
+                                                     ? (float) $work->unit_price : null,
+                        'terminal_price'        => ($work->terminal_price !== null && $work->terminal_price !== '')
+                                                     ? (float) $work->terminal_price : null,
+                        'standard_retail_price' => ($work->standard_retail_price !== null && $work->standard_retail_price !== '')
+                                                     ? (float) $work->standard_retail_price : null,
                     ]);
                     // 同一コードの重複作成を防ぐためキャッシュに追加
                     $validVehicleCodes[$work->vehicle_kisyu_cd] = true;

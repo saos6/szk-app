@@ -64,7 +64,7 @@ class VehicleController extends Controller
 
         $prefill = $vehicle->only([
             'kisyu_cd', 'name1', 'name2', 'kisyu_nm', 'keishiki', 'kisyu_no',
-            'iro_cd', 'sre_tan', 'uri_tan', 'maker_code', 'unit',
+            'iro_cd', 'sre_tan', 'uri_tan', 'terminal_price', 'standard_retail_price', 'maker_code', 'unit',
             'note1', 'note2', 'note3', 'shop_name',
         ]);
 

@@ -17,6 +17,8 @@ interface VehicleModel {
     kisyu_nm_h: string | null;
     sre_tan: string | null;
     uri_tan: string | null;
+    terminal_price: string | null;
+    standard_retail_price: string | null;
     g1: string | null;
     g2: string | null;
     g3: string | null;
@@ -49,8 +51,10 @@ const form = useForm({
     kisyu_nm_r: props.vehicleModel.kisyu_nm_r ?? '',
     kihon:      props.vehicleModel.kihon ?? '',
     kisyu_nm_h: props.vehicleModel.kisyu_nm_h ?? '',
-    sre_tan:    props.vehicleModel.sre_tan ?? '',
-    uri_tan:    props.vehicleModel.uri_tan ?? '',
+    sre_tan:               props.vehicleModel.sre_tan ?? '',
+    uri_tan:               props.vehicleModel.uri_tan ?? '',
+    terminal_price:        props.vehicleModel.terminal_price ?? '',
+    standard_retail_price: props.vehicleModel.standard_retail_price ?? '',
     g1:         props.vehicleModel.g1 ?? (null as string | null),
     g2:         props.vehicleModel.g2 ?? (null as string | null),
     g3:         props.vehicleModel.g3 ?? (null as string | null),

@@ -21,6 +21,8 @@ interface VehicleModelFormData {
     kisyu_nm_h: string;
     sre_tan: string;
     uri_tan: string;
+    terminal_price: string;
+    standard_retail_price: string;
     g1: string | null;
     g2: string | null;
     g3: string | null;
@@ -37,6 +39,8 @@ interface VehicleModelFormData {
         kisyu_nm_h?: string;
         sre_tan?: string;
         uri_tan?: string;
+        terminal_price?: string;
+        standard_retail_price?: string;
         g1?: string;
         g2?: string;
         g3?: string;
@@ -167,7 +171,7 @@ const emit = defineEmits<{ submit: [] }>();
             </div>
         </div>
 
-        <!-- 仕入単価・売上単価・税区分 -->
+        <!-- 単価情報 -->
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
             <div class="flex flex-col gap-1.5">
                 <Label for="sre_tan">仕入単価（税抜）</Label>
@@ -194,6 +198,30 @@ const emit = defineEmits<{ submit: [] }>();
                     :class="{ 'border-destructive': form.errors.uri_tan }"
                 />
                 <InputError :message="form.errors.uri_tan" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <Label for="terminal_price">末端価格</Label>
+                <Input
+                    id="terminal_price"
+                    v-model="form.terminal_price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    :class="{ 'border-destructive': form.errors.terminal_price }"
+                />
+                <InputError :message="form.errors.terminal_price" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <Label for="standard_retail_price">標準小売価格</Label>
+                <Input
+                    id="standard_retail_price"
+                    v-model="form.standard_retail_price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    :class="{ 'border-destructive': form.errors.standard_retail_price }"
+                />
+                <InputError :message="form.errors.standard_retail_price" />
             </div>
             <div class="flex flex-col gap-1.5">
                 <Label for="zei_kbn">税区分</Label>

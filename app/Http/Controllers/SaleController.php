@@ -110,6 +110,7 @@ class SaleController extends Controller
                 'unit' => $item->unit ?? '台',
                 'sre_tan' => $item->sre_tan,
                 'uri_tan' => $item->uri_tan,
+                'terminal_price' => $item->terminal_price ?? '',
                 'tax_rate' => $item->tax_rate,
                 'sale_amount' => (float) $item->sale_amount,
                 'cogs_amount' => (float) $item->cogs_amount,
@@ -286,8 +287,8 @@ class SaleController extends Controller
             'vehicles' => Vehicle::active()
                 ->orderBy('kisyu_cd')
                 ->orderBy('frame_no')
-                ->get(['id', 'kisyu_cd', 'frame_no', 'iro_cd', 'kisyu_nm', 'sre_tan', 'uri_tan']),
-            'vehicleModels' => VehicleModel::active()->orderBy('kisyu_cd')->orderBy('iro_cd')->get(['kisyu_cd', 'iro_cd', 'kisyu_nm', 'sre_tan', 'uri_tan']),
+                ->get(['id', 'kisyu_cd', 'frame_no', 'iro_cd', 'kisyu_nm', 'sre_tan', 'uri_tan', 'terminal_price']),
+            'vehicleModels' => VehicleModel::active()->orderBy('kisyu_cd')->orderBy('iro_cd')->get(['kisyu_cd', 'iro_cd', 'kisyu_nm', 'sre_tan', 'uri_tan', 'terminal_price']),
             'warehouses' => Warehouse::active()->orderBy('code')->get(['code', 'name']),
             'statuses' => Sale::STATUSES,
         ];
@@ -337,6 +338,7 @@ class SaleController extends Controller
                 'unit' => $item['unit'] ?? '台',
                 'sre_tan' => $sre,
                 'uri_tan' => $uri,
+                'terminal_price' => ($item['terminal_price'] ?? '') !== '' ? (float) $item['terminal_price'] : null,
                 'tax_rate' => $item['tax_rate'] ?? '10',
                 'sale_amount' => round($qty * $uri, 2),
                 'cogs_amount' => round($qty * $sre, 2),
@@ -357,14 +359,15 @@ class SaleController extends Controller
         }
 
         $data = [
-            'kisyu_cd'  => $kisyuCd,
-            'kisyu_nm'  => ($item['kisyu_nm'] ?? '') ?: null,
-            'iro_cd'    => ($item['iro_cd'] ?? '') ?: null,
-            'sre_tan'   => ($item['sre_tan'] ?? 0) ?: null,
-            'uri_tan'   => ($item['uri_tan'] ?? 0) ?: null,
-            'unit'      => ($item['unit'] ?? '') ?: null,
-            'shop_name' => $sale->customer?->name,
-            'sale_date' => $sale->sale_date,
+            'kisyu_cd'      => $kisyuCd,
+            'kisyu_nm'      => ($item['kisyu_nm'] ?? '') ?: null,
+            'iro_cd'        => ($item['iro_cd'] ?? '') ?: null,
+            'sre_tan'       => ($item['sre_tan'] ?? 0) ?: null,
+            'uri_tan'       => ($item['uri_tan'] ?? 0) ?: null,
+            'terminal_price' => ($item['terminal_price'] ?? '') !== '' ? (float) $item['terminal_price'] : null,
+            'unit'          => ($item['unit'] ?? '') ?: null,
+            'shop_name'     => $sale->customer?->name,
+            'sale_date'     => $sale->sale_date,
         ];
 
         $vehicle = Vehicle::where('frame_no', $frameNo)->where('is_deleted', false)->first();

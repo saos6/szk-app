@@ -32,6 +32,8 @@ interface VehicleFormData {
     iro_cd: string | null;
     sre_tan: string;
     uri_tan: string;
+    terminal_price: string;
+    standard_retail_price: string;
     maker_code: string;
     unit: string;
     note1: string;
@@ -206,6 +208,18 @@ watch(
                     <Input id="uri_tan" v-model="form.uri_tan" type="number" min="0" step="0.01"
                         :class="{ 'border-destructive': form.errors.uri_tan }" />
                     <InputError :message="form.errors.uri_tan" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <Label for="terminal_price">末端価格</Label>
+                    <Input id="terminal_price" v-model="form.terminal_price" type="number" min="0" step="0.01"
+                        :class="{ 'border-destructive': form.errors.terminal_price }" />
+                    <InputError :message="form.errors.terminal_price" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <Label for="standard_retail_price">標準小売価格</Label>
+                    <Input id="standard_retail_price" v-model="form.standard_retail_price" type="number" min="0" step="0.01"
+                        :class="{ 'border-destructive': form.errors.standard_retail_price }" />
+                    <InputError :message="form.errors.standard_retail_price" />
                 </div>
                 <div class="flex flex-col gap-1.5">
                     <Label for="maker_code">メーカー品番</Label>

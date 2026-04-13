@@ -26,6 +26,8 @@ class VehicleModelRequest extends FormRequest
             'kisyu_nm_h' => 'nullable|string|max:32',
             'sre_tan' => 'nullable|numeric|min:0',
             'uri_tan' => 'nullable|numeric|min:0',
+            'terminal_price' => 'nullable|numeric|min:0',
+            'standard_retail_price' => 'nullable|numeric|min:0',
             'g1' => ['nullable', Rule::in(array_keys(VehicleModel::G1_TYPES))],
             'g2' => ['nullable', Rule::in(array_keys(VehicleModel::G2_DISP))],
             'g3' => ['nullable', Rule::in(array_keys(VehicleModel::G3_OPTIONS))],

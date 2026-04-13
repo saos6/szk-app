@@ -20,6 +20,7 @@ class SaleItem extends Model
         'unit',
         'sre_tan',
         'uri_tan',
+        'terminal_price',
         'tax_rate',
         'sale_amount',
         'cogs_amount',
@@ -30,6 +31,7 @@ class SaleItem extends Model
         'quantity' => 'decimal:2',
         'sre_tan' => 'decimal:2',
         'uri_tan' => 'decimal:2',
+        'terminal_price' => 'decimal:2',
         'sale_amount' => 'decimal:2',
         'cogs_amount' => 'decimal:2',
     ];

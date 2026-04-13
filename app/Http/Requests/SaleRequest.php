@@ -38,6 +38,7 @@ class SaleRequest extends FormRequest
             'items.*.unit' => ['nullable', 'string', 'max:10'],
             'items.*.sre_tan' => ['required', 'numeric', 'min:0'],
             'items.*.uri_tan' => ['required', 'numeric', 'min:0'],
+            'items.*.terminal_price' => ['nullable', 'numeric', 'min:0'],
             'items.*.tax_rate' => ['required', Rule::in(['0', '10'])],
             'items.*.remarks' => ['nullable', 'string', 'max:500'],
         ];

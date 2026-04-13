@@ -28,6 +28,8 @@ class VehicleRequest extends FormRequest
             'iro_cd' => 'nullable|string|max:6',
             'sre_tan' => 'nullable|numeric|min:0',
             'uri_tan' => 'nullable|numeric|min:0',
+            'terminal_price' => 'nullable|numeric|min:0',
+            'standard_retail_price' => 'nullable|numeric|min:0',
             'maker_code' => 'nullable|string|max:32',
             'unit' => 'nullable|string|max:10',
             'note1' => 'nullable|string|max:1000',
