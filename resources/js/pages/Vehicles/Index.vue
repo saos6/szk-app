@@ -215,7 +215,7 @@ function formatDate(val: string | null) { return val ? val : '—'; }
                                     </span>
                                 </th>
                             </template>
-                            <th class="px-4 py-3 text-left font-medium whitespace-nowrap">操作</th>
+                            <th class="sticky right-0 z-10 bg-muted/50 border-l px-4 py-3 text-left font-medium whitespace-nowrap">操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -257,7 +257,7 @@ function formatDate(val: string | null) { return val ? val : '—'; }
                             <td v-if="columns.updated_at.visible" class="px-4 py-3 whitespace-nowrap text-muted-foreground">
                                 {{ v.updated_at ? new Date(v.updated_at).toLocaleString('ja-JP') : '—' }}
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 sticky right-0 z-10 bg-background border-l">
                                 <div class="flex gap-1">
                                     <Button variant="ghost" size="icon" class="h-8 w-8" as-child>
                                         <Link :href="VehicleController.show.url(v.id)"><Eye class="h-4 w-4" /></Link>

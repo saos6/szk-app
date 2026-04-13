@@ -583,7 +583,7 @@ function dayLabel(day: number | null): string {
                                 </span>
                             </th>
                             <th
-                                class="px-4 py-3 text-left font-medium whitespace-nowrap"
+                                class="px-4 py-3 text-left font-medium whitespace-nowrap sticky right-0 z-10 bg-muted/50 border-l"
                             >
                                 操作
                             </th>
@@ -687,7 +687,7 @@ function dayLabel(day: number | null): string {
                                         : '—'
                                 }}
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 sticky right-0 z-10 bg-background border-l">
                                 <div class="flex gap-1">
                                     <Button
                                         variant="ghost"

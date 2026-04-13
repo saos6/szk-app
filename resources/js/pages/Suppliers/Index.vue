@@ -272,7 +272,7 @@ function SortIcon(key: ColumnKey) {
                                         />
                                     </span>
                                 </th>
-                                <th class="px-4 py-3 text-right font-medium text-muted-foreground">操作</th>
+                                <th class="sticky right-0 z-10 bg-muted/50 border-l px-4 py-3 text-right font-medium text-muted-foreground">操作</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -296,7 +296,7 @@ function SortIcon(key: ColumnKey) {
                                 <td v-show="columns.updated_at.visible" class="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
                                     {{ new Date(supplier.updated_at).toLocaleString('ja-JP') }}
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 sticky right-0 z-10 bg-background border-l">
                                     <div class="flex items-center justify-end gap-1">
                                         <Button variant="ghost" size="icon" class="h-7 w-7" as-child>
                                             <Link :href="SupplierController.show.url(supplier.id)">

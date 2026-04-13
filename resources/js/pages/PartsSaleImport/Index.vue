@@ -736,7 +736,7 @@ const numericColumns = new Set<ColumnKey>([
                                     <ArrowUpDown v-else class="h-3.5 w-3.5 text-muted-foreground/40" />
                                 </span>
                             </th>
-                            <th class="whitespace-nowrap px-3 py-2 text-left font-medium">操作</th>
+                            <th class="sticky right-0 z-10 bg-muted/50 border-l whitespace-nowrap px-3 py-2 text-left font-medium">操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -778,7 +778,7 @@ const numericColumns = new Set<ColumnKey>([
                                     <span class="max-w-[200px] truncate">{{ work.check_message }}</span>
                                 </span>
                             </td>
-                            <td class="px-3 py-2">
+                            <td class="px-3 py-2 sticky right-0 z-10 bg-background border-l">
                                 <div class="flex gap-1">
                                     <Button
                                         variant="ghost"

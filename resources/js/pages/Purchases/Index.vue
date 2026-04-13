@@ -294,7 +294,7 @@ const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'outline' | 'dest
                                     </span>
                                 </th>
                             </template>
-                            <th class="px-4 py-3 text-left font-medium whitespace-nowrap">操作</th>
+                            <th class="sticky right-0 z-10 bg-muted/50 border-l px-4 py-3 text-left font-medium whitespace-nowrap">操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -332,7 +332,7 @@ const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'outline' | 'dest
                             <td v-if="columns.updated_at.visible" class="px-4 py-3 whitespace-nowrap text-muted-foreground">
                                 {{ purchase.updated_at ? new Date(purchase.updated_at).toLocaleString('ja-JP') : '—' }}
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 sticky right-0 z-10 bg-background border-l">
                                 <div class="flex gap-1">
                                     <Button variant="ghost" size="icon" class="h-8 w-8" title="参照" as-child>
                                         <Link :href="PurchaseController.show.url(purchase.id)">

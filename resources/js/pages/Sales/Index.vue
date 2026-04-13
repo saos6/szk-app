@@ -411,7 +411,7 @@ const STATUS_VARIANT: Record<
                                 </th>
                             </template>
                             <th
-                                class="px-4 py-3 text-left font-medium whitespace-nowrap"
+                                class="px-4 py-3 text-left font-medium whitespace-nowrap sticky right-0 z-10 bg-muted/50 border-l"
                             >
                                 操作
                             </th>
@@ -517,7 +517,7 @@ const STATUS_VARIANT: Record<
                                         : '—'
                                 }}
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 sticky right-0 z-10 bg-background border-l">
                                 <div class="flex gap-1">
                                     <!-- 参照 -->
                                     <Button

@@ -352,7 +352,7 @@ function fmtDate(val: string | null): string {
                                     </span>
                                 </th>
                             </template>
-                            <th class="px-4 py-3 text-left font-medium whitespace-nowrap">操作</th>
+                            <th class="sticky right-0 z-10 bg-muted/50 border-l px-4 py-3 text-left font-medium whitespace-nowrap">操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -433,7 +433,7 @@ function fmtDate(val: string | null): string {
                                         : '—'
                                 }}
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 sticky right-0 z-10 bg-background border-l">
                                 <div class="flex gap-1">
                                     <!-- 参照 -->
                                     <Button
