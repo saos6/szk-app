@@ -21,6 +21,7 @@ interface Employee {
 
 interface CustomerFormData {
     code: string;
+    partner_code: string;
     name: string;
     name_kana: string;
     postal_code: string;
@@ -35,6 +36,7 @@ interface CustomerFormData {
     remarks: string;
     errors: {
         code?: string;
+        partner_code?: string;
         name?: string;
         name_kana?: string;
         postal_code?: string;
@@ -88,6 +90,19 @@ dayOptions.push({ value: '31', label: '末日' });
                     :class="{ 'border-destructive': form.errors.code }"
                 />
                 <InputError :message="form.errors.code" />
+            </div>
+
+            <!-- 相手先コード -->
+            <div class="flex flex-col gap-1.5">
+                <Label for="partner_code">相手先コード</Label>
+                <Input
+                    id="partner_code"
+                    v-model="form.partner_code"
+                    placeholder="例：P001"
+                    maxlength="20"
+                    :class="{ 'border-destructive': form.errors.partner_code }"
+                />
+                <InputError :message="form.errors.partner_code" />
             </div>
 
             <!-- 担当社員 -->

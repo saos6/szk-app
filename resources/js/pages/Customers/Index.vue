@@ -37,6 +37,7 @@ import type { BreadcrumbItem } from '@/types';
 interface Customer {
     id: number;
     code: string;
+    partner_code: string | null;
     name: string;
     name_kana: string | null;
     phone: string | null;
@@ -89,6 +90,7 @@ const sortDir = ref(props.filters.direction ?? 'asc');
 type ColumnKey =
     | 'id'
     | 'code'
+    | 'partner_code'
     | 'name'
     | 'name_kana'
     | 'phone'
@@ -104,6 +106,7 @@ const COLUMNS_STORAGE_KEY = 'customers.columns';
 const defaultColumns: Record<ColumnKey, { label: string; visible: boolean }> = {
     id: { label: 'ID', visible: false },
     code: { label: '得意先コード', visible: true },
+    partner_code: { label: '相手先コード', visible: true },
     name: { label: '得意先名', visible: true },
     name_kana: { label: '得意先名カナ', visible: false },
     phone: { label: '電話番号', visible: true },
@@ -386,6 +389,27 @@ function dayLabel(day: number | null): string {
                                 </span>
                             </th>
                             <th
+                                v-if="columns.partner_code.visible"
+                                class="cursor-pointer px-4 py-3 text-left font-medium whitespace-nowrap select-none"
+                                @click="toggleSort('partner_code')"
+                            >
+                                <span class="flex items-center gap-1"
+                                    >相手先コード
+                                    <ArrowUp
+                                        v-if="sortIcon('partner_code') === 'asc'"
+                                        class="h-3.5 w-3.5"
+                                    />
+                                    <ArrowDown
+                                        v-else-if="sortIcon('partner_code') === 'desc'"
+                                        class="h-3.5 w-3.5"
+                                    />
+                                    <ArrowUpDown
+                                        v-else
+                                        class="h-3.5 w-3.5 opacity-40"
+                                    />
+                                </span>
+                            </th>
+                            <th
                                 v-if="columns.name.visible"
                                 class="cursor-pointer px-4 py-3 text-left font-medium whitespace-nowrap select-none"
                                 @click="toggleSort('name')"
@@ -582,6 +606,12 @@ function dayLabel(day: number | null): string {
                                 class="px-4 py-3 font-mono text-sm"
                             >
                                 {{ customer.code }}
+                            </td>
+                            <td
+                                v-if="columns.partner_code.visible"
+                                class="px-4 py-3 font-mono text-sm text-muted-foreground"
+                            >
+                                {{ customer.partner_code ?? '—' }}
                             </td>
                             <td
                                 v-if="columns.name.visible"

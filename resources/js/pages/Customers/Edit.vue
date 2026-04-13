@@ -16,6 +16,7 @@ interface Employee {
 interface Customer {
     id: number;
     code: string;
+    partner_code: string | null;
     name: string;
     name_kana: string | null;
     postal_code: string | null;
@@ -45,6 +46,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const form = useForm({
     code: props.customer.code,
+    partner_code: props.customer.partner_code ?? '',
     name: props.customer.name,
     name_kana: props.customer.name_kana ?? '',
     postal_code: props.customer.postal_code ?? '',

@@ -17,7 +17,7 @@ class CustomerController extends Controller
 {
     public function index(Request $request): Response
     {
-        $allowedSorts = ['id', 'code', 'name', 'name_kana', 'closing_day', 'payment_cycle', 'payment_day', 'created_at', 'updated_at'];
+        $allowedSorts = ['id', 'code', 'partner_code', 'name', 'name_kana', 'closing_day', 'payment_cycle', 'payment_day', 'created_at', 'updated_at'];
         $sort = in_array($request->get('sort'), $allowedSorts) ? $request->get('sort') : 'code';
         $direction = $request->get('direction') === 'desc' ? 'desc' : 'asc';
         $perPage = in_array((int) $request->get('per_page'), [10, 25, 50, 100]) ? (int) $request->get('per_page') : 10;

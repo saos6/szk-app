@@ -12,6 +12,7 @@ interface Employee {
 }
 
 interface Prefill {
+    partner_code?: string | null;
     name?: string;
     name_kana?: string;
     postal_code?: string;
@@ -42,6 +43,7 @@ const p = props.prefill ?? {};
 
 const form = useForm({
     code: '',
+    partner_code: p.partner_code ?? '',
     name: p.name ?? '',
     name_kana: p.name_kana ?? '',
     postal_code: p.postal_code ?? '',

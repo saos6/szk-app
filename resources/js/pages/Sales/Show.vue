@@ -28,6 +28,7 @@ interface SaleItem {
 interface Sale {
     id: number;
     sale_number: string;
+    import_no: string | null;
     customer: { id: number; name: string } | null;
     employee: { id: number; name: string } | null;
     sale_date: string;
@@ -138,6 +139,10 @@ function fmtDate(val: string | null): string {
                 <dl
                     class="grid grid-cols-2 gap-x-8 gap-y-3 text-sm sm:grid-cols-3"
                 >
+                    <div v-if="sale.import_no">
+                        <dt class="text-muted-foreground">取込伝票NO</dt>
+                        <dd class="font-mono font-medium">{{ sale.import_no }}</dd>
+                    </div>
                     <div>
                         <dt class="text-muted-foreground">得意先</dt>
                         <dd class="font-medium">

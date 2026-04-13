@@ -9,6 +9,7 @@ import type { BreadcrumbItem } from '@/types';
 interface Customer {
     id: number;
     code: string;
+    partner_code: string | null;
     name: string;
     name_kana: string | null;
     postal_code: string | null;
@@ -70,6 +71,10 @@ function dayLabel(day: number | null): string {
                     <div>
                         <dt class="text-muted-foreground">得意先コード</dt>
                         <dd class="mt-0.5 font-mono font-medium">{{ customer.code }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-muted-foreground">相手先コード</dt>
+                        <dd class="mt-0.5 font-mono font-medium">{{ customer.partner_code ?? '—' }}</dd>
                     </div>
                     <div>
                         <dt class="text-muted-foreground">得意先名</dt>
