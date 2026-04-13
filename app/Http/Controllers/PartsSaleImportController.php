@@ -470,15 +470,13 @@ class PartsSaleImportController extends Controller
     // ────────────────────────────────────────────────
 
     /**
-     * 変換対象ワーク一覧をもとに、存在しない車両機種・車両マスタを自動作成する。
+     * 変換対象ワーク一覧をもとに、存在しない車両（品番）マスタを自動作成する。
+     * 車両機種（商品）マスタは自動作成しない（手動登録が必要）。
      * 売上変換処理時のみ呼び出す。
      */
     private function autoCreateMasters(\Illuminate\Support\Collection $works): void
     {
-        // 既存マスタを一括取得してハッシュセット化
-        $existingModelCodes = array_flip(
-            VehicleModel::active()->pluck('kisyu_cd')->toArray()
-        );
+        // 既存車両マスタを一括取得してハッシュセット化
         $existingVehicleCodes = array_flip(
             Vehicle::active()->pluck('frame_no')->toArray()
         );
@@ -488,22 +486,6 @@ class PartsSaleImportController extends Controller
                                   ? (float) $work->terminal_price : null;
             $stdRetailPrice = ($work->standard_retail_price !== null && $work->standard_retail_price !== '')
                                   ? (float) $work->standard_retail_price : null;
-
-            // ── 車両機種（商品）マスタ自動作成 ──
-            if ($work->model_kisyu_cd && ! array_key_exists($work->model_kisyu_cd, $existingModelCodes)) {
-                VehicleModel::create([
-                    'kisyu_cd'              => $work->model_kisyu_cd,
-                    'iro_cd'                => '000000',         // 色コード既定値
-                    'kisyu_nm'              => $work->item_name,
-                    'sre_tan'               => ($work->cost_price !== null && (float) $work->cost_price > 0)
-                                                  ? (float) $work->cost_price : null,
-                    'uri_tan'               => ($work->unit_price !== null && (float) $work->unit_price > 0)
-                                                  ? (float) $work->unit_price : null,
-                    'terminal_price'        => $terminalPrice,
-                    'standard_retail_price' => $stdRetailPrice,
-                ]);
-                $existingModelCodes[$work->model_kisyu_cd] = true;
-            }
 
             // ── 車両（品番）マスタ自動作成 (frame_no = XXXXX-YYY) ──
             if ($work->vehicle_kisyu_cd && ! array_key_exists($work->vehicle_kisyu_cd, $existingVehicleCodes)) {
@@ -569,15 +551,12 @@ class PartsSaleImportController extends Controller
         $validModelCodes = array_flip(
             VehicleModel::active()->pluck('kisyu_cd')->toArray()
         );
-        $validVehicleCodes = array_flip(
-            Vehicle::active()->pluck('frame_no')->toArray()
-        );
 
         $errorCount = 0;
 
         DB::transaction(function () use (
             $works, $ym, $closingYm,
-            $validPartnerCodes, $validModelCodes, $validVehicleCodes,
+            $validPartnerCodes, $validModelCodes,
             &$errorCount
         ) {
             foreach ($works as $work) {
@@ -598,16 +577,15 @@ class PartsSaleImportController extends Controller
                     $messages[] = "販売店コード[{$work->partner_code}]の得意先が見つかりません";
                 }
 
-                // 4. 車両機種（商品）マスタ存在チェック（品番1-5桁）― 存在しない場合はエラー（売上変換時に自動作成）
+                // 4. 車両機種（商品）マスタ存在チェック（品番1-5桁）― 存在しない場合はエラー（手動登録が必要）
                 if (! $work->model_kisyu_cd || ! array_key_exists($work->model_kisyu_cd, $validModelCodes)) {
-                    $messages[] = "品番先頭5桁[{$work->model_kisyu_cd}]の車両機種マスタが存在しません（変換時に自動作成されます）";
+                    $messages[] = "品番先頭5桁[{$work->model_kisyu_cd}]の車両機種マスタが存在しません";
                 }
 
-                // 5. 車両（品番）マスタ存在チェック（品番6-13桁 XXXXX-YYY形式）― 存在しない場合はエラー（売上変換時に自動作成）
+                // 5. 車両（品番）マスタ存在チェック（品番6-13桁 XXXXX-YYY形式）
+                // ― 品番13桁未満は取得不可のためエラー、マスタ未存在は売上変換時に自動作成するためエラーにしない
                 if (! $work->vehicle_kisyu_cd) {
                     $messages[] = '品番が13桁未満のため車両コードを取得できません';
-                } elseif (! array_key_exists($work->vehicle_kisyu_cd, $validVehicleCodes)) {
-                    $messages[] = "品番後8桁[{$work->vehicle_kisyu_cd}]の車両マスタが存在しません（変換時に自動作成されます）";
                 }
 
                 if (empty($messages)) {
