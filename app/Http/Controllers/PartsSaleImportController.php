@@ -325,64 +325,83 @@ class PartsSaleImportController extends Controller
                 ->with('error', 'バリデーションエラーがあります。一覧のエラー行を確認・修正してから再実行してください。');
         }
 
-        // ── 売上変換（トランザクション） ──
-        $count = 0;
-        try {
-            DB::transaction(function () use ($works, &$count) {
-                foreach ($works as $work) {
-                    $customer   = Customer::active()->where('partner_code', $work->partner_code)->first();
-                    $saleDate   = $work->sale_date->format('Y-m-d');
-                    $qty        = (float) $work->quantity;
-                    $uriTan     = (float) $work->unit_price;
-                    $sreTan     = (float) $work->cost_price;
-                    $saleAmt    = round($qty * $uriTan, 2);
-                    $cogsAmt    = round($qty * $sreTan, 2);
-                    $taxAmount  = round($saleAmt * 10 / 100, 2);
-                    $total      = round($saleAmt + $taxAmount, 2);
+        // ── 売上変換（伝票NO単位にグループ化して1伝票N明細で作成） ──
+        // slip_no → works のグループに分割（orderBy slip_no, id で行順を保持）
+        $groups = $works->groupBy('slip_no');
+        $count  = 0;
 
+        try {
+            DB::transaction(function () use ($groups, $ym, &$count) {
+                foreach ($groups as $slipNo => $slipWorks) {
+                    // グループ内の先頭行からヘッダー情報を取得
+                    $first    = $slipWorks->first();
+                    $customer = Customer::active()->where('partner_code', $first->partner_code)->first();
+                    $saleDate = $first->sale_date->format('Y-m-d');
+
+                    // 明細行ごとの金額を計算し、ヘッダー合計も積算
+                    $items       = [];
+                    $subtotal    = 0.0;
+                    $cogsTotal   = 0.0;
+                    $lineNo      = 1;
+
+                    foreach ($slipWorks as $work) {
+                        $qty     = (float) $work->quantity;
+                        $uriTan  = (float) $work->unit_price;
+                        $sreTan  = (float) $work->cost_price;
+                        $saleAmt = round($qty * $uriTan, 2);
+                        $cogsAmt = round($qty * $sreTan, 2);
+
+                        $items[] = [
+                            'line_no'        => $lineNo++,
+                            'vehicle_id'     => null,
+                            'kisyu_cd'       => $work->model_kisyu_cd,
+                            'frame_no'       => $work->vehicle_kisyu_cd,
+                            'warehouse_code' => $work->dispatch_source,
+                            'iro_cd'         => null,
+                            'kisyu_nm'       => $work->item_name,
+                            'quantity'       => $qty,
+                            'unit'           => '個',
+                            'sre_tan'        => $sreTan,
+                            'uri_tan'        => $uriTan,
+                            'tax_rate'       => 10,
+                            'sale_amount'    => $saleAmt,
+                            'cogs_amount'    => $cogsAmt,
+                            'remarks'        => $work->maintenance_no,
+                        ];
+
+                        $subtotal  += $saleAmt;
+                        $cogsTotal += $cogsAmt;
+                    }
+
+                    $taxAmount   = round($subtotal * 10 / 100, 2);
+                    $totalAmount = round($subtotal + $taxAmount, 2);
+
+                    // 売上ヘッダー作成（伝票NO単位で1件）
                     $sale = Sale::create([
-                        'sale_number'    => Sale::generateSaleNumber(),
-                        'import_no'      => $work->slip_no,
-                        'partner_slip_no' => $work->slip_no,
-                        'customer_id'    => $customer->id,
-                        'employee_id'    => null,
-                        'sale_date'      => $saleDate,
-                        'order_date'     => $work->order_date?->format('Y-m-d'),
-                        'subject'        => $work->item_name ?? '部品売上',
-                        'status'         => 'recorded',
-                        'subtotal'       => $saleAmt,
-                        'tax_amount'     => $taxAmount,
-                        'total_amount'   => $total,
-                        'cogs_total'     => $cogsAmt,
-                        'remarks'        => null,
+                        'sale_number'     => Sale::generateSaleNumber(),
+                        'import_no'       => $slipNo,
+                        'partner_slip_no' => $slipNo,
+                        'customer_id'     => $customer->id,
+                        'employee_id'     => null,
+                        'sale_date'       => $saleDate,
+                        'order_date'      => $first->order_date?->format('Y-m-d'),
+                        'subject'         => '部品売上',
+                        'status'          => 'recorded',
+                        'subtotal'        => $subtotal,
+                        'tax_amount'      => $taxAmount,
+                        'total_amount'    => $totalAmount,
+                        'cogs_total'      => $cogsTotal,
+                        'remarks'         => null,
                     ]);
 
-                    $item = [
-                        'sale_id'        => $sale->id,
-                        'line_no'        => 1,
-                        'vehicle_id'     => null,
-                        'kisyu_cd'       => $work->model_kisyu_cd,
-                        'frame_no'       => $work->vehicle_kisyu_cd,
-                        'warehouse_code' => $work->dispatch_source,
-                        'iro_cd'         => null,
-                        'kisyu_nm'       => $work->item_name,
-                        'quantity'       => $qty,
-                        'unit'           => '個',
-                        'sre_tan'        => $sreTan,
-                        'uri_tan'        => $uriTan,
-                        'tax_rate'       => 10,
-                        'sale_amount'    => $saleAmt,
-                        'cogs_amount'    => $cogsAmt,
-                        'remarks'        => $work->maintenance_no,
-                    ];
+                    // 売上明細を一括作成・在庫更新
+                    foreach ($items as &$item) {
+                        $item['sale_id'] = $sale->id;
+                        SaleItem::create($item);
+                    }
+                    unset($item);
 
-                    SaleItem::create($item);
-
-                    InventoryService::applyItems(
-                        $work->sale_date->format('Y-m'),
-                        [$item],
-                        'out'
-                    );
+                    InventoryService::applyItems($ym, $items, 'out');
 
                     $count++;
                 }
@@ -393,7 +412,7 @@ class PartsSaleImportController extends Controller
         }
 
         return redirect()->route('sales.index')
-            ->with('success', "{$count}件の部品売上を売上データに変換しました。");
+            ->with('success', "{$count}伝票（部品売上）を売上データに変換しました。");
     }
 
     // ────────────────────────────────────────────────
@@ -450,17 +469,16 @@ class PartsSaleImportController extends Controller
             Vehicle::active()->pluck('kisyu_cd')->toArray()
         );
 
-        // 既変換の伝票NO+売上日セットを一括取得
+        // 既変換の伝票NOセットを一括取得（伝票NO単位で1売上を作るため伝票NOのみで重複判定）
         $slipNos = $works->pluck('slip_no')->filter()->unique()->toArray();
         $existingKeys = [];
         if (! empty($slipNos)) {
-            $existingKeys = Sale::whereIn('import_no', $slipNos)
-                ->where('is_deleted', false)
-                ->get(['import_no', 'sale_date'])
-                ->mapWithKeys(fn ($s) => [
-                    $s->import_no . '_' . Carbon::parse($s->sale_date)->format('Y-m-d') => true,
-                ])
-                ->all();
+            $existingKeys = array_flip(
+                Sale::whereIn('import_no', $slipNos)
+                    ->where('is_deleted', false)
+                    ->pluck('import_no')
+                    ->toArray()
+            );
         }
 
         $errorCount = 0;
@@ -510,12 +528,9 @@ class PartsSaleImportController extends Controller
                     $validVehicleCodes[$work->vehicle_kisyu_cd] = true;
                 }
 
-                // 6. 重複チェック（伝票NO + 売上日）
-                if ($work->slip_no && $work->sale_date) {
-                    $key = $work->slip_no . '_' . Carbon::parse($work->sale_date)->format('Y-m-d');
-                    if (isset($existingKeys[$key])) {
-                        $messages[] = "伝票NO[{$work->slip_no}]・売上日[{$work->sale_date}]は既に変換済みです";
-                    }
+                // 6. 重複チェック（伝票NO単位）
+                if ($work->slip_no && isset($existingKeys[$work->slip_no])) {
+                    $messages[] = "伝票NO[{$work->slip_no}]は既に売上に変換済みです";
                 }
 
                 if (empty($messages)) {
