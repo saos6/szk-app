@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name', 100);
             $table->foreignId('parent_id')->nullable()->constrained('depts')->nullOnDelete();
-            $table->boolean('is_deleted')->default(false);
+            $table->boolean('is_deleted')->default(false)->index();
             $table->timestamps();
         });
     }

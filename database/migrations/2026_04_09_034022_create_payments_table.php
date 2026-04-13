@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('total_amount', 12, 2)->default(0);
             $table->text('remarks')->nullable();
             $table->boolean('is_deleted')->default(false);
+            $table->foreignId('billing_balance_id')->nullable()->constrained('billing_balances')->nullOnDelete();
             $table->timestamps();
         });
     }

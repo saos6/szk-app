@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('kisyu_nm_h', 32)->nullable(); // 機種名(漢字)
             $table->decimal('sre_tan', 11, 2)->nullable(); // 仕入単価(税抜)
             $table->decimal('uri_tan', 11, 2)->nullable(); // 売上単価(税抜)
+            $table->decimal('terminal_price', 11, 2)->nullable();        // 末端価格
+            $table->decimal('standard_retail_price', 11, 2)->nullable(); // 標準小売価格
             $table->string('g1', 2)->nullable();     // タイプ区分
             $table->string('g2', 2)->nullable();     // 排気量区分
             $table->string('g3', 2)->nullable();

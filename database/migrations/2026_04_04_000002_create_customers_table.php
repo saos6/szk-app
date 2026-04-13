@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
             $table->string('code', 20)->unique();
+            $table->string('partner_code', 20)->nullable()->unique()->comment('相手先コード（外部システム連携用）');
             $table->string('name', 100);
             $table->string('name_kana', 200)->nullable();
             $table->string('postal_code', 8)->nullable();

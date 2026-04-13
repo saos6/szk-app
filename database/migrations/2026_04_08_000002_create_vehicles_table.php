@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('iro_cd', 6)->nullable();      // 色コード
             $table->decimal('sre_tan', 11, 2)->nullable(); // 仕入単価(税抜)
             $table->decimal('uri_tan', 11, 2)->nullable(); // 売上単価(税抜)
+            $table->decimal('terminal_price', 11, 2)->nullable();        // 末端価格
+            $table->decimal('standard_retail_price', 11, 2)->nullable(); // 標準小売価格
             $table->string('maker_code', 32)->nullable(); // メーカー品番
             $table->string('unit', 10)->nullable();       // 単位
             $table->string('note1', 1000)->nullable();    // 特記事項1
