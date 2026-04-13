@@ -45,8 +45,11 @@ interface PrefillItem {
 interface Prefill {
     customer_id?: string;
     employee_id?: string;
-    subject?: string;
+    sale_date?: string;
+    order_date?: string;
     delivery_date?: string;
+    partner_slip_no?: string;
+    subject?: string;
     remarks?: string;
     items?: PrefillItem[];
 }
@@ -90,13 +93,15 @@ const defaultItem = {
 };
 
 const form = useForm({
-    customer_id:   p?.customer_id ?? '',
-    employee_id:   p?.employee_id ?? '',
-    sale_date:     today,
-    delivery_date: p?.delivery_date ?? '',
-    subject:       p?.subject ?? '',
-    status:        'recorded',
-    remarks:       p?.remarks ?? '',
+    customer_id:     p?.customer_id ?? '',
+    employee_id:     p?.employee_id ?? '',
+    sale_date:       today,
+    order_date:      p?.order_date ?? '',
+    delivery_date:   p?.delivery_date ?? '',
+    partner_slip_no: p?.partner_slip_no ?? '',
+    subject:         p?.subject ?? '',
+    status:          'recorded',
+    remarks:         p?.remarks ?? '',
     items: p?.items?.length ? p.items : [{ ...defaultItem }],
 });
 

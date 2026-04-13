@@ -21,9 +21,11 @@ class Sale extends Model
     protected $fillable = [
         'sale_number',
         'import_no',
+        'partner_slip_no',
         'customer_id',
         'employee_id',
         'sale_date',
+        'order_date',
         'delivery_date',
         'subject',
         'status',
@@ -36,6 +38,7 @@ class Sale extends Model
 
     protected $casts = [
         'sale_date' => 'date:Y-m-d',
+        'order_date' => 'date:Y-m-d',
         'delivery_date' => 'date:Y-m-d',
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',

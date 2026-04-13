@@ -29,9 +29,11 @@ interface Sale {
     id: number;
     sale_number: string;
     import_no: string | null;
+    partner_slip_no: string | null;
     customer: { id: number; name: string } | null;
     employee: { id: number; name: string } | null;
     sale_date: string;
+    order_date: string | null;
     delivery_date: string | null;
     subject: string;
     status: string;
@@ -139,10 +141,6 @@ function fmtDate(val: string | null): string {
                 <dl
                     class="grid grid-cols-2 gap-x-8 gap-y-3 text-sm sm:grid-cols-3"
                 >
-                    <div v-if="sale.import_no">
-                        <dt class="text-muted-foreground">取込伝票NO</dt>
-                        <dd class="font-mono font-medium">{{ sale.import_no }}</dd>
-                    </div>
                     <div>
                         <dt class="text-muted-foreground">得意先</dt>
                         <dd class="font-medium">
@@ -158,8 +156,20 @@ function fmtDate(val: string | null): string {
                         <dd>{{ fmtDate(sale.sale_date) }}</dd>
                     </div>
                     <div>
+                        <dt class="text-muted-foreground">受注日</dt>
+                        <dd>{{ fmtDate(sale.order_date) }}</dd>
+                    </div>
+                    <div>
                         <dt class="text-muted-foreground">納品日</dt>
                         <dd>{{ fmtDate(sale.delivery_date) }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-muted-foreground">相手伝票NO</dt>
+                        <dd class="font-mono">{{ sale.partner_slip_no ?? '—' }}</dd>
+                    </div>
+                    <div v-if="sale.import_no">
+                        <dt class="text-muted-foreground">取込伝票NO</dt>
+                        <dd class="font-mono text-muted-foreground">{{ sale.import_no }}</dd>
                     </div>
                     <div class="col-span-2">
                         <dt class="text-muted-foreground">件名</dt>

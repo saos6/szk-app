@@ -48,7 +48,9 @@ interface SaleData {
     customer_id: number;
     employee_id: number | null;
     sale_date: string;
+    order_date: string | null;
     delivery_date: string | null;
+    partner_slip_no: string | null;
     subject: string;
     status: string;
     remarks: string | null;
@@ -75,13 +77,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const form = useForm({
-    customer_id:   String(props.sale.customer_id),
-    employee_id:   props.sale.employee_id ? String(props.sale.employee_id) : '',
-    sale_date:     props.sale.sale_date,
-    delivery_date: props.sale.delivery_date ?? '',
-    subject:       props.sale.subject,
-    status:        props.sale.status,
-    remarks:       props.sale.remarks ?? '',
+    customer_id:     String(props.sale.customer_id),
+    employee_id:     props.sale.employee_id ? String(props.sale.employee_id) : '',
+    sale_date:       props.sale.sale_date,
+    order_date:      props.sale.order_date ?? '',
+    delivery_date:   props.sale.delivery_date ?? '',
+    partner_slip_no: props.sale.partner_slip_no ?? '',
+    subject:         props.sale.subject,
+    status:          props.sale.status,
+    remarks:         props.sale.remarks ?? '',
     items: props.sale.items.map((item) => ({
         vehicle_id:  item.vehicle_id,
         kisyu_cd:       item.kisyu_cd ?? '',

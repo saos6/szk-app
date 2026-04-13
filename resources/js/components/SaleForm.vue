@@ -63,7 +63,9 @@ interface FormData {
     customer_id: string;
     employee_id: string;
     sale_date: string;
+    order_date: string;
     delivery_date: string;
+    partner_slip_no: string;
     subject: string;
     status: string;
     remarks: string;
@@ -292,6 +294,24 @@ function getItemError(index: number, field: string): string | undefined {
                     </p>
                 </div>
 
+                <!-- 受注日 -->
+                <div class="grid gap-1.5">
+                    <Label>受注日</Label>
+                    <Input
+                        type="date"
+                        v-model="form.order_date"
+                        :class="{
+                            'border-destructive': form.errors.order_date,
+                        }"
+                    />
+                    <p
+                        v-if="form.errors.order_date"
+                        class="text-xs text-destructive"
+                    >
+                        {{ form.errors.order_date }}
+                    </p>
+                </div>
+
                 <!-- 納品日 -->
                 <div class="grid gap-1.5">
                     <Label>納品日</Label>
@@ -307,6 +327,25 @@ function getItemError(index: number, field: string): string | undefined {
                         class="text-xs text-destructive"
                     >
                         {{ form.errors.delivery_date }}
+                    </p>
+                </div>
+
+                <!-- 相手伝票NO -->
+                <div class="grid gap-1.5">
+                    <Label>相手伝票NO</Label>
+                    <Input
+                        v-model="form.partner_slip_no"
+                        maxlength="50"
+                        placeholder="相手先の伝票番号"
+                        :class="{
+                            'border-destructive': form.errors.partner_slip_no,
+                        }"
+                    />
+                    <p
+                        v-if="form.errors.partner_slip_no"
+                        class="text-xs text-destructive"
+                    >
+                        {{ form.errors.partner_slip_no }}
                     </p>
                 </div>
 
