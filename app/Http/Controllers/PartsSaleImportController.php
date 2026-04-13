@@ -385,22 +385,47 @@ class PartsSaleImportController extends Controller
     private function validateWorkRow(Request $request): array
     {
         $validated = $request->validate([
-            'processing_ym'   => ['required', 'date_format:Y-m'],
-            'control_code'    => ['nullable', 'string', 'max:5'],
-            'hinban'          => ['required', 'string', 'max:20'],
-            'slip_no'         => ['required', 'string', 'max:20'],
-            'order_qty'       => ['nullable', 'numeric', 'min:0'],
-            'ship_qty'        => ['required', 'numeric'],
-            'sale_date'       => ['required', 'date'],
-            'unit_price'      => ['required', 'numeric', 'min:0'],
-            'partner_code'    => ['required', 'string', 'max:20'],
-            'cost_price'      => ['nullable', 'numeric', 'min:0'],
-            'maintenance_no'  => ['nullable', 'string', 'max:100'],
-            'red_black_kbn'   => ['nullable', 'string', 'in:0,2'],
-            'dispatch_source' => ['nullable', 'string', 'max:20'],
-            'staff_code'      => ['nullable', 'string', 'max:20'],
-            'item_code'       => ['nullable', 'string', 'max:20'],
-            'item_name'       => ['nullable', 'string', 'max:200'],
+            // 基本
+            'processing_ym'          => ['required', 'date_format:Y-m'],
+            'monthly_f_kbn'          => ['nullable', 'string', 'max:5'],
+            'control_code'           => ['nullable', 'string', 'max:5'],
+            'office_code'            => ['nullable', 'string', 'max:10'],
+            // 伝票・品番
+            'hinban'                 => ['required', 'string', 'max:20'],
+            'slip_no'                => ['required', 'string', 'max:20'],
+            'red_black_kbn'          => ['nullable', 'string', 'in:0,2'],
+            // 受注
+            'order_qty'              => ['nullable', 'numeric', 'min:0'],
+            'order_date'             => ['nullable', 'date'],
+            // 売上
+            'ship_qty'               => ['required', 'numeric'],
+            'sale_date'              => ['required', 'date'],
+            'unit_price'             => ['required', 'numeric', 'min:0'],
+            'sale_kbn'               => ['nullable', 'string', 'max:5'],
+            'les_rate'               => ['nullable', 'string', 'max:10'],
+            'cost_price'             => ['nullable', 'numeric', 'min:0'],
+            'terminal_price'         => ['nullable', 'string', 'max:20'],
+            'breakdown_code'         => ['nullable', 'string', 'max:10'],
+            // 得意先
+            'partner_code'           => ['required', 'string', 'max:20'],
+            'dealer_code'            => ['nullable', 'string', 'max:20'],
+            // 請求
+            'invoice_kbn'            => ['nullable', 'string', 'max:5'],
+            'invoice_m_kbn'          => ['nullable', 'string', 'max:5'],
+            // 出庫・担当
+            'dispatch_source'        => ['nullable', 'string', 'max:20'],
+            'staff_code'             => ['nullable', 'string', 'max:20'],
+            'rank_cd'                => ['nullable', 'string', 'max:5'],
+            'first_ship_kbn'         => ['nullable', 'string', 'max:5'],
+            // 商品
+            'item_code'              => ['nullable', 'string', 'max:20'],
+            'item_name'              => ['nullable', 'string', 'max:200'],
+            'open_kbn'               => ['nullable', 'string', 'max:5'],
+            'model_group'            => ['nullable', 'string', 'max:10'],
+            'maintenance_no'         => ['nullable', 'string', 'max:100'],
+            'standard_retail_price'  => ['nullable', 'string', 'max:20'],
+            // その他
+            'filler'                 => ['nullable', 'string', 'max:100'],
         ]);
 
         $hinban           = $validated['hinban'];
