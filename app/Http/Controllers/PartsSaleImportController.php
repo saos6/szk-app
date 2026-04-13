@@ -41,14 +41,24 @@ class PartsSaleImportController extends Controller
     {
         $ym      = $request->input('processing_ym', now()->format('Y-m'));
         $perPage = in_array((int) $request->get('per_page'), [10, 25, 50, 100]) ? (int) $request->get('per_page') : 50;
+        $search  = $request->get('search', '');
 
-        $baseQuery = PartsSaleWork::byYm($ym);
-        $total     = (clone $baseQuery)->count();
-        $errors    = (clone $baseQuery)->where('check_flag', PartsSaleWork::CHECK_ERROR)->count();
+        $allowedSorts = [
+            'processing_ym', 'hinban', 'slip_no', 'order_date', 'sale_date',
+            'ship_qty', 'unit_price', 'cost_price', 'partner_code', 'item_name',
+            'quantity', 'check_flag',
+        ];
+        $sort      = in_array($request->get('sort'), $allowedSorts) ? $request->get('sort') : 'sale_date';
+        $direction = $request->get('direction') === 'desc' ? 'desc' : 'asc';
 
-        $works = (clone $baseQuery)
-            ->orderBy('sale_date')
-            ->orderBy('slip_no')
+        // サマリーは検索フィルタに関係なく処理年月全体で集計
+        $total  = PartsSaleWork::byYm($ym)->count();
+        $errors = PartsSaleWork::byYm($ym)->where('check_flag', PartsSaleWork::CHECK_ERROR)->count();
+
+        $works = PartsSaleWork::byYm($ym)
+            ->filtered($search)
+            ->orderBy($sort, $direction)
+            ->orderBy('id')
             ->paginate($perPage)
             ->withQueryString();
 
@@ -56,7 +66,12 @@ class PartsSaleImportController extends Controller
             'works'        => $works,
             'processingYm' => $ym,
             'summary'      => ['total' => $total, 'errors' => $errors, 'ok' => $total - $errors],
-            'filters'      => ['per_page' => (string) $perPage],
+            'filters'      => [
+                'per_page'  => (string) $perPage,
+                'search'    => $search,
+                'sort'      => $sort,
+                'direction' => $direction,
+            ],
         ]);
     }
 

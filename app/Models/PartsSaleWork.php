@@ -67,4 +67,18 @@ class PartsSaleWork extends Model
     {
         return $query->where('processing_ym', $ym);
     }
+
+    public function scopeFiltered(Builder $query, string $search): Builder
+    {
+        return $query->when($search !== '', function ($q) use ($search) {
+            $q->where(function ($q2) use ($search) {
+                $q2->where('hinban', 'like', "%{$search}%")
+                    ->orWhere('slip_no', 'like', "%{$search}%")
+                    ->orWhere('item_name', 'like', "%{$search}%")
+                    ->orWhere('partner_code', 'like', "%{$search}%")
+                    ->orWhere('control_code', 'like', "%{$search}%")
+                    ->orWhere('maintenance_no', 'like', "%{$search}%");
+            });
+        });
+    }
 }

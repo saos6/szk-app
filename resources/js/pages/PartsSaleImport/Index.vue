@@ -2,7 +2,10 @@
 import { Head, router, useForm } from '@inertiajs/vue3';
 import {
     AlertCircle,
+    ArrowDown,
     ArrowLeftRight,
+    ArrowUp,
+    ArrowUpDown,
     CheckCircle2,
     Columns3,
     Download,
@@ -12,6 +15,7 @@ import {
     RefreshCw,
     Search,
     Trash2,
+    X,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import * as PartsSaleImportController from '@/actions/App/Http/Controllers/PartsSaleImportController';
@@ -105,7 +109,7 @@ interface Props {
     works: Paginator;
     processingYm: string;
     summary: { total: number; errors: number; ok: number };
-    filters: { per_page: string };
+    filters: { per_page: string; search: string; sort: string; direction: string };
 }
 
 const props = defineProps<Props>();
@@ -225,25 +229,67 @@ const visibleKeys = computed(() =>
     (Object.keys(columns.value) as ColumnKey[]).filter((k) => columns.value[k].visible),
 );
 
-// ── 処理年月 / ページング ──
-const searchYm = ref(props.processingYm);
-const perPage  = ref(props.filters.per_page ?? '50');
+// ── 処理年月 / 検索 / ソート / ページング ──
+const searchYm  = ref(props.processingYm);
+const search    = ref(props.filters.search ?? '');
+const sortField = ref(props.filters.sort ?? 'sale_date');
+const sortDir   = ref<'asc' | 'desc'>((props.filters.direction as 'asc' | 'desc') ?? 'asc');
+const perPage   = ref(props.filters.per_page ?? '50');
+
+// ソート可能列: ColumnKey → DBフィールド名 のマッピング
+const sortableColumns: Partial<Record<ColumnKey, string>> = {
+    processing_ym: 'processing_ym',
+    hinban:        'hinban',
+    slip_no:       'slip_no',
+    order_date:    'order_date',
+    sale_date:     'sale_date',
+    ship_qty:      'ship_qty',
+    unit_price:    'unit_price',
+    cost_price:    'cost_price',
+    partner_code:  'partner_code',
+    item_name:     'item_name',
+    quantity:      'quantity',
+};
+
+function navigate(params: Record<string, string>) {
+    router.get(PartsSaleImportController.index.url(), params, {
+        preserveState: false,
+        replace: true,
+    });
+}
+
+function currentParams(): Record<string, string> {
+    return {
+        processing_ym: props.processingYm,
+        per_page:      perPage.value,
+        search:        search.value,
+        sort:          sortField.value,
+        direction:     sortDir.value,
+    };
+}
 
 function doSearch() {
-    router.get(
-        PartsSaleImportController.index.url(),
-        { processing_ym: searchYm.value, per_page: perPage.value },
-        { preserveState: false, replace: true },
-    );
+    navigate({ ...currentParams(), processing_ym: searchYm.value });
+}
+
+function clearSearch() {
+    search.value = '';
+    navigate({ ...currentParams(), search: '' });
+}
+
+function toggleSort(field: string) {
+    if (sortField.value === field) {
+        sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortField.value = field;
+        sortDir.value = 'asc';
+    }
+    navigate({ ...currentParams(), sort: sortField.value, direction: sortDir.value });
 }
 
 function handlePerPageChange(value: string) {
     perPage.value = value;
-    router.get(
-        PartsSaleImportController.index.url(),
-        { processing_ym: props.processingYm, per_page: value },
-        { preserveState: false, replace: true },
-    );
+    navigate({ ...currentParams(), per_page: value });
 }
 
 function paginationLabel(label: string): string {
@@ -512,6 +558,27 @@ const numericColumns = new Set<ColumnKey>([
                         </p>
                     </div>
 
+                    <!-- 検索キーワード -->
+                    <div class="flex flex-col gap-1.5">
+                        <Label>検索キーワード</Label>
+                        <div class="relative flex items-center">
+                            <Input
+                                v-model="search"
+                                placeholder="品番・伝票NO・品名・販売店CD"
+                                class="w-60 pr-8"
+                                @keydown.enter="doSearch"
+                            />
+                            <button
+                                v-if="search"
+                                type="button"
+                                class="absolute right-2 text-muted-foreground hover:text-foreground"
+                                @click="clearSearch"
+                            >
+                                <X class="h-3.5 w-3.5" />
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- ボタン群: 取込 / 検索 / 照合 / 売上変換処理 -->
                     <div class="flex flex-wrap gap-2 pb-0.5">
                         <!-- 取込 -->
@@ -554,6 +621,9 @@ const numericColumns = new Set<ColumnKey>([
             <div class="flex flex-wrap items-center gap-4 text-sm">
                 <span class="text-muted-foreground">
                     全 <strong class="text-foreground">{{ summary.total }}</strong> 件
+                    <template v-if="search">
+                        （検索中: <strong class="text-foreground">{{ works.total }}</strong> 件一致）
+                    </template>
                 </span>
                 <span class="flex items-center gap-1 text-green-700">
                     <CheckCircle2 class="h-4 w-4" />
@@ -634,11 +704,38 @@ const numericColumns = new Set<ColumnKey>([
                                 v-for="key in visibleKeys"
                                 :key="key"
                                 class="whitespace-nowrap px-3 py-2 font-medium"
-                                :class="numericColumns.has(key) ? 'text-right' : 'text-left'"
+                                :class="[
+                                    numericColumns.has(key) ? 'text-right' : 'text-left',
+                                    sortableColumns[key] ? 'cursor-pointer select-none hover:bg-muted' : '',
+                                ]"
+                                @click="sortableColumns[key] && toggleSort(sortableColumns[key]!)"
                             >
-                                {{ columns[key].label }}
+                                <span class="inline-flex items-center gap-1">
+                                    {{ columns[key].label }}
+                                    <template v-if="sortableColumns[key]">
+                                        <ArrowUp
+                                            v-if="sortField === sortableColumns[key] && sortDir === 'asc'"
+                                            class="h-3.5 w-3.5 text-primary"
+                                        />
+                                        <ArrowDown
+                                            v-else-if="sortField === sortableColumns[key] && sortDir === 'desc'"
+                                            class="h-3.5 w-3.5 text-primary"
+                                        />
+                                        <ArrowUpDown v-else class="h-3.5 w-3.5 text-muted-foreground/40" />
+                                    </template>
+                                </span>
                             </th>
-                            <th class="whitespace-nowrap px-3 py-2 text-left font-medium">チェック</th>
+                            <th
+                                class="cursor-pointer select-none whitespace-nowrap px-3 py-2 text-left font-medium hover:bg-muted"
+                                @click="toggleSort('check_flag')"
+                            >
+                                <span class="inline-flex items-center gap-1">
+                                    チェック
+                                    <ArrowUp v-if="sortField === 'check_flag' && sortDir === 'asc'" class="h-3.5 w-3.5 text-primary" />
+                                    <ArrowDown v-else-if="sortField === 'check_flag' && sortDir === 'desc'" class="h-3.5 w-3.5 text-primary" />
+                                    <ArrowUpDown v-else class="h-3.5 w-3.5 text-muted-foreground/40" />
+                                </span>
+                            </th>
                             <th class="whitespace-nowrap px-3 py-2 text-left font-medium">操作</th>
                         </tr>
                     </thead>
