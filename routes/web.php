@@ -3,6 +3,7 @@
 use App\Http\Controllers\BillingBalanceController;
 use App\Http\Controllers\BillingClosingController;
 use App\Http\Controllers\MonthlyClosingController;
+use App\Http\Controllers\PartsSaleImportController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeptController;
@@ -72,6 +73,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('warehouses/export', [WarehouseController::class, 'export'])->name('warehouses.export');
     Route::get('warehouses/{warehouse}/replicate', [WarehouseController::class, 'replicate'])->name('warehouses.replicate');
     Route::resource('warehouses', WarehouseController::class);
+
+    // 部品売上一括取込
+    Route::get('parts-sale-import', [PartsSaleImportController::class, 'index'])->name('parts-sale-import.index');
+    Route::post('parts-sale-import/upload', [PartsSaleImportController::class, 'upload'])->name('parts-sale-import.upload');
+    Route::post('parts-sale-import/convert', [PartsSaleImportController::class, 'convert'])->name('parts-sale-import.convert');
+    Route::post('parts-sale-import', [PartsSaleImportController::class, 'store'])->name('parts-sale-import.store');
+    Route::put('parts-sale-import/{partsSaleWork}', [PartsSaleImportController::class, 'update'])->name('parts-sale-import.update');
+    Route::delete('parts-sale-import/{partsSaleWork}', [PartsSaleImportController::class, 'destroy'])->name('parts-sale-import.destroy');
 
     // 月次繰越処理
     Route::get('monthly-closing', [MonthlyClosingController::class, 'index'])->name('monthly-closing.index');

@@ -19,9 +19,11 @@ import {
     BoxesIcon,
     ClipboardList,
     SlidersHorizontal,
+    Upload,
 } from 'lucide-vue-next';
 import * as BillingBalanceController from '@/actions/App/Http/Controllers/BillingBalanceController';
 import * as BillingClosingController from '@/actions/App/Http/Controllers/BillingClosingController';
+import * as PartsSaleImportController from '@/actions/App/Http/Controllers/PartsSaleImportController';
 import * as MonthlyClosingController from '@/actions/App/Http/Controllers/MonthlyClosingController';
 import * as PaymentController from '@/actions/App/Http/Controllers/PaymentController';
 import * as PurchaseController from '@/actions/App/Http/Controllers/PurchaseController';
@@ -83,6 +85,11 @@ const mainNavItems: NavItem[] = [
         title: '月次繰越処理',
         href: MonthlyClosingController.index.url(),
         icon: ClipboardList,
+    },
+    {
+        title: '部品売上一括取込',
+        href: PartsSaleImportController.index.url(),
+        icon: Upload,
     },
     {
         title: '見積',
