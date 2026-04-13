@@ -170,8 +170,22 @@ class PartsSaleImportController extends Controller
             PartsSaleWork::insert($chunk);
         }
 
+        // 挿入後にチェックを実行
+        $insertedWorks = PartsSaleWork::byYm($ym)->orderBy('id')->get();
+        $errorCount    = $this->runChecks($ym, $insertedWorks);
+
+        $totalCount = count($rows);
+        if ($errorCount > 0) {
+            return redirect()->route('parts-sale-import.index', ['processing_ym' => $ym])
+                ->with('error', sprintf(
+                    '%d件のデータを取込みました。うち%d件にチェックエラーがあります。エラー行を確認・修正してから売上変換を実行してください。',
+                    $totalCount,
+                    $errorCount
+                ));
+        }
+
         return redirect()->route('parts-sale-import.index', ['processing_ym' => $ym])
-            ->with('success', sprintf('%d件のデータを取込みました。', count($rows)));
+            ->with('success', sprintf('%d件のデータを取込みました。全件正常です。', $totalCount));
     }
 
     // ────────────────────────────────────────────────
@@ -219,62 +233,10 @@ class PartsSaleImportController extends Controller
             return back()->with('error', '対象データがありません。先に取込を実行してください。');
         }
 
-        $closingYm = SystemSetting::instance()->closing_ym;
+        // ── バリデーション（チェック実行） ──
+        $errorCount = $this->runChecks($ym, $works);
 
-        // ── バリデーション ──
-        $hasError = false;
-
-        foreach ($works as $work) {
-            $messages = [];
-
-            // 1. 処理年月と売上日年月のアンマッチチェック
-            if (! $work->sale_date || Carbon::parse($work->sale_date)->format('Y-m') !== $ym) {
-                $messages[] = '売上日の年月が処理年月と一致しません';
-            }
-
-            // 2. 月次更新済み期間チェック
-            if ($work->sale_date && Carbon::parse($work->sale_date)->format('Y-m') <= $closingYm) {
-                $messages[] = '月次更新済みの期間（' . Carbon::parse($work->sale_date)->format('Y年n月') . '）です';
-            }
-
-            // 3. 得意先存在チェック
-            if (! $work->partner_code || ! Customer::active()->where('partner_code', $work->partner_code)->exists()) {
-                $messages[] = "販売店コード[{$work->partner_code}]の得意先が見つかりません";
-            }
-
-            // 4. 機種マスタ存在チェック（品番1-5桁）
-            if (! $work->model_kisyu_cd || ! VehicleModel::active()->where('kisyu_cd', $work->model_kisyu_cd)->exists()) {
-                $messages[] = "品番先頭5桁[{$work->model_kisyu_cd}]が車両機種マスタに存在しません";
-            }
-
-            // 5. 車両マスタ存在チェック（品番6-10桁）
-            if (! $work->vehicle_kisyu_cd || ! Vehicle::active()->where('kisyu_cd', $work->vehicle_kisyu_cd)->exists()) {
-                $messages[] = "品番6-10桁[{$work->vehicle_kisyu_cd}]が車両マスタに存在しません";
-            }
-
-            // 6. 重複チェック（伝票NO + 売上日）
-            if ($work->slip_no && $work->sale_date) {
-                $duplicate = Sale::where('import_no', $work->slip_no)
-                    ->whereDate('sale_date', $work->sale_date)
-                    ->where('is_deleted', false)
-                    ->exists();
-                if ($duplicate) {
-                    $messages[] = "伝票NO[{$work->slip_no}]・売上日[{$work->sale_date}]は既に変換済みです";
-                }
-            }
-
-            if (empty($messages)) {
-                $work->check_flag    = PartsSaleWork::CHECK_NORMAL;
-                $work->check_message = null;
-            } else {
-                $work->check_flag    = PartsSaleWork::CHECK_ERROR;
-                $work->check_message = implode(' / ', $messages);
-                $hasError            = true;
-            }
-            $work->save();
-        }
-
-        if ($hasError) {
+        if ($errorCount > 0) {
             return redirect()->route('parts-sale-import.index', ['processing_ym' => $ym])
                 ->with('error', 'バリデーションエラーがあります。一覧のエラー行を確認・修正してから再実行してください。');
         }
@@ -379,6 +341,100 @@ class PartsSaleImportController extends Controller
         if (! checkdate($month, $day, $westernYear)) return null;
 
         return sprintf('%04d-%02d-%02d', $westernYear, $month, $day);
+    }
+
+    /**
+     * ワーク行一覧に対してビジネスルールチェックを実行し、
+     * check_flag / check_message を更新する。エラー件数を返す。
+     *
+     * マスタを一括取得してメモリ照合するため、大量行でも高速。
+     */
+    private function runChecks(string $ym, \Illuminate\Support\Collection $works): int
+    {
+        if ($works->isEmpty()) return 0;
+
+        $closingYm = SystemSetting::instance()->closing_ym;
+
+        // マスタを一括取得してハッシュセット化（行ごとのクエリを排除）
+        $validPartnerCodes = array_flip(
+            Customer::active()->whereNotNull('partner_code')->pluck('partner_code')->toArray()
+        );
+        $validModelCodes = array_flip(
+            VehicleModel::active()->pluck('kisyu_cd')->toArray()
+        );
+        $validVehicleCodes = array_flip(
+            Vehicle::active()->pluck('kisyu_cd')->toArray()
+        );
+
+        // 既変換の伝票NO+売上日セットを一括取得
+        $slipNos = $works->pluck('slip_no')->filter()->unique()->toArray();
+        $existingKeys = [];
+        if (! empty($slipNos)) {
+            $existingKeys = Sale::whereIn('import_no', $slipNos)
+                ->where('is_deleted', false)
+                ->get(['import_no', 'sale_date'])
+                ->mapWithKeys(fn ($s) => [
+                    $s->import_no . '_' . Carbon::parse($s->sale_date)->format('Y-m-d') => true,
+                ])
+                ->all();
+        }
+
+        $errorCount = 0;
+
+        DB::transaction(function () use (
+            $works, $ym, $closingYm,
+            $validPartnerCodes, $validModelCodes, $validVehicleCodes, $existingKeys,
+            &$errorCount
+        ) {
+            foreach ($works as $work) {
+                $messages = [];
+
+                // 1. 処理年月と売上日年月のアンマッチチェック
+                if (! $work->sale_date || Carbon::parse($work->sale_date)->format('Y-m') !== $ym) {
+                    $messages[] = '売上日の年月が処理年月と一致しません';
+                }
+
+                // 2. 月次更新済み期間チェック
+                if ($closingYm && $work->sale_date && Carbon::parse($work->sale_date)->format('Y-m') <= $closingYm) {
+                    $messages[] = '月次更新済みの期間（' . Carbon::parse($work->sale_date)->format('Y年n月') . '）です';
+                }
+
+                // 3. 得意先存在チェック（販売店コード → 相手先コード）
+                if (! $work->partner_code || ! array_key_exists($work->partner_code, $validPartnerCodes)) {
+                    $messages[] = "販売店コード[{$work->partner_code}]の得意先が見つかりません";
+                }
+
+                // 4. 機種マスタ存在チェック（品番1-5桁）
+                if (! $work->model_kisyu_cd || ! array_key_exists($work->model_kisyu_cd, $validModelCodes)) {
+                    $messages[] = "品番先頭5桁[{$work->model_kisyu_cd}]が車両機種マスタに存在しません";
+                }
+
+                // 5. 車両マスタ存在チェック（品番6-10桁）
+                if (! $work->vehicle_kisyu_cd || ! array_key_exists($work->vehicle_kisyu_cd, $validVehicleCodes)) {
+                    $messages[] = "品番6-10桁[{$work->vehicle_kisyu_cd}]が車両マスタに存在しません";
+                }
+
+                // 6. 重複チェック（伝票NO + 売上日）
+                if ($work->slip_no && $work->sale_date) {
+                    $key = $work->slip_no . '_' . Carbon::parse($work->sale_date)->format('Y-m-d');
+                    if (isset($existingKeys[$key])) {
+                        $messages[] = "伝票NO[{$work->slip_no}]・売上日[{$work->sale_date}]は既に変換済みです";
+                    }
+                }
+
+                if (empty($messages)) {
+                    $work->check_flag    = PartsSaleWork::CHECK_NORMAL;
+                    $work->check_message = null;
+                } else {
+                    $work->check_flag    = PartsSaleWork::CHECK_ERROR;
+                    $work->check_message = implode(' / ', $messages);
+                    $errorCount++;
+                }
+                $work->save();
+            }
+        });
+
+        return $errorCount;
     }
 
     /** ワーク行の登録・更新バリデーション */
