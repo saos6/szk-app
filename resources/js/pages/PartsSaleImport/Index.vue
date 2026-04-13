@@ -10,6 +10,7 @@ import {
     Columns3,
     Download,
     FileUp,
+    Lock,
     Pencil,
     Plus,
     RefreshCw,
@@ -88,6 +89,7 @@ interface Work {
     vehicle_kisyu_cd: string | null;
     check_flag: number;
     check_message: string | null;
+    converted_at: string | null;
 }
 
 interface PaginationLink {
@@ -108,7 +110,7 @@ interface Paginator {
 interface Props {
     works: Paginator;
     processingYm: string;
-    summary: { total: number; errors: number; ok: number };
+    summary: { total: number; errors: number; ok: number; converted: number };
     filters: { per_page: string; search: string; sort: string; direction: string };
 }
 
@@ -606,7 +608,8 @@ const numericColumns = new Set<ColumnKey>([
                         <!-- 売上変換処理 -->
                         <Button
                             @click="doConvert"
-                            :disabled="convertForm.processing || summary.total === 0 || summary.errors > 0"
+                            :disabled="convertForm.processing || summary.total === 0 || summary.errors > 0 || summary.converted > 0"
+                            :title="summary.converted > 0 ? '変換済みです。再度変換するには取込をやり直してください。' : ''"
                             variant="outline"
                             class="border-green-500 text-green-700 hover:bg-green-50 disabled:opacity-50"
                         >
@@ -632,6 +635,10 @@ const numericColumns = new Set<ColumnKey>([
                 <span v-if="summary.errors > 0" class="flex items-center gap-1 text-destructive">
                     <AlertCircle class="h-4 w-4" />
                     エラー: <strong>{{ summary.errors }}</strong> 件（照合または修正後に売上変換を実行してください）
+                </span>
+                <span v-if="summary.converted > 0" class="flex items-center gap-1 font-medium text-blue-700">
+                    <Lock class="h-4 w-4" />
+                    変換済み: <strong>{{ summary.converted }}</strong> 件（売上変換処理は完了しています）
                 </span>
             </div>
 
@@ -764,7 +771,14 @@ const numericColumns = new Set<ColumnKey>([
                             </td>
                             <td class="px-3 py-2">
                                 <span
-                                    v-if="work.check_flag === 0"
+                                    v-if="work.converted_at"
+                                    class="flex items-center gap-1 text-xs font-medium text-blue-700"
+                                    :title="`売上変換済み: ${work.converted_at}`"
+                                >
+                                    <Lock class="h-3.5 w-3.5" />変換済み
+                                </span>
+                                <span
+                                    v-else-if="work.check_flag === 0"
                                     class="flex items-center gap-1 text-xs text-green-700"
                                 >
                                     <CheckCircle2 class="h-3.5 w-3.5" />正常

@@ -52,8 +52,9 @@ class PartsSaleImportController extends Controller
         $direction = $request->get('direction') === 'desc' ? 'desc' : 'asc';
 
         // サマリーは検索フィルタに関係なく処理年月全体で集計
-        $total  = PartsSaleWork::byYm($ym)->count();
-        $errors = PartsSaleWork::byYm($ym)->where('check_flag', PartsSaleWork::CHECK_ERROR)->count();
+        $total     = PartsSaleWork::byYm($ym)->count();
+        $errors    = PartsSaleWork::byYm($ym)->where('check_flag', PartsSaleWork::CHECK_ERROR)->count();
+        $converted = PartsSaleWork::byYm($ym)->whereNotNull('converted_at')->count();
 
         $works = PartsSaleWork::byYm($ym)
             ->filtered($search)
@@ -65,7 +66,7 @@ class PartsSaleImportController extends Controller
         return Inertia::render('PartsSaleImport/Index', [
             'works'        => $works,
             'processingYm' => $ym,
-            'summary'      => ['total' => $total, 'errors' => $errors, 'ok' => $total - $errors],
+            'summary'      => ['total' => $total, 'errors' => $errors, 'ok' => $total - $errors, 'converted' => $converted],
             'filters'      => [
                 'per_page'  => (string) $perPage,
                 'search'    => $search,
@@ -317,6 +318,12 @@ class PartsSaleImportController extends Controller
             return back()->with('error', '対象データがありません。先に取込を実行してください。');
         }
 
+        // ── 変換済みチェック ──
+        if ($works->whereNotNull('converted_at')->isNotEmpty()) {
+            return redirect()->route('parts-sale-import.index', ['processing_ym' => $ym])
+                ->with('error', 'このデータは既に売上変換済みです。再度変換するには取込を最初からやり直してください。');
+        }
+
         // ── バリデーション（チェック実行） ──
         $errorCount = $this->runChecks($ym, $works);
 
@@ -440,6 +447,10 @@ class PartsSaleImportController extends Controller
                 ->with('error', '変換中にエラーが発生しました: ' . $e->getMessage());
         }
 
+        // 変換済みマークを付与（再変換防止）
+        PartsSaleWork::where('processing_ym', $ym)
+            ->update(['converted_at' => now()]);
+
         return redirect()->route('sales.index')
             ->with('success', "{$count}伝票（部品売上）を売上データに変換しました。");
     }
@@ -498,23 +509,11 @@ class PartsSaleImportController extends Controller
             Vehicle::active()->pluck('kisyu_cd')->toArray()
         );
 
-        // 既変換の伝票NOセットを一括取得（伝票NO単位で1売上を作るため伝票NOのみで重複判定）
-        $slipNos = $works->pluck('slip_no')->filter()->unique()->toArray();
-        $existingKeys = [];
-        if (! empty($slipNos)) {
-            $existingKeys = array_flip(
-                Sale::whereIn('import_no', $slipNos)
-                    ->where('is_deleted', false)
-                    ->pluck('import_no')
-                    ->toArray()
-            );
-        }
-
         $errorCount = 0;
 
         DB::transaction(function () use (
             $works, $ym, $closingYm,
-            $validPartnerCodes, $validModelCodes, &$validVehicleCodes, $existingKeys,
+            $validPartnerCodes, $validModelCodes, &$validVehicleCodes,
             &$errorCount
         ) {
             foreach ($works as $work) {
@@ -559,11 +558,6 @@ class PartsSaleImportController extends Controller
                     ]);
                     // 同一コードの重複作成を防ぐためキャッシュに追加
                     $validVehicleCodes[$work->vehicle_kisyu_cd] = true;
-                }
-
-                // 6. 重複チェック（伝票NO単位）
-                if ($work->slip_no && isset($existingKeys[$work->slip_no])) {
-                    $messages[] = "伝票NO[{$work->slip_no}]は既に売上に変換済みです";
                 }
 
                 if (empty($messages)) {

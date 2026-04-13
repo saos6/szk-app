@@ -50,17 +50,19 @@ class PartsSaleWork extends Model
         'vehicle_kisyu_cd',
         'check_flag',
         'check_message',
+        'converted_at',
     ];
 
     protected $casts = [
-        'order_date'  => 'date:Y-m-d',
-        'sale_date'   => 'date:Y-m-d',
-        'order_qty'   => 'decimal:2',
-        'ship_qty'    => 'decimal:2',
-        'unit_price'  => 'decimal:2',
-        'cost_price'  => 'decimal:2',
-        'quantity'    => 'decimal:2',
-        'check_flag'  => 'integer',
+        'order_date'   => 'date:Y-m-d',
+        'sale_date'    => 'date:Y-m-d',
+        'order_qty'    => 'decimal:2',
+        'ship_qty'     => 'decimal:2',
+        'unit_price'   => 'decimal:2',
+        'cost_price'   => 'decimal:2',
+        'quantity'     => 'decimal:2',
+        'check_flag'   => 'integer',
+        'converted_at' => 'datetime',
     ];
 
     public function scopeByYm(Builder $query, string $ym): Builder
