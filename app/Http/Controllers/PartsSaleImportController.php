@@ -136,8 +136,13 @@ class PartsSaleImportController extends Controller
             $redBlackKbn  = trim($cols[17]);
             $shipQty      = (float) trim($cols[7]);
             $quantity     = $redBlackKbn === '2' ? $shipQty * -1 : $shipQty;
-            $modelKisyuCd = mb_strlen($hinban) >= 5 ? mb_substr($hinban, 0, 5) : null;
-            $vehicleKisyuCd = mb_strlen($hinban) >= 10 ? mb_substr($hinban, 5, 5) : null;
+            // 品番13桁: 1-5桁目=機種CD / 6-10桁目+"-"+11-13桁目=車両CD(XXXXX-YYY)
+            $modelKisyuCd   = mb_strlen($hinban) >= 5
+                                  ? mb_substr($hinban, 0, 5)
+                                  : null;
+            $vehicleKisyuCd = mb_strlen($hinban) >= 13
+                                  ? mb_substr($hinban, 5, 5) . '-' . mb_substr($hinban, 10, 3)
+                                  : null;
 
             $rows[] = [
                 'processing_ym'          => $ym,
@@ -324,7 +329,12 @@ class PartsSaleImportController extends Controller
                 ->with('error', 'このデータは既に売上変換済みです。再度変換するには取込を最初からやり直してください。');
         }
 
+        // ── マスタ自動作成（変換対象データのみ） ──
+        $this->autoCreateMasters($works);
+
         // ── バリデーション（チェック実行） ──
+        // マスタ自動作成後に再取得して最新状態でチェック
+        $works = PartsSaleWork::byYm($ym)->orderBy('id')->get();
         $errorCount = $this->runChecks($ym, $works);
 
         if ($errorCount > 0) {
@@ -460,6 +470,60 @@ class PartsSaleImportController extends Controller
     // ────────────────────────────────────────────────
 
     /**
+     * 変換対象ワーク一覧をもとに、存在しない車両機種・車両マスタを自動作成する。
+     * 売上変換処理時のみ呼び出す。
+     */
+    private function autoCreateMasters(\Illuminate\Support\Collection $works): void
+    {
+        // 既存マスタを一括取得してハッシュセット化
+        $existingModelCodes = array_flip(
+            VehicleModel::active()->pluck('kisyu_cd')->toArray()
+        );
+        $existingVehicleCodes = array_flip(
+            Vehicle::active()->pluck('frame_no')->toArray()
+        );
+
+        foreach ($works as $work) {
+            $terminalPrice  = ($work->terminal_price !== null && $work->terminal_price !== '')
+                                  ? (float) $work->terminal_price : null;
+            $stdRetailPrice = ($work->standard_retail_price !== null && $work->standard_retail_price !== '')
+                                  ? (float) $work->standard_retail_price : null;
+
+            // ── 車両機種（商品）マスタ自動作成 ──
+            if ($work->model_kisyu_cd && ! array_key_exists($work->model_kisyu_cd, $existingModelCodes)) {
+                VehicleModel::create([
+                    'kisyu_cd'              => $work->model_kisyu_cd,
+                    'iro_cd'                => '000000',         // 色コード既定値
+                    'kisyu_nm'              => $work->item_name,
+                    'sre_tan'               => ($work->cost_price !== null && (float) $work->cost_price > 0)
+                                                  ? (float) $work->cost_price : null,
+                    'uri_tan'               => ($work->unit_price !== null && (float) $work->unit_price > 0)
+                                                  ? (float) $work->unit_price : null,
+                    'terminal_price'        => $terminalPrice,
+                    'standard_retail_price' => $stdRetailPrice,
+                ]);
+                $existingModelCodes[$work->model_kisyu_cd] = true;
+            }
+
+            // ── 車両（品番）マスタ自動作成 (frame_no = XXXXX-YYY) ──
+            if ($work->vehicle_kisyu_cd && ! array_key_exists($work->vehicle_kisyu_cd, $existingVehicleCodes)) {
+                Vehicle::create([
+                    'kisyu_cd'              => $work->model_kisyu_cd, // 機種コード（VehicleModelとの紐付け）
+                    'frame_no'              => $work->vehicle_kisyu_cd,
+                    'kisyu_nm'              => $work->item_name,
+                    'sre_tan'               => ($work->cost_price !== null && (float) $work->cost_price > 0)
+                                                  ? (float) $work->cost_price : null,
+                    'uri_tan'               => ($work->unit_price !== null && (float) $work->unit_price > 0)
+                                                  ? (float) $work->unit_price : null,
+                    'terminal_price'        => $terminalPrice,
+                    'standard_retail_price' => $stdRetailPrice,
+                ]);
+                $existingVehicleCodes[$work->vehicle_kisyu_cd] = true;
+            }
+        }
+    }
+
+    /**
      * 令和日付文字列（EYYMMD D: E=元号コード3=令和, YY=年, MM=月, DD=日）を
      * YYYY-MM-DD 形式に変換する。変換不可の場合は null を返す。
      */
@@ -506,14 +570,14 @@ class PartsSaleImportController extends Controller
             VehicleModel::active()->pluck('kisyu_cd')->toArray()
         );
         $validVehicleCodes = array_flip(
-            Vehicle::active()->pluck('kisyu_cd')->toArray()
+            Vehicle::active()->pluck('frame_no')->toArray()
         );
 
         $errorCount = 0;
 
         DB::transaction(function () use (
             $works, $ym, $closingYm,
-            $validPartnerCodes, $validModelCodes, &$validVehicleCodes,
+            $validPartnerCodes, $validModelCodes, $validVehicleCodes,
             &$errorCount
         ) {
             foreach ($works as $work) {
@@ -534,30 +598,16 @@ class PartsSaleImportController extends Controller
                     $messages[] = "販売店コード[{$work->partner_code}]の得意先が見つかりません";
                 }
 
-                // 4. 車両機種（商品）マスタ存在チェック（品番1-5桁）― 存在しない場合はエラー
+                // 4. 車両機種（商品）マスタ存在チェック（品番1-5桁）― 存在しない場合はエラー（売上変換時に自動作成）
                 if (! $work->model_kisyu_cd || ! array_key_exists($work->model_kisyu_cd, $validModelCodes)) {
-                    $messages[] = "品番先頭5桁[{$work->model_kisyu_cd}]が車両機種マスタに存在しません";
+                    $messages[] = "品番先頭5桁[{$work->model_kisyu_cd}]の車両機種マスタが存在しません（変換時に自動作成されます）";
                 }
 
-                // 5. 車両（品番）マスタ自動作成（品番6-10桁）― 存在しない場合は自動作成しエラーにしない
+                // 5. 車両（品番）マスタ存在チェック（品番6-13桁 XXXXX-YYY形式）― 存在しない場合はエラー（売上変換時に自動作成）
                 if (! $work->vehicle_kisyu_cd) {
-                    $messages[] = '品番が10桁未満のため車両コードを取得できません';
+                    $messages[] = '品番が13桁未満のため車両コードを取得できません';
                 } elseif (! array_key_exists($work->vehicle_kisyu_cd, $validVehicleCodes)) {
-                    Vehicle::create([
-                        'kisyu_cd'             => $work->vehicle_kisyu_cd,
-                        'frame_no'             => $work->vehicle_kisyu_cd,
-                        'kisyu_nm'             => $work->item_name,
-                        'sre_tan'              => ($work->cost_price !== null && (float) $work->cost_price > 0)
-                                                     ? (float) $work->cost_price : null,
-                        'uri_tan'              => ($work->unit_price !== null && (float) $work->unit_price > 0)
-                                                     ? (float) $work->unit_price : null,
-                        'terminal_price'        => ($work->terminal_price !== null && $work->terminal_price !== '')
-                                                     ? (float) $work->terminal_price : null,
-                        'standard_retail_price' => ($work->standard_retail_price !== null && $work->standard_retail_price !== '')
-                                                     ? (float) $work->standard_retail_price : null,
-                    ]);
-                    // 同一コードの重複作成を防ぐためキャッシュに追加
-                    $validVehicleCodes[$work->vehicle_kisyu_cd] = true;
+                    $messages[] = "品番後8桁[{$work->vehicle_kisyu_cd}]の車両マスタが存在しません（変換時に自動作成されます）";
                 }
 
                 if (empty($messages)) {
@@ -626,11 +676,15 @@ class PartsSaleImportController extends Controller
         $redBlackKbn      = $validated['red_black_kbn'] ?? '0';
         $shipQty          = (float) ($validated['ship_qty'] ?? 0);
 
-        $validated['quantity']          = $redBlackKbn === '2' ? $shipQty * -1 : $shipQty;
-        $validated['model_kisyu_cd']    = mb_strlen($hinban) >= 5 ? mb_substr($hinban, 0, 5) : null;
-        $validated['vehicle_kisyu_cd']  = mb_strlen($hinban) >= 10 ? mb_substr($hinban, 5, 5) : null;
-        $validated['check_flag']        = PartsSaleWork::CHECK_NORMAL;
-        $validated['check_message']     = null;
+        $validated['quantity']         = $redBlackKbn === '2' ? $shipQty * -1 : $shipQty;
+        $validated['model_kisyu_cd']   = mb_strlen($hinban) >= 5
+                                             ? mb_substr($hinban, 0, 5)
+                                             : null;
+        $validated['vehicle_kisyu_cd'] = mb_strlen($hinban) >= 13
+                                             ? mb_substr($hinban, 5, 5) . '-' . mb_substr($hinban, 10, 3)
+                                             : null;
+        $validated['check_flag']       = PartsSaleWork::CHECK_NORMAL;
+        $validated['check_message']    = null;
 
         return $validated;
     }

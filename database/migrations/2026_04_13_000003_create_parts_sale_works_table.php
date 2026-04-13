@@ -37,7 +37,7 @@ return new class extends Migration
             // ── 取込時導出項目 ──
             $table->decimal('quantity', 10, 2)->default(0)->comment('最終数量（赤黒区分適用後）');
             $table->string('model_kisyu_cd', 5)->nullable()->comment('品番1-5桁: 機種コード');
-            $table->string('vehicle_kisyu_cd', 5)->nullable()->comment('品番6-10桁: 車両コード');
+            $table->string('vehicle_kisyu_cd', 10)->nullable()->comment('品番6-13桁: 車両コード(XXXXX-YYY形式)');
 
             // ── 管理項目 ──
             $table->tinyInteger('check_flag')->default(0)->comment('0=正常/1=エラー');
