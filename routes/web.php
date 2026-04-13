@@ -74,7 +74,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('warehouses/{warehouse}/replicate', [WarehouseController::class, 'replicate'])->name('warehouses.replicate');
     Route::resource('warehouses', WarehouseController::class);
 
-    // 部品売上一括取込
+    // 部品売上一括取込（静的ルートを動的ルートより前に定義）
+    Route::get('parts-sale-import/export', [PartsSaleImportController::class, 'export'])->name('parts-sale-import.export');
+    Route::post('parts-sale-import/check', [PartsSaleImportController::class, 'check'])->name('parts-sale-import.check');
+    Route::delete('parts-sale-import/bulk-destroy', [PartsSaleImportController::class, 'bulkDestroy'])->name('parts-sale-import.bulk-destroy');
     Route::get('parts-sale-import', [PartsSaleImportController::class, 'index'])->name('parts-sale-import.index');
     Route::post('parts-sale-import/upload', [PartsSaleImportController::class, 'upload'])->name('parts-sale-import.upload');
     Route::post('parts-sale-import/convert', [PartsSaleImportController::class, 'convert'])->name('parts-sale-import.convert');

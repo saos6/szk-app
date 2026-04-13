@@ -9,6 +9,7 @@ use App\Models\SaleItem;
 use App\Models\SystemSetting;
 use App\Models\VehicleModel;
 use App\Models\Vehicle;
+use App\Exports\PartsSaleWorksExport;
 use App\Services\InventoryService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PartsSaleImportController extends Controller
 {
@@ -36,19 +39,24 @@ class PartsSaleImportController extends Controller
 
     public function index(Request $request): Response
     {
-        $ym    = $request->input('processing_ym', now()->format('Y-m'));
-        $works = PartsSaleWork::byYm($ym)
+        $ym      = $request->input('processing_ym', now()->format('Y-m'));
+        $perPage = in_array((int) $request->get('per_page'), [10, 25, 50, 100]) ? (int) $request->get('per_page') : 50;
+
+        $baseQuery = PartsSaleWork::byYm($ym);
+        $total     = (clone $baseQuery)->count();
+        $errors    = (clone $baseQuery)->where('check_flag', PartsSaleWork::CHECK_ERROR)->count();
+
+        $works = (clone $baseQuery)
             ->orderBy('sale_date')
             ->orderBy('slip_no')
-            ->get();
-
-        $total  = $works->count();
-        $errors = $works->where('check_flag', PartsSaleWork::CHECK_ERROR)->count();
+            ->paginate($perPage)
+            ->withQueryString();
 
         return Inertia::render('PartsSaleImport/Index', [
             'works'        => $works,
             'processingYm' => $ym,
             'summary'      => ['total' => $total, 'errors' => $errors, 'ok' => $total - $errors],
+            'filters'      => ['per_page' => (string) $perPage],
         ]);
     }
 
@@ -217,6 +225,67 @@ class PartsSaleImportController extends Controller
 
         return redirect()->route('parts-sale-import.index', ['processing_ym' => $ym])
             ->with('success', '行を削除しました。');
+    }
+
+    // ────────────────────────────────────────────────
+    // 照合（チェックのみ実行）
+    // ────────────────────────────────────────────────
+
+    public function check(Request $request): RedirectResponse
+    {
+        $request->validate(['processing_ym' => ['required', 'date_format:Y-m']]);
+        $ym = $request->input('processing_ym');
+
+        $works = PartsSaleWork::byYm($ym)->orderBy('id')->get();
+        if ($works->isEmpty()) {
+            return redirect()->route('parts-sale-import.index', ['processing_ym' => $ym])
+                ->with('error', '対象データがありません。先に取込を実行してください。');
+        }
+
+        $errorCount = $this->runChecks($ym, $works);
+        $total      = $works->count();
+
+        if ($errorCount > 0) {
+            return redirect()->route('parts-sale-import.index', ['processing_ym' => $ym])
+                ->with('error', sprintf('照合完了。%d件中%d件にエラーがあります。エラー行を確認・修正してください。', $total, $errorCount));
+        }
+
+        return redirect()->route('parts-sale-import.index', ['processing_ym' => $ym])
+            ->with('success', sprintf('照合完了。%d件全件正常です。', $total));
+    }
+
+    // ────────────────────────────────────────────────
+    // 一括削除
+    // ────────────────────────────────────────────────
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $request->validate(['processing_ym' => ['required', 'date_format:Y-m']]);
+        $ym    = $request->input('processing_ym');
+        $count = PartsSaleWork::where('processing_ym', $ym)->count();
+
+        if ($count === 0) {
+            return redirect()->route('parts-sale-import.index', ['processing_ym' => $ym])
+                ->with('error', '削除対象のデータがありません。');
+        }
+
+        PartsSaleWork::where('processing_ym', $ym)->delete();
+
+        return redirect()->route('parts-sale-import.index', ['processing_ym' => $ym])
+            ->with('success', sprintf('%s のデータ %d件を一括削除しました。', $ym, $count));
+    }
+
+    // ────────────────────────────────────────────────
+    // Excel出力
+    // ────────────────────────────────────────────────
+
+    public function export(Request $request): BinaryFileResponse
+    {
+        $request->validate(['processing_ym' => ['required', 'date_format:Y-m']]);
+        $ym       = $request->input('processing_ym');
+        $filename = 'parts_sale_works_' . str_replace('-', '', $ym) . '.xlsx';
+
+        return Excel::download(new PartsSaleWorksExport($ym), $filename);
     }
 
     // ────────────────────────────────────────────────

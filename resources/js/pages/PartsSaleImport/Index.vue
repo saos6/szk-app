@@ -5,9 +5,11 @@ import {
     ArrowLeftRight,
     CheckCircle2,
     Columns3,
+    Download,
     FileUp,
     Pencil,
     Plus,
+    RefreshCw,
     Search,
     Trash2,
 } from 'lucide-vue-next';
@@ -84,10 +86,26 @@ interface Work {
     check_message: string | null;
 }
 
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
+interface Paginator {
+    data: Work[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    links: PaginationLink[];
+}
+
 interface Props {
-    works: Work[];
+    works: Paginator;
     processingYm: string;
     summary: { total: number; errors: number; ok: number };
+    filters: { per_page: string };
 }
 
 const props = defineProps<Props>();
@@ -207,8 +225,32 @@ const visibleKeys = computed(() =>
     (Object.keys(columns.value) as ColumnKey[]).filter((k) => columns.value[k].visible),
 );
 
-// ── 処理年月 ──
+// ── 処理年月 / ページング ──
 const searchYm = ref(props.processingYm);
+const perPage  = ref(props.filters.per_page ?? '50');
+
+function doSearch() {
+    router.get(
+        PartsSaleImportController.index.url(),
+        { processing_ym: searchYm.value, per_page: perPage.value },
+        { preserveState: false, replace: true },
+    );
+}
+
+function handlePerPageChange(value: string) {
+    perPage.value = value;
+    router.get(
+        PartsSaleImportController.index.url(),
+        { processing_ym: props.processingYm, per_page: value },
+        { preserveState: false, replace: true },
+    );
+}
+
+function paginationLabel(label: string): string {
+    if (label.includes('Previous') || label === '&laquo; Previous') return '«';
+    if (label.includes('Next') || label === 'Next &raquo;') return '»';
+    return label;
+}
 
 // ── CSV取込フォーム ──
 const uploadForm = useForm({
@@ -230,13 +272,12 @@ function doUpload() {
     uploadForm.post(PartsSaleImportController.upload.url());
 }
 
-// ── 検索 ──
-function doSearch() {
-    router.get(
-        PartsSaleImportController.index.url(),
-        { processing_ym: searchYm.value },
-        { preserveState: false, replace: true },
-    );
+// ── 照合フォーム ──
+const checkForm = useForm({ processing_ym: props.processingYm });
+
+function doCheck() {
+    checkForm.processing_ym = props.processingYm;
+    checkForm.post(PartsSaleImportController.check.url());
 }
 
 // ── 売上変換処理 ──
@@ -253,9 +294,29 @@ function doConvert() {
     convertForm.post(PartsSaleImportController.convert.url());
 }
 
+// ── 一括削除フォーム ──
+const bulkDestroyForm = useForm({ processing_ym: props.processingYm });
+
+function doBulkDestroy() {
+    if (
+        !confirm(
+            `${fmtYm(props.processingYm)} の部品売上データ ${props.summary.total}件を全て削除します。\n\nよろしいですか？`,
+        )
+    )
+        return;
+    bulkDestroyForm.processing_ym = props.processingYm;
+    bulkDestroyForm.delete(PartsSaleImportController.bulkDestroy.url());
+}
+
+// ── Excel出力 ──
+function doExport() {
+    const params = new URLSearchParams({ processing_ym: props.processingYm });
+    window.location.href = `${PartsSaleImportController.exportMethod.url()}?${params}`;
+}
+
 // ── ワーク行 CRUD ──
 const dialogOpen = ref(false);
-const editingId = ref<number | null>(null);
+const editingId  = ref<number | null>(null);
 
 const workForm = useForm({
     processing_ym:         '',
@@ -446,26 +507,36 @@ const numericColumns = new Set<ColumnKey>([
                             class="w-72"
                             @change="handleFileChange"
                         />
-                        <p
-                            v-if="uploadForm.errors.csv_file"
-                            class="text-xs text-destructive"
-                        >
+                        <p v-if="uploadForm.errors.csv_file" class="text-xs text-destructive">
                             {{ uploadForm.errors.csv_file }}
                         </p>
                     </div>
 
-                    <!-- ボタン群 -->
-                    <div class="flex gap-2 pb-0.5">
+                    <!-- ボタン群: 取込 / 検索 / 照合 / 売上変換処理 -->
+                    <div class="flex flex-wrap gap-2 pb-0.5">
+                        <!-- 取込 -->
                         <Button @click="doUpload" :disabled="uploadForm.processing">
                             <FileUp class="mr-1 h-4 w-4" />
                             {{ uploadForm.processing ? '取込中...' : '取込' }}
                         </Button>
 
+                        <!-- 検索 -->
                         <Button @click="doSearch" variant="secondary">
-                            <Search class="mr-1 h-4 w-4" />
-                            検索
+                            <Search class="mr-1 h-4 w-4" />検索
                         </Button>
 
+                        <!-- 照合 -->
+                        <Button
+                            @click="doCheck"
+                            :disabled="checkForm.processing || summary.total === 0"
+                            variant="outline"
+                            class="border-blue-400 text-blue-700 hover:bg-blue-50 disabled:opacity-50"
+                        >
+                            <RefreshCw class="mr-1 h-4 w-4" :class="{ 'animate-spin': checkForm.processing }" />
+                            {{ checkForm.processing ? '照合中...' : '照合' }}
+                        </Button>
+
+                        <!-- 売上変換処理 -->
                         <Button
                             @click="doConvert"
                             :disabled="convertForm.processing || summary.total === 0 || summary.errors > 0"
@@ -488,21 +559,45 @@ const numericColumns = new Set<ColumnKey>([
                     <CheckCircle2 class="h-4 w-4" />
                     正常: <strong>{{ summary.ok }}</strong> 件
                 </span>
-                <span
-                    v-if="summary.errors > 0"
-                    class="flex items-center gap-1 text-destructive"
-                >
+                <span v-if="summary.errors > 0" class="flex items-center gap-1 text-destructive">
                     <AlertCircle class="h-4 w-4" />
-                    エラー: <strong>{{ summary.errors }}</strong> 件（修正後に売上変換を実行してください）
+                    エラー: <strong>{{ summary.errors }}</strong> 件（照合または修正後に売上変換を実行してください）
                 </span>
             </div>
 
-            <!-- テーブルヘッダー -->
-            <div class="flex items-center justify-between">
-                <span class="text-sm font-medium text-muted-foreground">
-                    {{ fmtYm(processingYm) }} のデータ
-                </span>
+            <!-- テーブルヘッダー行 -->
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span class="font-medium">{{ fmtYm(processingYm) }} のデータ</span>
+                    <!-- 件数/ページ -->
+                    <Select :model-value="perPage" @update:model-value="handlePerPageChange">
+                        <SelectTrigger class="h-8 w-24">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="10">10件</SelectItem>
+                            <SelectItem value="25">25件</SelectItem>
+                            <SelectItem value="50">50件</SelectItem>
+                            <SelectItem value="100">100件</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
                 <div class="flex items-center gap-2">
+                    <!-- Excel出力 -->
+                    <Button variant="outline" size="sm" @click="doExport" :disabled="summary.total === 0">
+                        <Download class="mr-1 h-4 w-4" />Excel出力
+                    </Button>
+                    <!-- 一括削除 -->
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        :disabled="bulkDestroyForm.processing || summary.total === 0"
+                        class="border-destructive text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                        @click="doBulkDestroy"
+                    >
+                        <Trash2 class="mr-1 h-4 w-4" />
+                        {{ bulkDestroyForm.processing ? '削除中...' : '一括削除' }}
+                    </Button>
                     <!-- 列表示切替 -->
                     <DropdownMenu>
                         <DropdownMenuTrigger as-child>
@@ -523,6 +618,7 @@ const numericColumns = new Set<ColumnKey>([
                             </DropdownMenuCheckboxItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
+                    <!-- 行追加 -->
                     <Button size="sm" @click="openAddDialog">
                         <Plus class="mr-1 h-4 w-4" />行追加
                     </Button>
@@ -548,7 +644,7 @@ const numericColumns = new Set<ColumnKey>([
                     </thead>
                     <tbody>
                         <tr
-                            v-for="work in works"
+                            v-for="work in works.data"
                             :key="work.id"
                             class="border-t transition-colors"
                             :class="
@@ -582,9 +678,7 @@ const numericColumns = new Set<ColumnKey>([
                                     :title="work.check_message ?? ''"
                                 >
                                     <AlertCircle class="h-3.5 w-3.5 shrink-0" />
-                                    <span class="max-w-[200px] truncate">{{
-                                        work.check_message
-                                    }}</span>
+                                    <span class="max-w-[200px] truncate">{{ work.check_message }}</span>
                                 </span>
                             </td>
                             <td class="px-3 py-2">
@@ -610,7 +704,7 @@ const numericColumns = new Set<ColumnKey>([
                                 </div>
                             </td>
                         </tr>
-                        <tr v-if="works.length === 0">
+                        <tr v-if="works.data.length === 0">
                             <td
                                 :colspan="visibleKeys.length + 2"
                                 class="px-4 py-10 text-center text-muted-foreground"
@@ -621,15 +715,34 @@ const numericColumns = new Set<ColumnKey>([
                     </tbody>
                 </table>
             </div>
+
+            <!-- ページング -->
+            <div v-if="works.last_page > 1" class="flex items-center justify-center gap-1">
+                <template v-for="link in works.links" :key="link.label">
+                    <Button
+                        v-if="link.url"
+                        variant="outline"
+                        size="sm"
+                        :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': link.active }"
+                        @click="router.visit(link.url)"
+                    >{{ paginationLabel(link.label) }}</Button>
+                    <Button v-else variant="outline" size="sm" disabled>
+                        {{ paginationLabel(link.label) }}
+                    </Button>
+                </template>
+            </div>
+
+            <!-- ページ情報 -->
+            <p v-if="summary.total > 0" class="text-center text-xs text-muted-foreground">
+                {{ summary.total }}件中 {{ (works.current_page - 1) * works.per_page + 1 }}〜{{ Math.min(works.current_page * works.per_page, summary.total) }}件表示
+            </p>
         </div>
 
         <!-- 追加・編集ダイアログ -->
         <Dialog v-model:open="dialogOpen">
             <DialogContent class="max-h-[90vh] max-w-4xl overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>{{
-                        editingId !== null ? '行を編集' : '行を追加'
-                    }}</DialogTitle>
+                    <DialogTitle>{{ editingId !== null ? '行を編集' : '行を追加' }}</DialogTitle>
                 </DialogHeader>
                 <form @submit.prevent="submitWorkForm" class="flex flex-col gap-4">
                     <div class="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
@@ -638,74 +751,56 @@ const numericColumns = new Set<ColumnKey>([
                         <div class="col-span-full border-b pb-1">
                             <span class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">基本情報</span>
                         </div>
-
-                        <!-- 処理年月 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>処理年月 <span class="text-destructive">*</span></Label>
                             <Input type="month" v-model="workForm.processing_ym" />
                             <p v-if="workForm.errors.processing_ym" class="text-xs text-destructive">{{ workForm.errors.processing_ym }}</p>
                         </div>
-                        <!-- 月次区分 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>月次区分</Label>
                             <Input v-model="workForm.monthly_f_kbn" maxlength="5" />
-                            <p v-if="workForm.errors.monthly_f_kbn" class="text-xs text-destructive">{{ workForm.errors.monthly_f_kbn }}</p>
                         </div>
-                        <!-- 制御コード -->
                         <div class="flex flex-col gap-1.5">
                             <Label>制御コード</Label>
                             <Input v-model="workForm.control_code" maxlength="5" />
-                            <p v-if="workForm.errors.control_code" class="text-xs text-destructive">{{ workForm.errors.control_code }}</p>
                         </div>
-                        <!-- 営業所コード -->
                         <div class="flex flex-col gap-1.5">
                             <Label>営業所CD</Label>
                             <Input v-model="workForm.office_code" maxlength="10" />
-                            <p v-if="workForm.errors.office_code" class="text-xs text-destructive">{{ workForm.errors.office_code }}</p>
                         </div>
 
                         <!-- ── 伝票・受注情報 ── -->
                         <div class="col-span-full border-b pb-1 pt-2">
                             <span class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">伝票・受注情報</span>
                         </div>
-
-                        <!-- 品番 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>品番 <span class="text-destructive">*</span></Label>
                             <Input v-model="workForm.hinban" maxlength="20" placeholder="13桁品番" class="font-mono" />
                             <p v-if="workForm.errors.hinban" class="text-xs text-destructive">{{ workForm.errors.hinban }}</p>
                         </div>
-                        <!-- 伝票NO -->
                         <div class="flex flex-col gap-1.5">
                             <Label>伝票NO <span class="text-destructive">*</span></Label>
                             <Input v-model="workForm.slip_no" maxlength="20" />
                             <p v-if="workForm.errors.slip_no" class="text-xs text-destructive">{{ workForm.errors.slip_no }}</p>
                         </div>
-                        <!-- 受注日 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>受注日</Label>
                             <Input type="date" v-model="workForm.order_date" />
-                            <p v-if="workForm.errors.order_date" class="text-xs text-destructive">{{ workForm.errors.order_date }}</p>
                         </div>
-                        <!-- 受注数 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>受注数</Label>
                             <Input type="number" step="0.01" min="0" v-model="workForm.order_qty" />
-                            <p v-if="workForm.errors.order_qty" class="text-xs text-destructive">{{ workForm.errors.order_qty }}</p>
                         </div>
-                        <!-- 売上日 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>売上日 <span class="text-destructive">*</span></Label>
                             <Input type="date" v-model="workForm.sale_date" />
                             <p v-if="workForm.errors.sale_date" class="text-xs text-destructive">{{ workForm.errors.sale_date }}</p>
                         </div>
-                        <!-- 出荷数 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>出荷数 <span class="text-destructive">*</span></Label>
                             <Input type="number" step="0.01" v-model="workForm.ship_qty" />
                             <p v-if="workForm.errors.ship_qty" class="text-xs text-destructive">{{ workForm.errors.ship_qty }}</p>
                         </div>
-                        <!-- 赤黒区分 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>赤黒区分</Label>
                             <Select v-model="workForm.red_black_kbn">
@@ -721,158 +816,112 @@ const numericColumns = new Set<ColumnKey>([
                         <div class="col-span-full border-b pb-1 pt-2">
                             <span class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">価格情報</span>
                         </div>
-
-                        <!-- 販売単価 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>販売単価 <span class="text-destructive">*</span></Label>
                             <Input type="number" step="0.01" min="0" v-model="workForm.unit_price" />
                             <p v-if="workForm.errors.unit_price" class="text-xs text-destructive">{{ workForm.errors.unit_price }}</p>
                         </div>
-                        <!-- 売上原価 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>売上原価</Label>
                             <Input type="number" step="0.01" min="0" v-model="workForm.cost_price" />
-                            <p v-if="workForm.errors.cost_price" class="text-xs text-destructive">{{ workForm.errors.cost_price }}</p>
                         </div>
-                        <!-- 端末価格 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>端末価格</Label>
                             <Input v-model="workForm.terminal_price" maxlength="20" />
-                            <p v-if="workForm.errors.terminal_price" class="text-xs text-destructive">{{ workForm.errors.terminal_price }}</p>
                         </div>
-                        <!-- 標準小売価格 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>標準小売価格</Label>
                             <Input v-model="workForm.standard_retail_price" maxlength="20" />
-                            <p v-if="workForm.errors.standard_retail_price" class="text-xs text-destructive">{{ workForm.errors.standard_retail_price }}</p>
                         </div>
-                        <!-- LES比率 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>LES比率</Label>
                             <Input v-model="workForm.les_rate" maxlength="10" />
-                            <p v-if="workForm.errors.les_rate" class="text-xs text-destructive">{{ workForm.errors.les_rate }}</p>
                         </div>
 
                         <!-- ── 得意先・請求情報 ── -->
                         <div class="col-span-full border-b pb-1 pt-2">
                             <span class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">得意先・請求情報</span>
                         </div>
-
-                        <!-- 販売店コード（半角） -->
                         <div class="flex flex-col gap-1.5">
                             <Label>販売店CD(半角) <span class="text-destructive">*</span></Label>
                             <Input v-model="workForm.partner_code" maxlength="20" />
                             <p v-if="workForm.errors.partner_code" class="text-xs text-destructive">{{ workForm.errors.partner_code }}</p>
                         </div>
-                        <!-- 販売店コード（全角） -->
                         <div class="flex flex-col gap-1.5">
                             <Label>販売店CD(全角)</Label>
                             <Input v-model="workForm.dealer_code" maxlength="20" />
-                            <p v-if="workForm.errors.dealer_code" class="text-xs text-destructive">{{ workForm.errors.dealer_code }}</p>
                         </div>
-                        <!-- 売上区分 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>売上区分</Label>
                             <Input v-model="workForm.sale_kbn" maxlength="5" />
-                            <p v-if="workForm.errors.sale_kbn" class="text-xs text-destructive">{{ workForm.errors.sale_kbn }}</p>
                         </div>
-                        <!-- 請求区分 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>請求区分</Label>
                             <Input v-model="workForm.invoice_kbn" maxlength="5" />
-                            <p v-if="workForm.errors.invoice_kbn" class="text-xs text-destructive">{{ workForm.errors.invoice_kbn }}</p>
                         </div>
-                        <!-- 請求月区分 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>請求月区分</Label>
                             <Input v-model="workForm.invoice_m_kbn" maxlength="5" />
-                            <p v-if="workForm.errors.invoice_m_kbn" class="text-xs text-destructive">{{ workForm.errors.invoice_m_kbn }}</p>
                         </div>
 
                         <!-- ── 出庫・担当情報 ── -->
                         <div class="col-span-full border-b pb-1 pt-2">
                             <span class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">出庫・担当情報</span>
                         </div>
-
-                        <!-- 出庫元 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>出庫元</Label>
                             <Input v-model="workForm.dispatch_source" maxlength="20" />
-                            <p v-if="workForm.errors.dispatch_source" class="text-xs text-destructive">{{ workForm.errors.dispatch_source }}</p>
                         </div>
-                        <!-- 担当コード -->
                         <div class="flex flex-col gap-1.5">
                             <Label>担当CD</Label>
                             <Input v-model="workForm.staff_code" maxlength="20" />
-                            <p v-if="workForm.errors.staff_code" class="text-xs text-destructive">{{ workForm.errors.staff_code }}</p>
                         </div>
-                        <!-- ランクCD -->
                         <div class="flex flex-col gap-1.5">
                             <Label>ランクCD</Label>
                             <Input v-model="workForm.rank_cd" maxlength="5" />
-                            <p v-if="workForm.errors.rank_cd" class="text-xs text-destructive">{{ workForm.errors.rank_cd }}</p>
                         </div>
-                        <!-- 初回出荷区分 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>初回区分</Label>
                             <Input v-model="workForm.first_ship_kbn" maxlength="5" />
-                            <p v-if="workForm.errors.first_ship_kbn" class="text-xs text-destructive">{{ workForm.errors.first_ship_kbn }}</p>
                         </div>
-                        <!-- 内訳コード -->
                         <div class="flex flex-col gap-1.5">
                             <Label>内訳CD</Label>
                             <Input v-model="workForm.breakdown_code" maxlength="10" />
-                            <p v-if="workForm.errors.breakdown_code" class="text-xs text-destructive">{{ workForm.errors.breakdown_code }}</p>
                         </div>
-                        <!-- 公開区分 -->
                         <div class="flex flex-col gap-1.5">
                             <Label>公開区分</Label>
                             <Input v-model="workForm.open_kbn" maxlength="5" />
-                            <p v-if="workForm.errors.open_kbn" class="text-xs text-destructive">{{ workForm.errors.open_kbn }}</p>
                         </div>
 
                         <!-- ── 商品情報 ── -->
                         <div class="col-span-full border-b pb-1 pt-2">
                             <span class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">商品情報</span>
                         </div>
-
-                        <!-- 品目コード -->
                         <div class="flex flex-col gap-1.5">
                             <Label>品目CD</Label>
                             <Input v-model="workForm.item_code" maxlength="20" />
-                            <p v-if="workForm.errors.item_code" class="text-xs text-destructive">{{ workForm.errors.item_code }}</p>
                         </div>
-                        <!-- モデルグループ -->
                         <div class="flex flex-col gap-1.5">
                             <Label>モデルグループ</Label>
                             <Input v-model="workForm.model_group" maxlength="10" />
-                            <p v-if="workForm.errors.model_group" class="text-xs text-destructive">{{ workForm.errors.model_group }}</p>
                         </div>
-                        <!-- 品名 -->
                         <div class="col-span-2 flex flex-col gap-1.5">
                             <Label>品名</Label>
                             <Input v-model="workForm.item_name" maxlength="200" />
-                            <p v-if="workForm.errors.item_name" class="text-xs text-destructive">{{ workForm.errors.item_name }}</p>
                         </div>
 
                         <!-- ── その他 ── -->
                         <div class="col-span-full border-b pb-1 pt-2">
                             <span class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">その他</span>
                         </div>
-
-                        <!-- 整備注文NO -->
                         <div class="col-span-2 flex flex-col gap-1.5">
                             <Label>整備注文NO</Label>
                             <Input v-model="workForm.maintenance_no" maxlength="100" />
-                            <p v-if="workForm.errors.maintenance_no" class="text-xs text-destructive">{{ workForm.errors.maintenance_no }}</p>
                         </div>
-                        <!-- フィラー -->
                         <div class="col-span-2 flex flex-col gap-1.5">
                             <Label>フィラー</Label>
                             <Input v-model="workForm.filler" maxlength="100" />
-                            <p v-if="workForm.errors.filler" class="text-xs text-destructive">{{ workForm.errors.filler }}</p>
                         </div>
-
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="outline" @click="dialogOpen = false">キャンセル</Button>
