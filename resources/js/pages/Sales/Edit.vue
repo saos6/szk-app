@@ -37,6 +37,7 @@ interface SaleItemData {
     unit: string | null;
     purchase_price: string;
     selling_price: string;
+    terminal_price: string | null;
     tax_rate: string;
     sale_amount: string;
     cogs_amount: string;
@@ -100,6 +101,7 @@ const form = useForm({
         unit:        item.unit ?? '台',
         purchase_price:     item.purchase_price,
         selling_price:     item.selling_price,
+        terminal_price:    item.terminal_price ?? '',
         tax_rate:    item.tax_rate,
         sale_amount: parseFloat(item.sale_amount) || 0,
         cogs_amount: parseFloat(item.cogs_amount) || 0,
