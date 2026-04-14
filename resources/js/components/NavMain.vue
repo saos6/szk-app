@@ -47,7 +47,6 @@ function isChildActive(item: NavItem): boolean {
                     <SidebarMenuItem>
                         <CollapsibleTrigger as-child>
                             <SidebarMenuButton
-                                :tooltip="item.title"
                                 :is-active="isChildActive(item)"
                             >
                                 <component :is="item.icon" v-if="item.icon" />

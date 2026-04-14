@@ -169,7 +169,8 @@ class PaymentController extends Controller
         abort_if($payment->is_deleted, 404);
         $payment->load(['customer', 'employee', 'items']);
 
-        $pdf = Pdf::loadView('pdf.payment', compact('payment'))
+        $setting = SystemSetting::instance();
+        $pdf = Pdf::loadView('pdf.payment', compact('payment', 'setting'))
             ->setPaper('a4', 'portrait');
 
         $filename = '入金確認書_'.$payment->payment_number.'.pdf';

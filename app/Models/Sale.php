@@ -14,6 +14,11 @@ class Sale extends Model
         'parts'   => '部品',
     ];
 
+    public const TRANSACTION_TYPES = [
+        'cash'   => '現金',
+        'credit' => '売掛',
+    ];
+
     public const STATUSES = [
         'draft'     => '下書き',
         'recorded'  => '計上',
@@ -35,6 +40,7 @@ class Sale extends Model
         'subject',
         'status',
         'sale_type',
+        'transaction_type',
         'subtotal',
         'tax_amount',
         'total_amount',

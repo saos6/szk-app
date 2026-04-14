@@ -51,6 +51,7 @@ class BillingClosingService
             ->whereIn('customer_id', $customerIds)
             ->whereNull('billing_balance_id')
             ->where('status', 'recorded')
+            ->where('transaction_type', 'credit')
             ->where('sale_date', '<=', $date->toDateString())
             ->update(['status' => 'invoiced']);
 
@@ -278,6 +279,7 @@ class BillingClosingService
             ->where('customer_id', $customer->id)
             ->whereNull('billing_balance_id')
             ->where('status', $saleStatus)
+            ->where('transaction_type', 'credit')
             ->where('sale_date', '<=', $date->toDateString())
             ->get();
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>納品書 {{ $sale->sale_number }}</title>
+<title>売上伝票 {{ $sale->sale_number }}</title>
 <style>
     @font-face {
         font-family: 'NotoSansJP';
@@ -25,6 +25,7 @@
         background: #fff;
         padding: 20mm 18mm 20mm 18mm;
     }
+    .page-break { page-break-after: always; }
     /* ─── ヘッダーエリア ─── */
     .doc-title {
         font-size: 22px;
@@ -122,7 +123,10 @@
 </head>
 <body>
 
-<div class="doc-title">納　品　書</div>
+@foreach($docTypes as $docIndex => $doc)
+<div @if($docIndex < count($docTypes) - 1) class="page-break" @endif>
+
+<div class="doc-title">{{ $doc['title'] }}</div>
 
 <table class="header-body" cellspacing="0" cellpadding="0">
 <tr>
@@ -168,6 +172,12 @@
                 <td class="meta-label">売上番号</td>
                 <td class="meta-value sale-number">{{ $sale->sale_number }}</td>
             </tr>
+            @if($sale->transaction_type)
+            <tr>
+                <td class="meta-label">取引区分</td>
+                <td class="meta-value">{{ \App\Models\Sale::TRANSACTION_TYPES[$sale->transaction_type] ?? $sale->transaction_type }}</td>
+            </tr>
+            @endif
             @if($sale->sale_type)
             <tr>
                 <td class="meta-label">売上区分</td>
@@ -258,6 +268,9 @@
     <div class="remarks-body">{{ $sale->remarks }}</div>
 </div>
 @endif
+
+</div>
+@endforeach
 
 </body>
 </html>

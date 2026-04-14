@@ -46,6 +46,7 @@ interface Prefill {
     customer_id?: string;
     employee_id?: string;
     sale_type?: string;
+    transaction_type?: string;
     sale_date?: string;
     order_date?: string;
     delivery_date?: string;
@@ -65,6 +66,7 @@ const props = defineProps<{
     warehouses: Warehouse[];
     statuses: Record<string, string>;
     saleTypes: Record<string, string>;
+    transactionTypes: Record<string, string>;
     prefill?: Prefill;
 }>();
 
@@ -102,9 +104,10 @@ const form = useForm({
     delivery_date:   p?.delivery_date ?? '',
     partner_slip_no: p?.partner_slip_no ?? '',
     subject:         p?.subject ?? '',
-    status:          'recorded',
-    sale_type:       p?.sale_type ?? '',
-    remarks:         p?.remarks ?? '',
+    status:           'recorded',
+    sale_type:        p?.sale_type ?? '',
+    transaction_type: p?.transaction_type ?? '',
+    remarks:          p?.remarks ?? '',
     items: p?.items?.length ? p.items : [{ ...defaultItem }],
 });
 
@@ -134,6 +137,7 @@ function submit() {
                 :warehouses="warehouses"
                 :statuses="statuses"
                 :sale-types="saleTypes"
+                :transaction-types="transactionTypes"
                 :cancel-href="SaleController.index.url()"
                 submit-label="登録"
                 processing-label="登録中..."

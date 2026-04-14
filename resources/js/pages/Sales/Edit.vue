@@ -55,6 +55,7 @@ interface SaleData {
     subject: string;
     status: string;
     sale_type: string | null;
+    transaction_type: string | null;
     remarks: string | null;
     items: SaleItemData[];
 }
@@ -70,6 +71,7 @@ const props = defineProps<{
     warehouses: Warehouse[];
     statuses: Record<string, string>;
     saleTypes: Record<string, string>;
+    transactionTypes: Record<string, string>;
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -88,8 +90,9 @@ const form = useForm({
     partner_slip_no: props.sale.partner_slip_no ?? '',
     subject:         props.sale.subject,
     status:          props.sale.status,
-    sale_type:       props.sale.sale_type ?? '',
-    remarks:         props.sale.remarks ?? '',
+    sale_type:        props.sale.sale_type ?? '',
+    transaction_type: props.sale.transaction_type ?? '',
+    remarks:          props.sale.remarks ?? '',
     items: props.sale.items.map((item) => ({
         vehicle_id:  item.vehicle_id,
         model_code:       item.model_code ?? '',
@@ -133,6 +136,7 @@ function submit() {
                 :warehouses="warehouses"
                 :statuses="statuses"
                 :sale-types="saleTypes"
+                :transaction-types="transactionTypes"
                 :cancel-href="SaleController.index.url()"
                 submit-label="更新"
                 processing-label="更新中..."

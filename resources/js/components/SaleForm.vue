@@ -72,6 +72,7 @@ interface FormData {
     subject: string;
     status: string;
     sale_type: string;
+    transaction_type: string;
     remarks: string;
     items: SaleItem[];
     [key: string]: unknown;
@@ -86,6 +87,7 @@ const props = defineProps<{
     warehouses: Warehouse[];
     statuses: Record<string, string>;
     saleTypes: Record<string, string>;
+    transactionTypes: Record<string, string>;
     cancelHref: string;
     submitLabel: string;
     processingLabel: string;
@@ -399,6 +401,34 @@ function getItemError(index: number, field: string): string | undefined {
                         class="text-xs text-destructive"
                     >
                         {{ form.errors.sale_type }}
+                    </p>
+                </div>
+
+                <!-- 取引区分 -->
+                <div class="grid gap-1.5">
+                    <Label>取引区分</Label>
+                    <Select
+                        :model-value="form.transaction_type || '__none__'"
+                        @update:model-value="(v) => (form.transaction_type = v === '__none__' ? '' : v)"
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="未設定" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="__none__">未設定</SelectItem>
+                            <SelectItem
+                                v-for="(label, key) in transactionTypes"
+                                :key="key"
+                                :value="key"
+                                >{{ label }}</SelectItem
+                            >
+                        </SelectContent>
+                    </Select>
+                    <p
+                        v-if="form.errors.transaction_type"
+                        class="text-xs text-destructive"
+                    >
+                        {{ form.errors.transaction_type }}
                     </p>
                 </div>
 

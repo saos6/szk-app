@@ -226,7 +226,8 @@ class PurchaseController extends Controller
             ->map(fn ($items) => $items->sum(fn ($i) => round((float) $i->purchase_amount * (int) $i->tax_rate / 100, 0)))
             ->sortKeys();
 
-        $pdf = Pdf::loadView('pdf.purchase', compact('purchase', 'taxBreakdown'))
+        $setting = SystemSetting::instance();
+        $pdf = Pdf::loadView('pdf.purchase', compact('purchase', 'taxBreakdown', 'setting'))
             ->setPaper('a4', 'portrait');
 
         $filename = '仕入書_'.$purchase->purchase_number.'.pdf';

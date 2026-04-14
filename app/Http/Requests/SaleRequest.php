@@ -26,6 +26,7 @@ class SaleRequest extends FormRequest
             'subject'        => ['required', 'string', 'max:200'],
             'status'         => ['required', Rule::in(array_keys(Sale::STATUSES))],
             'sale_type'      => ['nullable', Rule::in(array_keys(Sale::SALE_TYPES))],
+            'transaction_type' => ['nullable', Rule::in(array_keys(Sale::TRANSACTION_TYPES))],
             'remarks'        => ['nullable', 'string'],
 
             'items'                    => ['required', 'array', 'min:1'],

@@ -48,6 +48,8 @@
     .subject-row { margin-top: 10px; font-size: 13px; }
     .subject-label { color: #555; margin-right: 6px; }
     .from-block { width: 44%; text-align: right; }
+    .company-info { font-size: 10px; color: #333; line-height: 1.6; margin-bottom: 8px; }
+    .company-name-main { font-size: 13px; font-weight: bold; margin-bottom: 2px; }
     .meta-table { width: 100%; border-collapse: collapse; }
     .meta-table td { padding: 2px 4px; font-size: 11px; }
     .meta-label { color: #555; white-space: nowrap; }
@@ -124,6 +126,30 @@
     </td>
     <!-- 発行情報 -->
     <td class="from-block">
+        <!-- 自社情報 -->
+        <div class="company-info">
+            @if($setting->company_name)
+            <div class="company-name-main">{{ $setting->company_name }}</div>
+            @endif
+            @if($setting->postal_code)
+            <div>〒{{ $setting->postal_code }}</div>
+            @endif
+            @if($setting->prefecture_city || $setting->address)
+            <div>{{ $setting->prefecture_city }}{{ $setting->address }}</div>
+            @endif
+            @if($setting->building)
+            <div>{{ $setting->building }}</div>
+            @endif
+            @if($setting->tel)
+            <div>TEL: {{ $setting->tel }}</div>
+            @endif
+            @if($setting->fax)
+            <div>FAX: {{ $setting->fax }}</div>
+            @endif
+            @if($setting->invoice_no)
+            <div>登録番号: {{ $setting->invoice_no }}</div>
+            @endif
+        </div>
         <table class="meta-table" cellspacing="0" cellpadding="0">
             <tr>
                 <td class="meta-label">仕入番号</td>

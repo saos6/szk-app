@@ -96,7 +96,8 @@ class SaleController extends Controller
         $prefill = [
             'customer_id' => (string) $sale->customer_id,
             'employee_id' => $sale->employee_id ? (string) $sale->employee_id : '',
-            'sale_type'   => $sale->sale_type ?? '',
+            'sale_type'        => $sale->sale_type ?? '',
+            'transaction_type' => $sale->transaction_type ?? '',
             'subject' => $sale->subject,
             'delivery_date' => $sale->delivery_date?->format('Y-m-d') ?? '',
             'remarks' => $sale->remarks ?? '',
@@ -131,10 +132,11 @@ class SaleController extends Controller
         $sale->load(['customer', 'employee', 'items']);
 
         return Inertia::render('Sales/Show', [
-            'sale'      => $sale,
-            'statuses'  => Sale::STATUSES,
-            'saleTypes' => Sale::SALE_TYPES,
-            'locked'    => $this->lockMsg($sale) !== null,
+            'sale'             => $sale,
+            'statuses'         => Sale::STATUSES,
+            'saleTypes'        => Sale::SALE_TYPES,
+            'transactionTypes' => Sale::TRANSACTION_TYPES,
+            'locked'           => $this->lockMsg($sale) !== null,
         ]);
     }
 
@@ -224,7 +226,7 @@ class SaleController extends Controller
         return redirect()->route('sales.index')->with('success', '売上を削除しました。');
     }
 
-    public function pdf(Sale $sale)
+    public function pdf(Sale $sale, \Illuminate\Http\Request $request)
     {
         abort_if($sale->is_deleted, 404);
         $sale->load(['customer', 'employee', 'items']);
@@ -235,11 +237,28 @@ class SaleController extends Controller
             ->map(fn ($items) => $items->sum(fn ($i) => round((float) $i->sale_amount * (int) $i->tax_rate / 100, 0)))
             ->sortKeys();
 
+        // 出力する書類種別（デフォルト：納品書）
+        $docMap = [
+            'delivery'       => '納　品　書',
+            'receipt'        => '領　収　書',
+            'invoice'        => '請　求　書',
+            'acknowledgment' => '受　領　書',
+        ];
+        $requested = (array) $request->input('docs', ['delivery']);
+        $docTypes = collect($requested)
+            ->filter(fn ($k) => isset($docMap[$k]))
+            ->map(fn ($k) => ['key' => $k, 'title' => $docMap[$k]])
+            ->values()
+            ->toArray();
+        if (empty($docTypes)) {
+            $docTypes = [['key' => 'delivery', 'title' => '納　品　書']];
+        }
+
         $setting = SystemSetting::instance();
-        $pdf = Pdf::loadView('pdf.sale', compact('sale', 'taxBreakdown', 'setting'))
+        $pdf = Pdf::loadView('pdf.sale', compact('sale', 'taxBreakdown', 'setting', 'docTypes'))
             ->setPaper('a4', 'portrait');
 
-        $filename = '納品書_'.$sale->sale_number.'.pdf';
+        $filename = '売上伝票_'.$sale->sale_number.'.pdf';
 
         return $pdf->download($filename);
     }
@@ -293,8 +312,9 @@ class SaleController extends Controller
                 ->get(['id', 'model_code', 'frame_number', 'color_code', 'model_name', 'purchase_price', 'selling_price', 'terminal_price']),
             'vehicleModels' => VehicleModel::active()->orderBy('model_code')->orderBy('color_code')->get(['model_code', 'color_code', 'model_name', 'purchase_price', 'selling_price', 'terminal_price']),
             'warehouses' => Warehouse::active()->orderBy('code')->get(['code', 'name']),
-            'statuses'  => Sale::STATUSES,
-            'saleTypes' => Sale::SALE_TYPES,
+            'statuses'         => Sale::STATUSES,
+            'saleTypes'        => Sale::SALE_TYPES,
+            'transactionTypes' => Sale::TRANSACTION_TYPES,
         ];
     }
 

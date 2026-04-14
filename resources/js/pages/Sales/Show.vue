@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import { Copy, FileDown, Lock, Pencil } from 'lucide-vue-next';
+import { ref } from 'vue';
 import * as SaleController from '@/actions/App/Http/Controllers/SaleController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -39,6 +40,7 @@ interface Sale {
     subject: string;
     status: string;
     sale_type: string | null;
+    transaction_type: string | null;
     subtotal: string;
     tax_amount: string;
     total_amount: string;
@@ -51,6 +53,7 @@ const props = defineProps<{
     sale: Sale;
     statuses: Record<string, string>;
     saleTypes: Record<string, string>;
+    transactionTypes: Record<string, string>;
     locked: boolean;
 }>();
 
@@ -83,6 +86,24 @@ function fmtDate(val: string | null): string {
     if (!val) return '—';
     return new Date(val).toLocaleDateString('ja-JP');
 }
+
+// PDF 書類選択
+const showPdfPanel = ref(false);
+const docOptions = [
+    { key: 'delivery',       label: '納品書' },
+    { key: 'receipt',        label: '領収書' },
+    { key: 'invoice',        label: '請求書' },
+    { key: 'acknowledgment', label: '受領書' },
+];
+const selectedDocs = ref<string[]>(['delivery']);
+
+function buildPdfUrl(): string {
+    const params = new URLSearchParams();
+    for (const key of selectedDocs.value) {
+        params.append('docs[]', key);
+    }
+    return SaleController.pdf.url(props.sale.id) + '?' + params.toString();
+}
 </script>
 
 <template>
@@ -106,13 +127,12 @@ function fmtDate(val: string | null): string {
                     <Button variant="outline" size="sm" as-child>
                         <Link :href="SaleController.index.url()">一覧へ戻る</Link>
                     </Button>
-                    <Button variant="outline" size="sm" as-child>
-                        <a
-                            :href="SaleController.pdf.url(sale.id)"
-                            target="_blank"
-                        >
-                            <FileDown class="mr-1 h-4 w-4" />納品書PDF
-                        </a>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        @click="showPdfPanel = !showPdfPanel"
+                    >
+                        <FileDown class="mr-1 h-4 w-4" />売上伝票PDF
                     </Button>
                     <Button variant="outline" size="sm" as-child>
                         <Link :href="SaleController.replicate.url(sale.id)">
@@ -128,6 +148,40 @@ function fmtDate(val: string | null): string {
                         <Lock class="mr-1 h-4 w-4" />編集不可
                     </Button>
                 </div>
+            </div>
+
+            <!-- PDF書類選択パネル -->
+            <div
+                v-if="showPdfPanel"
+                class="rounded-md border border-dashed bg-muted/30 p-4"
+            >
+                <p class="mb-3 text-sm font-semibold text-muted-foreground">
+                    出力する書類にチェックを入れてください
+                </p>
+                <div class="mb-4 flex flex-wrap gap-4">
+                    <label
+                        v-for="opt in docOptions"
+                        :key="opt.key"
+                        class="flex cursor-pointer items-center gap-2 text-sm"
+                    >
+                        <input
+                            type="checkbox"
+                            :value="opt.key"
+                            v-model="selectedDocs"
+                            class="h-4 w-4 rounded border-gray-300"
+                        />
+                        {{ opt.label }}
+                    </label>
+                </div>
+                <Button
+                    size="sm"
+                    :disabled="selectedDocs.length === 0"
+                    as-child
+                >
+                    <a :href="buildPdfUrl()" target="_blank">
+                        <FileDown class="mr-1 h-4 w-4" />PDFをダウンロード
+                    </a>
+                </Button>
             </div>
 
             <!-- ロック警告 -->
@@ -177,6 +231,10 @@ function fmtDate(val: string | null): string {
                     <div>
                         <dt class="text-muted-foreground">売上区分</dt>
                         <dd>{{ sale.sale_type ? (saleTypes[sale.sale_type] ?? sale.sale_type) : '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-muted-foreground">取引区分</dt>
+                        <dd>{{ sale.transaction_type ? (transactionTypes[sale.transaction_type] ?? sale.transaction_type) : '—' }}</dd>
                     </div>
                     <div class="col-span-2">
                         <dt class="text-muted-foreground">件名</dt>
