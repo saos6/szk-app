@@ -61,10 +61,10 @@ const COLUMNS_STORAGE_KEY = 'vehicles.columns';
 
 const defaultColumns: Record<ColumnKey, { label: string; visible: boolean }> = {
     id:                  { label: 'ID',           visible: false },
-    model_code:            { label: '機種コード（商品）',   visible: true  },
-    frame_number:            { label: 'フレームNo（品番）',   visible: true  },
-    model_name:            { label: '機種名（商品名）',      visible: true  },
-    color_code:              { label: '色コード',      visible: false },
+    model_code:            { label: '機種商品コード',   visible: true  },
+    frame_number:            { label: '車両品番',   visible: true  },
+    model_name:            { label: '機種商品名',      visible: true  },
+    color_code:              { label: '色',      visible: false },
     vehicle_no:          { label: '車両番号',      visible: true  },
     owner_name:          { label: '氏名',          visible: true  },
     owner_kana:          { label: '氏名カナ',      visible: false },
@@ -169,7 +169,7 @@ function formatDate(val: string | null) { return val ? val : '—'; }
             <div class="flex items-center gap-2">
                 <div class="relative max-w-sm flex-1">
                     <Search class="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input v-model="search" placeholder="機種コード（商品）・フレームNo（品番）・機種名（商品名）・氏名・販売店で検索..."
+                    <Input v-model="search" placeholder="機種商品コード・車両品番・機種商品名・氏名・販売店で検索..."
                         class="pl-8" @keyup.enter="handleSearch" />
                 </div>
                 <Button variant="secondary" size="sm" @click="handleSearch">検索</Button>

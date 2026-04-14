@@ -119,8 +119,8 @@ const COLUMNS_STORAGE_KEY = 'vehicle-models.columns';
 
 const defaultColumns: Record<ColumnKey, { label: string; visible: boolean }> = {
     id:         { label: 'ID',            visible: false },
-    model_code:   { label: '機種コード（商品）',    visible: true  },
-    color_code:     { label: '色コード',      visible: true  },
+    model_code:   { label: '機種商品コード',    visible: true  },
+    color_code:     { label: '色',      visible: true  },
     model_name_kanji: { label: '機種名(漢字)',  visible: true  },
     model_name:   { label: '営業機種記号',  visible: true  },
     model_abbr: { label: '機種略称',      visible: true  },
@@ -266,7 +266,7 @@ function formatPrice(val: string | null): string {
                     <Search class="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         v-model="search"
-                        placeholder="機種コード（商品）・色コード・機種名で検索..."
+                        placeholder="機種商品コード・色・機種名で検索..."
                         class="pl-8"
                         @keyup.enter="handleSearch"
                     />

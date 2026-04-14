@@ -83,11 +83,11 @@ function fmt(val: string | number | null): string {
                         <h2 class="mb-3 text-sm font-semibold text-muted-foreground">基本情報</h2>
                         <div class="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-3">
                             <div>
-                                <dt class="text-muted-foreground">機種コード（商品）</dt>
+                                <dt class="text-muted-foreground">機種商品コード</dt>
                                 <dd class="mt-0.5 font-mono font-medium">{{ vehicleModel.model_code }}</dd>
                             </div>
                             <div>
-                                <dt class="text-muted-foreground">色コード</dt>
+                                <dt class="text-muted-foreground">色</dt>
                                 <dd class="mt-0.5 font-mono font-medium">{{ vehicleModel.color_code ?? '—' }}</dd>
                             </div>
                             <div>
@@ -95,7 +95,7 @@ function fmt(val: string | number | null): string {
                                 <dd class="mt-0.5 font-medium">{{ vehicleModel.order_number ?? '—' }}</dd>
                             </div>
                             <div>
-                                <dt class="text-muted-foreground">機種名（商品名）</dt>
+                                <dt class="text-muted-foreground">機種商品名</dt>
                                 <dd class="mt-0.5 font-medium">{{ vehicleModel.model_name ?? '—' }}</dd>
                             </div>
                             <div>

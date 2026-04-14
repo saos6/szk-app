@@ -323,11 +323,11 @@ function getItemError(index: number, field: string): string | undefined {
                 <table class="w-full text-sm">
                     <thead class="bg-muted/50">
                         <tr>
-                            <th class="px-3 py-2 text-left font-medium">機種コード（商品）<span class="text-destructive">*</span></th>
-                            <th class="px-3 py-2 text-left font-medium">フレームNo（品番）<span class="text-destructive">*</span></th>
-                            <th class="px-3 py-2 text-left font-medium">色コード</th>
+                            <th class="px-3 py-2 text-left font-medium">機種商品コード<span class="text-destructive">*</span></th>
+                            <th class="px-3 py-2 text-left font-medium">車両品番<span class="text-destructive">*</span></th>
+                            <th class="px-3 py-2 text-left font-medium">色</th>
                             <th class="px-3 py-2 text-left font-medium">倉庫</th>
-                            <th class="px-3 py-2 text-left font-medium">機種名（商品名）</th>
+                            <th class="px-3 py-2 text-left font-medium">機種商品名</th>
                             <th class="px-3 py-2 text-right font-medium">数量 <span class="text-destructive">*</span></th>
                             <th class="px-3 py-2 text-left font-medium">単位</th>
                             <th class="px-3 py-2 text-right font-medium">仕入単価</th>
@@ -344,7 +344,7 @@ function getItemError(index: number, field: string): string | undefined {
                                 <Combobox
                                     :options="modelCodeOptions"
                                     :model-value="item.model_code"
-                                    placeholder="機種コード（商品）..."
+                                    placeholder="機種商品コード..."
                                     :class="['w-36', getItemError(i, 'model_code') ? '[&_input]:border-destructive' : '']"
                                     @update:model-value="(v) => onModelCodeChange(i, v)"
                                 />
@@ -355,7 +355,7 @@ function getItemError(index: number, field: string): string | undefined {
                                 <Input
                                     v-model="item.frame_number"
                                     :list="`frame-number-${i}`"
-                                    placeholder="フレームNo（品番）..."
+                                    placeholder="車両品番..."
                                     :class="['h-8 w-40', getItemError(i, 'frame_number') ? 'border-destructive' : '']"
                                     @change="onFrameNumberChange(i)"
                                 />
@@ -364,7 +364,7 @@ function getItemError(index: number, field: string): string | undefined {
                                 </datalist>
                                 <p v-if="getItemError(i, 'frame_number')" class="mt-0.5 text-xs text-destructive">{{ getItemError(i, 'frame_number') }}</p>
                             </td>
-                            <!-- 色コード -->
+                            <!-- 色 -->
                             <td class="px-2 py-1.5">
                                 <Combobox
                                     :options="colorCodeOptions(item.model_code)"

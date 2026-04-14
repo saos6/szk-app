@@ -66,11 +66,11 @@ const breadcrumbs: BreadcrumbItem[] = [
                         <dd class="mt-0.5 font-medium">{{ inventoryBalance.warehouse_code }}</dd>
                     </div>
                     <div>
-                        <dt class="text-muted-foreground">機種コード（商品）</dt>
+                        <dt class="text-muted-foreground">機種商品コード</dt>
                         <dd class="mt-0.5 font-medium">{{ inventoryBalance.model_code }}</dd>
                     </div>
                     <div>
-                        <dt class="text-muted-foreground">フレームNo（品番）</dt>
+                        <dt class="text-muted-foreground">車両品番</dt>
                         <dd class="mt-0.5 font-medium">{{ inventoryBalance.frame_number }}</dd>
                     </div>
 

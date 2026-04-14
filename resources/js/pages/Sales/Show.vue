@@ -192,10 +192,10 @@ function fmtDate(val: string | null): string {
                         <thead class="bg-muted/50">
                             <tr>
                                 <th class="px-3 py-2 text-left font-medium">#</th>
-                                <th class="px-3 py-2 text-left font-medium">機種名（商品名）</th>
-                                <th class="px-3 py-2 text-left font-medium">フレームNo（品番）</th>
+                                <th class="px-3 py-2 text-left font-medium">機種商品名</th>
+                                <th class="px-3 py-2 text-left font-medium">車両品番</th>
                                 <th class="px-3 py-2 text-left font-medium">倉庫</th>
-                                <th class="px-3 py-2 text-left font-medium">色コード</th>
+                                <th class="px-3 py-2 text-left font-medium">色</th>
                                 <th class="px-3 py-2 text-right font-medium">数量</th>
                                 <th class="px-3 py-2 text-left font-medium">単位</th>
                                 <th class="px-3 py-2 text-right font-medium">仕入単価</th>

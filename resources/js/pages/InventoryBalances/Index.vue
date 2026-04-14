@@ -71,8 +71,8 @@ const COLUMNS_STORAGE_KEY = 'inventory-balances.columns';
 const defaultColumns: Record<ColumnKey, { label: string; visible: boolean }> = {
     stock_ym:            { label: '年月',           visible: true  },
     warehouse_code:      { label: '倉庫コード',     visible: true  },
-    model_code:  { label: '機種コード（商品）',     visible: true  },
-    frame_number:            { label: 'フレームNo（品番）',      visible: true  },
+    model_code:  { label: '機種商品コード',     visible: true  },
+    frame_number:            { label: '車両品番',      visible: true  },
     prev_stock:          { label: '前月繰越',        visible: true  },
     in_stock:            { label: '当月入庫',        visible: true  },
     out_stock:           { label: '当月出庫',        visible: true  },
@@ -198,7 +198,7 @@ function paginationLabel(label: string): string {
                 </div>
                 <div class="relative max-w-sm flex-1 min-w-48">
                     <Search class="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input v-model="search" placeholder="倉庫・機種（商品）・フレームNo（品番）で検索..." class="pl-8" @keyup.enter="handleSearch" />
+                    <Input v-model="search" placeholder="倉庫・機種（商品）・車両品番で検索..." class="pl-8" @keyup.enter="handleSearch" />
                 </div>
                 <Button variant="secondary" size="sm" @click="handleSearch">検索</Button>
                 <Button variant="ghost" size="sm" @click="() => { search = ''; ymFrom = ''; ymTo = ''; handleSearch(); }">クリア</Button>

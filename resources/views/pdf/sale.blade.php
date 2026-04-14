@@ -168,9 +168,9 @@
     <thead>
         <tr>
             <th style="width:4%">No.</th>
-            <th style="width:20%">機種名（商品名）</th>
-            <th style="width:14%">フレームNo.（品番）</th>
-            <th style="width:8%">色コード</th>
+            <th style="width:20%">機種商品名</th>
+            <th style="width:14%">車両品番</th>
+            <th style="width:8%">色</th>
             <th style="width:7%">数量</th>
             <th style="width:6%">単位</th>
             <th style="width:13%">売上単価</th>

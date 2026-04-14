@@ -87,12 +87,12 @@ const modelCodeOptions = computed(() => {
     });
 });
 
-// 色コード一覧（選択中の機種コードで絞り込み）
+// 色一覧（選択中の機種コードで絞り込み）
 const colorCodeOptions = computed(() =>
     props.vehicleModelList.filter((vm) => vm.model_code === props.form.model_code),
 );
 
-// 機種コード変更時に色コードをリセット
+// 機種コード変更時に色をリセット
 watch(
     () => props.form.model_code,
     () => {
@@ -111,7 +111,7 @@ watch(
                 <!-- 機種コード・フレームNo -->
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="flex flex-col gap-1.5">
-                        <Label>機種コード（商品） <span class="ml-1 text-xs text-destructive">*必須</span></Label>
+                        <Label>機種商品コード <span class="ml-1 text-xs text-destructive">*必須</span></Label>
                         <Select
                             :model-value="form.model_code || '__none__'"
                             @update:model-value="(v) => (form.model_code = v === '__none__' ? '' : v)"
@@ -129,16 +129,16 @@ watch(
                         <InputError :message="form.errors.model_code" />
                     </div>
                     <div class="flex flex-col gap-1.5">
-                        <Label for="frame_number">フレームNo（品番） <span class="ml-1 text-xs text-destructive">*必須</span></Label>
+                        <Label for="frame_number">車両品番 <span class="ml-1 text-xs text-destructive">*必須</span></Label>
                         <Input id="frame_number" v-model="form.frame_number" maxlength="10" class="font-mono"
                             :class="{ 'border-destructive': form.errors.frame_number }" />
                         <InputError :message="form.errors.frame_number" />
                     </div>
                 </div>
-                <!-- 色コード -->
+                <!-- 色 -->
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div class="flex flex-col gap-1.5">
-                        <Label>色コード</Label>
+                        <Label>色</Label>
                         <Select
                             :model-value="form.color_code ?? '__none__'"
                             @update:model-value="(v) => (form.color_code = v === '__none__' ? null : v)"
@@ -170,7 +170,7 @@ watch(
                 </div>
                 <!-- 機種名 -->
                 <div class="flex flex-col gap-1.5">
-                    <Label for="model_name">機種名（商品名）</Label>
+                    <Label for="model_name">機種商品名</Label>
                     <Input id="model_name" v-model="form.model_name" maxlength="1000"
                         :class="{ 'border-destructive': form.errors.model_name }" />
                     <InputError :message="form.errors.model_name" />

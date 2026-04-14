@@ -71,7 +71,7 @@ const emit = defineEmits<{ submit: [] }>();
 
 <template>
     <form @submit.prevent="emit('submit')" class="flex flex-col gap-5">
-        <!-- 機種コード・色コード -->
+        <!-- 機種コード・色 -->
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div class="flex flex-col gap-1.5">
                 <Label for="model_code">
@@ -90,7 +90,7 @@ const emit = defineEmits<{ submit: [] }>();
             </div>
             <div class="flex flex-col gap-1.5">
                 <Label for="color_code">
-                    色コード
+                    色
                     <span class="ml-1 text-xs text-destructive">*必須</span>
                 </Label>
                 <Input
