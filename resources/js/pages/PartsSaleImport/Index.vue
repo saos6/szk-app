@@ -118,7 +118,7 @@ const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '部品売上一括取込', href: PartsSaleImportController.index.url() },
+    { title: '売上取込', href: PartsSaleImportController.index.url() },
 ];
 
 // ── 列表示設定 ──
@@ -533,9 +533,9 @@ const numericColumns = new Set<ColumnKey>([
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="部品売上一括取込" />
+        <Head title="売上取込" />
         <div class="flex flex-col gap-4 p-4">
-            <h1 class="text-2xl font-bold">部品売上一括取込</h1>
+            <h1 class="text-2xl font-bold">売上取込</h1>
 
             <!-- 上部コントロールパネル -->
             <div class="rounded-md border p-4">

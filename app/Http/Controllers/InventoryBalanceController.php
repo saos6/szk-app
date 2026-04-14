@@ -120,7 +120,7 @@ class InventoryBalanceController extends Controller
             direction: $request->string('direction', 'desc')->toString(),
         );
 
-        $filename = '在庫残高マスタ_'.now()->format('YmdHis').'.xlsx';
+        $filename = '在庫残高_'.now()->format('YmdHis').'.xlsx';
 
         return Excel::download($export, $filename);
     }

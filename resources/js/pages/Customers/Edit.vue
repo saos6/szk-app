@@ -40,7 +40,7 @@ const props = defineProps<{
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '得意先マスタ', href: CustomerController.index.url() },
+    { title: '得意先', href: CustomerController.index.url() },
     { title: '編集', href: CustomerController.edit.url(props.customer.id) },
 ];
 
@@ -74,7 +74,7 @@ function submit() {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head :title="`得意先マスタ 編集 - ${customer.name}`" />
+        <Head :title="`得意先 編集 - ${customer.name}`" />
 
         <div class="max-w-4xl p-6">
             <div class="rounded-lg border bg-card p-6 shadow-sm">

@@ -21,7 +21,7 @@ const props = defineProps<{ employee: Employee }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '社員マスタ', href: EmployeeController.index.url() },
+    { title: '社員', href: EmployeeController.index.url() },
     { title: props.employee.name, href: EmployeeController.show.url(props.employee.id) },
 ];
 </script>

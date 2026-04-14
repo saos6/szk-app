@@ -18,7 +18,7 @@ const props = defineProps<{ dept: Dept }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '所属マスタ', href: DeptController.index.url() },
+    { title: '所属', href: DeptController.index.url() },
     { title: props.dept.name, href: DeptController.show.url(props.dept.id) },
 ];
 </script>

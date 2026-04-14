@@ -25,7 +25,7 @@ const props = defineProps<{
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '在庫残高マスタ', href: InventoryBalanceController.index.url() },
+    { title: '在庫残高', href: InventoryBalanceController.index.url() },
     { title: '新規登録', href: InventoryBalanceController.create.url() },
 ];
 
@@ -48,7 +48,7 @@ function submit() {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="在庫残高マスタ 新規登録" />
+        <Head title="在庫残高 新規登録" />
 
         <div class="max-w-3xl p-6">
             <div class="rounded-lg border bg-card p-6 shadow-sm">

@@ -34,7 +34,7 @@ const props = defineProps<{
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '商品マスタ', href: ProductController.index.url() },
+    { title: '商品', href: ProductController.index.url() },
     { title: '編集', href: ProductController.edit.url(props.product.id) },
 ];
 
@@ -62,7 +62,7 @@ function submit() {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head :title="`商品マスタ 編集 - ${product.name}`" />
+        <Head :title="`商品 編集 - ${product.name}`" />
         <div class="max-w-4xl p-6">
             <div class="rounded-lg border bg-card p-6 shadow-sm">
                 <div class="mb-6 flex items-center justify-between">

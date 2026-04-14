@@ -50,7 +50,7 @@ defineOptions({
     layout: {
         breadcrumbs: [
             { title: 'Dashboard', href: '/dashboard' },
-            { title: '請求締め処理', href: BillingClosingController.index.url() },
+            { title: '請求管理', href: BillingClosingController.index.url() },
         ],
     },
 });
@@ -161,13 +161,13 @@ const successRows = computed(() => props.results?.filter(r => !r.error) ?? []);
 </script>
 
 <template>
-    <Head title="請求締め処理" />
+    <Head title="請求管理" />
 
     <div class="flex flex-col gap-6 p-4">
 
         <!-- 条件フォーム -->
         <div class="rounded-xl border bg-card p-6">
-            <h1 class="mb-5 text-lg font-semibold">請求締め処理</h1>
+            <h1 class="mb-5 text-lg font-semibold">請求管理</h1>
             <form @submit.prevent="search" class="flex flex-wrap items-end gap-4">
 
                 <!-- 締め日（プルダウン）(仕様1) -->

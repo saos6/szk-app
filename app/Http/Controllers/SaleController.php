@@ -349,7 +349,7 @@ class SaleController extends Controller
         }
     }
 
-    /** 売上明細から車両マスタを自動登録・更新 */
+    /** 売上明細から車両品番を自動登録・更新 */
     private function syncVehicleFromSaleItem(array $item, Sale $sale): void
     {
         $modelCode = ($item['model_code'] ?? '') ?: null;

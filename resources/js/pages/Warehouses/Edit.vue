@@ -16,7 +16,7 @@ const props = defineProps<{ warehouse: Warehouse }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '倉庫マスタ', href: WarehouseController.index.url() },
+    { title: '倉庫', href: WarehouseController.index.url() },
     { title: '編集', href: WarehouseController.edit.url(props.warehouse.code) },
 ];
 
@@ -32,7 +32,7 @@ function submit() {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head :title="`倉庫マスタ 編集 - ${warehouse.name}`" />
+        <Head :title="`倉庫 編集 - ${warehouse.name}`" />
 
         <div class="max-w-2xl p-6">
             <div class="rounded-lg border bg-card p-6 shadow-sm">

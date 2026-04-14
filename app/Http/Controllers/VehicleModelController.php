@@ -120,7 +120,7 @@ class VehicleModelController extends Controller
             direction: $request->string('direction', 'asc')->toString(),
         );
 
-        $filename = '車両機種マスタ_'.now()->format('YmdHis').'.xlsx';
+        $filename = '機種商品_'.now()->format('YmdHis').'.xlsx';
 
         return Excel::download($export, $filename);
     }

@@ -27,7 +27,7 @@ const props = defineProps<{ supplier: Supplier }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '仕入先マスタ', href: SupplierController.index.url() },
+    { title: '仕入先', href: SupplierController.index.url() },
     { title: props.supplier.name, href: SupplierController.show.url(props.supplier.id) },
 ];
 </script>

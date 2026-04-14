@@ -16,7 +16,7 @@ const props = defineProps<{ setting: SystemSetting }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'システム設定', href: SystemSettingController.show.url() },
+    { title: '設定', href: SystemSettingController.show.url() },
     { title: '編集', href: SystemSettingController.edit.url() },
 ];
 
@@ -31,9 +31,9 @@ function submit() {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="システム設定 編集" />
+        <Head title="設定 編集" />
         <div class="flex flex-col gap-4 p-4">
-            <h1 class="text-2xl font-bold">システム設定 編集</h1>
+            <h1 class="text-2xl font-bold">設定 編集</h1>
 
             <div class="rounded-md border p-6">
                 <form @submit.prevent="submit" class="flex flex-col gap-6">
@@ -52,7 +52,7 @@ function submit() {
                             {{ form.errors.closing_ym }}
                         </p>
                         <p class="text-xs text-muted-foreground">
-                            在庫月次繰越処理の対象年月です
+                            在庫月次繰越の対象年月です
                         </p>
                     </div>
 

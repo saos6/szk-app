@@ -71,7 +71,7 @@ const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '所属マスタ', href: DeptController.index.url() },
+    { title: '所属', href: DeptController.index.url() },
 ];
 
 const search = ref(props.filters.search ?? '');
@@ -204,12 +204,12 @@ function paginationLabel(label: string): string {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="所属マスタ" />
+        <Head title="所属" />
 
         <div class="flex flex-col gap-4 p-4">
             <!-- ヘッダー -->
             <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold">所属マスタ</h1>
+                <h1 class="text-2xl font-bold">所属</h1>
                 <div class="flex gap-2">
                     <!-- 列表示選択 -->
                     <DropdownMenu>

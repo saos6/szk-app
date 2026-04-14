@@ -23,7 +23,7 @@ const props = defineProps<{ inventoryBalance: InventoryBalance }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '在庫残高マスタ', href: InventoryBalanceController.index.url() },
+    { title: '在庫残高', href: InventoryBalanceController.index.url() },
     {
         title: `${props.inventoryBalance.stock_ym} ${props.inventoryBalance.warehouse_code}`,
         href: InventoryBalanceController.show.url(props.inventoryBalance.id),

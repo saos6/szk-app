@@ -34,7 +34,7 @@ const props = defineProps<{
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '商品マスタ', href: ProductController.index.url() },
+    { title: '商品', href: ProductController.index.url() },
     { title: props.product.name, href: ProductController.show.url(props.product.id) },
 ];
 

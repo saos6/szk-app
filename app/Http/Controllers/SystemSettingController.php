@@ -28,6 +28,6 @@ class SystemSettingController extends Controller
     {
         SystemSetting::instance()->update($request->validated());
 
-        return redirect()->route('system-settings.show')->with('success', 'システム設定を更新しました。');
+        return redirect()->route('system-settings.show')->with('success', '設定を更新しました。');
     }
 }

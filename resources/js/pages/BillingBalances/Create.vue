@@ -28,7 +28,7 @@ const props = defineProps<{
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '請求残高マスタ', href: BillingBalanceController.index.url() },
+    { title: '請求残高', href: BillingBalanceController.index.url() },
     { title: '新規登録', href: BillingBalanceController.create.url() },
 ];
 

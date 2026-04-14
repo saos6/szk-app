@@ -332,7 +332,7 @@ class PurchaseController extends Controller
         }
     }
 
-    /** 仕入明細から車両マスタを自動登録・更新 */
+    /** 仕入明細から車両品番を自動登録・更新 */
     private function syncVehicleFromPurchaseItem(array $item): void
     {
         $modelCode = ($item['model_code'] ?? '') ?: null;

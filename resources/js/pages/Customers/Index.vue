@@ -79,7 +79,7 @@ const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '得意先マスタ', href: CustomerController.index.url() },
+    { title: '得意先', href: CustomerController.index.url() },
 ];
 
 const search = ref(props.filters.search ?? '');
@@ -239,12 +239,12 @@ function dayLabel(day: number | null): string {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="得意先マスタ" />
+        <Head title="得意先" />
 
         <div class="flex flex-col gap-4 p-4">
             <!-- ヘッダー -->
             <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold">得意先マスタ</h1>
+                <h1 class="text-2xl font-bold">得意先</h1>
                 <div class="flex gap-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger as-child>

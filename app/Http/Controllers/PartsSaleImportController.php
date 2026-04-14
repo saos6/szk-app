@@ -391,7 +391,7 @@ class PartsSaleImportController extends Controller
                             'remarks'        => $work->maintenance_no,
                         ];
 
-                        // 車両（品番）マスタの単価を上書き更新
+                        // 車両品番の単価を上書き更新
                         if ($work->vehicle_code) {
                             Vehicle::where('frame_number', $work->vehicle_code)
                                 ->where('is_deleted', false)
@@ -403,7 +403,7 @@ class PartsSaleImportController extends Controller
                                 ]);
                         }
 
-                        // 車両機種（商品）マスタの単価を上書き更新
+                        // 機種商品の単価を上書き更新
                         if ($work->model_code) {
                             VehicleModel::where('model_code', $work->model_code)
                                 ->where('is_deleted', false)
@@ -470,13 +470,13 @@ class PartsSaleImportController extends Controller
     // ────────────────────────────────────────────────
 
     /**
-     * 変換対象ワーク一覧をもとに、存在しない車両（品番）マスタを自動作成する。
-     * 車両機種（商品）マスタは自動作成しない（手動登録が必要）。
+     * 変換対象ワーク一覧をもとに、存在しない車両品番を自動作成する。
+     * 機種商品は自動作成しない（手動登録が必要）。
      * 売上変換処理時のみ呼び出す。
      */
     private function autoCreateMasters(\Illuminate\Support\Collection $works): void
     {
-        // 既存車両マスタを一括取得してハッシュセット化
+        // 既存車両品番を一括取得してハッシュセット化
         $existingVehicleCodes = array_flip(
             Vehicle::active()->pluck('frame_number')->toArray()
         );
@@ -487,7 +487,7 @@ class PartsSaleImportController extends Controller
             $stdRetailPrice = ($work->standard_retail_price !== null && $work->standard_retail_price !== '')
                                   ? (float) $work->standard_retail_price : null;
 
-            // ── 車両（品番）マスタ自動作成 (frame_number = XXXXX-YYY) ──
+            // ── 車両品番自動作成 (frame_number = XXXXX-YYY) ──
             if ($work->vehicle_code && ! array_key_exists($work->vehicle_code, $existingVehicleCodes)) {
                 Vehicle::create([
                     'model_code'            => $work->model_code, // 機種コード（VehicleModelとの紐付け）
@@ -577,12 +577,12 @@ class PartsSaleImportController extends Controller
                     $messages[] = "販売店コード[{$work->partner_code}]の得意先が見つかりません";
                 }
 
-                // 4. 車両機種（商品）マスタ存在チェック（品番1-5桁）― 存在しない場合はエラー（手動登録が必要）
+                // 4. 機種商品存在チェック（品番1-5桁）― 存在しない場合はエラー（手動登録が必要）
                 if (! $work->model_code || ! array_key_exists($work->model_code, $validModelCodes)) {
-                    $messages[] = "品番先頭5桁[{$work->model_code}]の車両機種マスタが存在しません";
+                    $messages[] = "品番先頭5桁[{$work->model_code}]の機種商品が存在しません";
                 }
 
-                // 5. 車両（品番）マスタ存在チェック（品番6-13桁 XXXXX-YYY形式）
+                // 5. 車両品番存在チェック（品番6-13桁 XXXXX-YYY形式）
                 // ― 品番13桁未満は取得不可のためエラー、マスタ未存在は売上変換時に自動作成するためエラーにしない
                 if (! $work->vehicle_code) {
                     $messages[] = '品番が13桁未満のため車両コードを取得できません';

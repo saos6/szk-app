@@ -103,7 +103,7 @@ class WarehouseController extends Controller
             direction: $request->string('direction', 'asc')->toString(),
         );
 
-        $filename = '倉庫マスタ_'.now()->format('YmdHis').'.xlsx';
+        $filename = '倉庫_'.now()->format('YmdHis').'.xlsx';
 
         return Excel::download($export, $filename);
     }

@@ -78,7 +78,7 @@ const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '請求残高マスタ', href: BillingBalanceController.index.url() },
+    { title: '請求残高', href: BillingBalanceController.index.url() },
 ];
 
 const search    = ref(props.filters.search    ?? '');
@@ -238,11 +238,11 @@ function fmtDate(val: string | null): string {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="請求残高マスタ" />
+        <Head title="請求残高" />
         <div class="flex flex-col gap-4 p-4">
             <!-- ヘッダー -->
             <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold">請求残高マスタ</h1>
+                <h1 class="text-2xl font-bold">請求残高</h1>
                 <div class="flex gap-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger as-child>

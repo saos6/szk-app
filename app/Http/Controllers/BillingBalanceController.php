@@ -127,7 +127,7 @@ class BillingBalanceController extends Controller
             direction: $request->string('direction', 'desc')->toString(),
         );
 
-        $filename = '請求残高マスタ_'.now()->format('YmdHis').'.xlsx';
+        $filename = '請求残高_'.now()->format('YmdHis').'.xlsx';
 
         return Excel::download($export, $filename);
     }

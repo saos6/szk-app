@@ -16,7 +16,7 @@ const props = defineProps<{ setting: SystemSetting }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'システム設定', href: SystemSettingController.show.url() },
+    { title: '設定', href: SystemSettingController.show.url() },
 ];
 
 function fmtYm(ym: string): string {
@@ -27,10 +27,10 @@ function fmtYm(ym: string): string {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="システム設定" />
+        <Head title="設定" />
         <div class="flex flex-col gap-4 p-4">
             <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold">システム設定</h1>
+                <h1 class="text-2xl font-bold">設定</h1>
                 <Button size="sm" as-child>
                     <Link :href="SystemSettingController.edit.url()">
                         <Pencil class="mr-1 h-4 w-4" />編集
@@ -45,7 +45,7 @@ function fmtYm(ym: string): string {
                         <dt class="text-muted-foreground">月次更新年月</dt>
                         <dd class="mt-1 text-lg font-semibold">{{ fmtYm(setting.closing_ym) }}</dd>
                         <p class="mt-0.5 text-xs text-muted-foreground">
-                            在庫月次繰越処理の対象年月です
+                            在庫月次繰越の対象年月です
                         </p>
                     </div>
 

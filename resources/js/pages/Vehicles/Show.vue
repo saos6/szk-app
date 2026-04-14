@@ -56,7 +56,7 @@ const props = defineProps<{
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '車両（品番）マスタ', href: VehicleController.index.url() },
+    { title: '車両品番', href: VehicleController.index.url() },
     {
         title: props.vehicle.model_code ?? String(props.vehicle.id),
         href: VehicleController.show.url(props.vehicle.id),
@@ -76,10 +76,10 @@ function fmt(val: string | number | null): string {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head :title="`車両（品番） ${vehicle.model_code ?? vehicle.id}`" />
+        <Head :title="`車両品番 ${vehicle.model_code ?? vehicle.id}`" />
         <div class="flex flex-col gap-4 p-4">
             <div class="flex flex-wrap items-center justify-between gap-2">
-                <h1 class="text-2xl font-bold">車両（品番） 参照</h1>
+                <h1 class="text-2xl font-bold">車両品番 参照</h1>
                 <div class="flex flex-wrap gap-2">
                     <Button variant="outline" size="sm" as-child>
                         <Link :href="VehicleController.index.url()">一覧へ戻る</Link>

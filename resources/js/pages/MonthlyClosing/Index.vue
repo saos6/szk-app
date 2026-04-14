@@ -11,7 +11,7 @@ const props = defineProps<{ currentYm: string }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '月次繰越処理', href: MonthlyClosingController.index.url() },
+    { title: '月次繰越', href: MonthlyClosingController.index.url() },
 ];
 
 const confirmForm = useForm({ ym: props.currentYm });
@@ -36,9 +36,9 @@ function fmtYm(ym: string): string {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="月次繰越処理" />
+        <Head title="月次繰越" />
         <div class="flex flex-col gap-6 p-4">
-            <h1 class="text-2xl font-bold">月次繰越処理</h1>
+            <h1 class="text-2xl font-bold">月次繰越</h1>
 
             <!-- 確定 -->
             <div class="rounded-md border p-6">
@@ -98,7 +98,7 @@ function fmtYm(ym: string): string {
 
             <!-- 現在の設定 -->
             <div class="rounded-md bg-muted/50 p-4 text-sm text-muted-foreground">
-                システム設定の月次更新年月：<span class="font-semibold text-foreground">{{ fmtYm(currentYm) }}</span>
+                設定の月次更新年月：<span class="font-semibold text-foreground">{{ fmtYm(currentYm) }}</span>
             </div>
         </div>
     </AppLayout>

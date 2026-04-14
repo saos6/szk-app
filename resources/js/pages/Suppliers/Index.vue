@@ -59,7 +59,7 @@ const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '仕入先マスタ', href: SupplierController.index.url() },
+    { title: '仕入先', href: SupplierController.index.url() },
 ];
 
 const search    = ref(props.filters.search ?? '');
@@ -186,7 +186,7 @@ function SortIcon(key: ColumnKey) {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="仕入先マスタ" />
+        <Head title="仕入先" />
         <div class="flex flex-col gap-4 p-4">
 
             <!-- ツールバー -->

@@ -17,7 +17,7 @@ const props = defineProps<{ warehouse: Warehouse }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '倉庫マスタ', href: WarehouseController.index.url() },
+    { title: '倉庫', href: WarehouseController.index.url() },
     { title: props.warehouse.name, href: WarehouseController.show.url(props.warehouse.code) },
 ];
 </script>

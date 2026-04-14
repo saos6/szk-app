@@ -29,7 +29,7 @@ const props = defineProps<{
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '在庫残高マスタ', href: InventoryBalanceController.index.url() },
+    { title: '在庫残高', href: InventoryBalanceController.index.url() },
     { title: '編集', href: InventoryBalanceController.edit.url(props.inventoryBalance.id) },
 ];
 

@@ -22,7 +22,7 @@ const props = defineProps<{ prefill?: Prefill }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '仕入先マスタ', href: SupplierController.index.url() },
+    { title: '仕入先', href: SupplierController.index.url() },
     { title: '新規登録', href: SupplierController.create.url() },
 ];
 

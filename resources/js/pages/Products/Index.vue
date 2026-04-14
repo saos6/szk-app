@@ -83,7 +83,7 @@ const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: '商品マスタ', href: ProductController.index.url() },
+    { title: '商品', href: ProductController.index.url() },
 ];
 
 const search = ref(props.filters.search ?? '');
@@ -245,11 +245,11 @@ function formatPrice(val: string | null): string {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="商品マスタ" />
+        <Head title="商品" />
         <div class="flex flex-col gap-4 p-4">
             <!-- ヘッダー -->
             <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold">商品マスタ</h1>
+                <h1 class="text-2xl font-bold">商品</h1>
                 <div class="flex gap-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger as-child>
