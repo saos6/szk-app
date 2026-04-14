@@ -19,6 +19,7 @@ interface SaleItem {
     unit: string | null;
     purchase_price: string;
     selling_price: string;
+    terminal_price: string | null;
     tax_rate: string;
     sale_amount: string;
     cogs_amount: string;
@@ -206,6 +207,7 @@ function fmtDate(val: string | null): string {
                                 <th class="px-3 py-2 text-left font-medium">単位</th>
                                 <th class="px-3 py-2 text-right font-medium">仕入単価</th>
                                 <th class="px-3 py-2 text-right font-medium">売上単価</th>
+                                <th class="px-3 py-2 text-right font-medium">末端価格</th>
                                 <th class="px-3 py-2 text-center font-medium">税率</th>
                                 <th class="px-3 py-2 text-right font-medium">売上金額</th>
                                 <th class="px-3 py-2 text-right font-medium">仕入金額</th>
@@ -244,6 +246,9 @@ function fmtDate(val: string | null): string {
                                 </td>
                                 <td class="px-3 py-2 text-right tabular-nums">
                                     {{ fmt(item.selling_price) }}
+                                </td>
+                                <td class="px-3 py-2 text-right tabular-nums text-muted-foreground">
+                                    {{ item.terminal_price ? fmt(item.terminal_price) : '—' }}
                                 </td>
                                 <td class="px-3 py-2 text-center text-muted-foreground">
                                     {{ item.tax_rate }}%
