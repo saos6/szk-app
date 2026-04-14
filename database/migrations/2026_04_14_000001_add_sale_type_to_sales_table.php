@@ -8,6 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('sales', 'sale_type')) {
+            return;
+        }
         Schema::table('sales', function (Blueprint $table) {
             $table->string('sale_type', 20)->nullable()->after('status')->comment('売上区分: vehicle=車両, parts=部品');
         });
@@ -15,6 +18,9 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (! Schema::hasColumn('sales', 'sale_type')) {
+            return;
+        }
         Schema::table('sales', function (Blueprint $table) {
             $table->dropColumn('sale_type');
         });
