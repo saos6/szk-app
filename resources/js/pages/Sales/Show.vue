@@ -37,6 +37,7 @@ interface Sale {
     delivery_date: string | null;
     subject: string;
     status: string;
+    sale_type: string | null;
     subtotal: string;
     tax_amount: string;
     total_amount: string;
@@ -48,6 +49,7 @@ interface Sale {
 const props = defineProps<{
     sale: Sale;
     statuses: Record<string, string>;
+    saleTypes: Record<string, string>;
     locked: boolean;
 }>();
 
@@ -170,6 +172,10 @@ function fmtDate(val: string | null): string {
                     <div v-if="sale.import_no">
                         <dt class="text-muted-foreground">取込伝票NO</dt>
                         <dd class="font-mono text-muted-foreground">{{ sale.import_no }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-muted-foreground">売上区分</dt>
+                        <dd>{{ sale.sale_type ? (saleTypes[sale.sale_type] ?? sale.sale_type) : '—' }}</dd>
                     </div>
                     <div class="col-span-2">
                         <dt class="text-muted-foreground">件名</dt>

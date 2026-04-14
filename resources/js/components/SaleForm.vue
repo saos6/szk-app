@@ -71,6 +71,7 @@ interface FormData {
     partner_slip_no: string;
     subject: string;
     status: string;
+    sale_type: string;
     remarks: string;
     items: SaleItem[];
     [key: string]: unknown;
@@ -84,6 +85,7 @@ const props = defineProps<{
     vehicleModels: VehicleModelOption[];
     warehouses: Warehouse[];
     statuses: Record<string, string>;
+    saleTypes: Record<string, string>;
     cancelHref: string;
     submitLabel: string;
     processingLabel: string;
@@ -369,6 +371,34 @@ function getItemError(index: number, field: string): string | undefined {
                         class="text-xs text-destructive"
                     >
                         {{ form.errors.subject }}
+                    </p>
+                </div>
+
+                <!-- 売上区分 -->
+                <div class="grid gap-1.5">
+                    <Label>売上区分</Label>
+                    <Select
+                        :model-value="form.sale_type || '__none__'"
+                        @update:model-value="(v) => (form.sale_type = v === '__none__' ? '' : v)"
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="未設定" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="__none__">未設定</SelectItem>
+                            <SelectItem
+                                v-for="(label, key) in saleTypes"
+                                :key="key"
+                                :value="key"
+                                >{{ label }}</SelectItem
+                            >
+                        </SelectContent>
+                    </Select>
+                    <p
+                        v-if="form.errors.sale_type"
+                        class="text-xs text-destructive"
+                    >
+                        {{ form.errors.sale_type }}
                     </p>
                 </div>
 

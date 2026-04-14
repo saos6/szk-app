@@ -433,6 +433,7 @@ class PartsSaleImportController extends Controller
                         'order_date'      => $first->order_date?->format('Y-m-d'),
                         'subject'         => '部品売上',
                         'status'          => 'recorded',
+                        'sale_type'       => 'parts',
                         'subtotal'        => $subtotal,
                         'tax_amount'      => $taxAmount,
                         'total_amount'    => $totalAmount,

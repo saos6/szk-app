@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sale extends Model
 {
+    public const SALE_TYPES = [
+        'vehicle' => '車両',
+        'parts'   => '部品',
+    ];
+
     public const STATUSES = [
         'draft'     => '下書き',
         'recorded'  => '計上',
@@ -29,6 +34,7 @@ class Sale extends Model
         'delivery_date',
         'subject',
         'status',
+        'sale_type',
         'subtotal',
         'tax_amount',
         'total_amount',

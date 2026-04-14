@@ -25,6 +25,7 @@ class SaleRequest extends FormRequest
             'partner_slip_no' => ['nullable', 'string', 'max:50'],
             'subject'        => ['required', 'string', 'max:200'],
             'status'         => ['required', Rule::in(array_keys(Sale::STATUSES))],
+            'sale_type'      => ['nullable', Rule::in(array_keys(Sale::SALE_TYPES))],
             'remarks'        => ['nullable', 'string'],
 
             'items'                    => ['required', 'array', 'min:1'],

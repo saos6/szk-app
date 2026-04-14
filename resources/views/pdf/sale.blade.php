@@ -142,6 +142,12 @@
                 <td class="meta-label">売上番号</td>
                 <td class="meta-value sale-number">{{ $sale->sale_number }}</td>
             </tr>
+            @if($sale->sale_type)
+            <tr>
+                <td class="meta-label">売上区分</td>
+                <td class="meta-value">{{ \App\Models\Sale::SALE_TYPES[$sale->sale_type] ?? $sale->sale_type }}</td>
+            </tr>
+            @endif
             <tr>
                 <td class="meta-label">売上日</td>
                 <td class="meta-value">{{ $sale->sale_date?->format('Y年m月d日') }}</td>

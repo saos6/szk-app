@@ -165,12 +165,13 @@
     <table class="detail-table">
         <thead>
             <tr>
-                <th style="width:18%">売上番号</th>
-                <th style="width:15%">売上日</th>
+                <th style="width:16%">売上番号</th>
+                <th style="width:8%">売上区分</th>
+                <th style="width:13%">売上日</th>
                 <th>件名</th>
-                <th style="width:16%;text-align:right">税抜金額</th>
-                <th style="width:12%;text-align:right">消費税</th>
-                <th style="width:16%;text-align:right">税込金額</th>
+                <th style="width:15%;text-align:right">税抜金額</th>
+                <th style="width:11%;text-align:right">消費税</th>
+                <th style="width:15%;text-align:right">税込金額</th>
             </tr>
         </thead>
         <tbody>
@@ -178,6 +179,7 @@
             @php $saleItems = $sale->relationLoaded('items') ? $sale->items : collect(); @endphp
             <tr class="detail-header-row">
                 <td class="text-center" style="font-size:9px;">{{ $sale->sale_number }}</td>
+                <td class="text-center">{{ $sale->sale_type ? (\App\Models\Sale::SALE_TYPES[$sale->sale_type] ?? $sale->sale_type) : '—' }}</td>
                 <td class="text-center">{{ \Carbon\Carbon::parse($sale->sale_date)->format('Y/m/d') }}</td>
                 <td>{{ $sale->subject }}</td>
                 <td class="text-right">{{ $fmtAmt($sale->subtotal) }}</td>

@@ -96,6 +96,7 @@ class SaleController extends Controller
         $prefill = [
             'customer_id' => (string) $sale->customer_id,
             'employee_id' => $sale->employee_id ? (string) $sale->employee_id : '',
+            'sale_type'   => $sale->sale_type ?? '',
             'subject' => $sale->subject,
             'delivery_date' => $sale->delivery_date?->format('Y-m-d') ?? '',
             'remarks' => $sale->remarks ?? '',
@@ -130,9 +131,10 @@ class SaleController extends Controller
         $sale->load(['customer', 'employee', 'items']);
 
         return Inertia::render('Sales/Show', [
-            'sale'     => $sale,
-            'statuses' => Sale::STATUSES,
-            'locked'   => $this->lockMsg($sale) !== null,
+            'sale'      => $sale,
+            'statuses'  => Sale::STATUSES,
+            'saleTypes' => Sale::SALE_TYPES,
+            'locked'    => $this->lockMsg($sale) !== null,
         ]);
     }
 
@@ -290,7 +292,8 @@ class SaleController extends Controller
                 ->get(['id', 'model_code', 'frame_number', 'color_code', 'model_name', 'purchase_price', 'selling_price', 'terminal_price']),
             'vehicleModels' => VehicleModel::active()->orderBy('model_code')->orderBy('color_code')->get(['model_code', 'color_code', 'model_name', 'purchase_price', 'selling_price', 'terminal_price']),
             'warehouses' => Warehouse::active()->orderBy('code')->get(['code', 'name']),
-            'statuses' => Sale::STATUSES,
+            'statuses'  => Sale::STATUSES,
+            'saleTypes' => Sale::SALE_TYPES,
         ];
     }
 

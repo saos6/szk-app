@@ -20,6 +20,7 @@ return new class extends Migration
             $table->date('delivery_date')->nullable();         // 納品日
             $table->string('subject', 200);                   // 件名
             $table->string('status', 20)->default('draft');   // ステータス
+            $table->string('sale_type', 20)->nullable()->comment('売上区分: vehicle=車両, parts=部品');
             $table->decimal('subtotal', 12, 2)->default(0);   // 売上小計（税抜）
             $table->decimal('tax_amount', 12, 2)->default(0); // 消費税
             $table->decimal('total_amount', 12, 2)->default(0); // 税込合計
