@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BillingBalance;
 use App\Models\Customer;
+use App\Models\SystemSetting;
 use App\Services\BillingClosingService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -186,7 +187,8 @@ class BillingClosingController extends Controller
 
         $rows = $this->service->aggregate($billingDate, $closingDay, $fromCode, $toCode);
 
-        $pdf = Pdf::loadView('pdf.billing', compact('rows', 'billingDate'))
+        $setting = SystemSetting::instance();
+        $pdf = Pdf::loadView('pdf.billing', compact('rows', 'billingDate', 'setting'))
             ->setPaper('a4', 'portrait');
 
         return $pdf->download('請求書_'.$billingDate.'.pdf');
@@ -213,7 +215,8 @@ class BillingClosingController extends Controller
 
         $billingDate = $billingBalance->billing_date->toDateString();
 
-        $pdf = Pdf::loadView('pdf.billing', compact('rows', 'billingDate'))
+        $setting = SystemSetting::instance();
+        $pdf = Pdf::loadView('pdf.billing', compact('rows', 'billingDate', 'setting'))
             ->setPaper('a4', 'portrait');
 
         return $pdf->download('請求書_'.$billingBalance->billing_number.'.pdf');

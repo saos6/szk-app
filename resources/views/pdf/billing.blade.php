@@ -43,6 +43,8 @@
     .customer-name { font-size: 16px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 2px; margin-bottom: 4px; }
     .honorific { font-size: 13px; }
     .from-block { width: 44%; text-align: right; }
+    .company-info { font-size: 10px; color: #333; line-height: 1.6; margin-bottom: 8px; }
+    .company-name-main { font-size: 13px; font-weight: bold; margin-bottom: 2px; }
     .meta-table { width: 100%; border-collapse: collapse; }
     .meta-table td { padding: 2px 4px; font-size: 11px; }
     .meta-label { color: #555; white-space: nowrap; }
@@ -68,7 +70,8 @@
     .text-center { text-align: center; }
     /* ─── 振込先 ─── */
     .bank-section { margin-top: 14px; border: 1px solid #ccc; padding: 8px 10px; font-size: 10px; background: #fafafa; }
-    .bank-title { font-weight: bold; margin-bottom: 4px; }
+    .bank-title { font-weight: bold; margin-bottom: 4px; font-size: 11px; }
+    .bank-row { display: inline-block; margin-right: 16px; }
 </style>
 </head>
 <body>
@@ -106,6 +109,30 @@
             </td>
             <!-- 発行情報 -->
             <td class="from-block">
+                <!-- 自社情報 -->
+                <div class="company-info">
+                    @if($setting->company_name)
+                    <div class="company-name-main">{{ $setting->company_name }}</div>
+                    @endif
+                    @if($setting->postal_code)
+                    <div>〒{{ $setting->postal_code }}</div>
+                    @endif
+                    @if($setting->prefecture_city || $setting->address)
+                    <div>{{ $setting->prefecture_city }}{{ $setting->address }}</div>
+                    @endif
+                    @if($setting->building)
+                    <div>{{ $setting->building }}</div>
+                    @endif
+                    @if($setting->tel)
+                    <div>TEL: {{ $setting->tel }}</div>
+                    @endif
+                    @if($setting->fax)
+                    <div>FAX: {{ $setting->fax }}</div>
+                    @endif
+                    @if($setting->invoice_no)
+                    <div>登録番号: {{ $setting->invoice_no }}</div>
+                    @endif
+                </div>
                 <table class="meta-table">
                     <tr><td class="meta-label">請求番号</td><td class="meta-value">{{ $billingNum }}</td></tr>
                     <tr><td class="meta-label">請求日</td><td class="meta-value">{{ $endDate }}</td></tr>
@@ -251,6 +278,22 @@
             @endforeach
         </tbody>
     </table>
+    @endif
+
+    <!-- 振込先情報 -->
+    @if($setting->bank_info || $setting->account_number || $setting->account_holder)
+    <div class="bank-section">
+        <div class="bank-title">振込先</div>
+        @if($setting->bank_info)
+        <span class="bank-row">{{ $setting->bank_info }}</span>
+        @endif
+        @if($setting->account_number)
+        <span class="bank-row">口座番号: {{ $setting->account_number }}</span>
+        @endif
+        @if($setting->account_holder)
+        <span class="bank-row">口座名義: {{ $setting->account_holder }}</span>
+        @endif
+    </div>
     @endif
 
 </div>

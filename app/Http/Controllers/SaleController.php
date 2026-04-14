@@ -235,7 +235,8 @@ class SaleController extends Controller
             ->map(fn ($items) => $items->sum(fn ($i) => round((float) $i->sale_amount * (int) $i->tax_rate / 100, 0)))
             ->sortKeys();
 
-        $pdf = Pdf::loadView('pdf.sale', compact('sale', 'taxBreakdown'))
+        $setting = SystemSetting::instance();
+        $pdf = Pdf::loadView('pdf.sale', compact('sale', 'taxBreakdown', 'setting'))
             ->setPaper('a4', 'portrait');
 
         $filename = '納品書_'.$sale->sale_number.'.pdf';

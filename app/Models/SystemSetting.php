@@ -8,6 +8,20 @@ class SystemSetting extends Model
 {
     protected $fillable = [
         'closing_ym',
+        'company_name',
+        'company_name_kana',
+        'postal_code',
+        'prefecture_city',
+        'address',
+        'building',
+        'representative',
+        'tel',
+        'fax',
+        'invoice_no',
+        'bank_info',
+        'account_number',
+        'account_holder',
+        'remarks',
     ];
 
     /**
