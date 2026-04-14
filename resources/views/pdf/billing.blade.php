@@ -196,12 +196,12 @@
             </tr>
             @foreach($saleItems as $si)
             <tr class="item-row">
-                <td>{{ $si->kisyu_cd }}</td>
-                <td>{{ $si->frame_no }}</td>
-                <td class="text-center">{{ $si->iro_cd }}</td>
-                <td>{{ $si->kisyu_nm }}</td>
+                <td>{{ $si->model_code }}</td>
+                <td>{{ $si->frame_number }}</td>
+                <td class="text-center">{{ $si->color_code }}</td>
+                <td>{{ $si->model_name }}</td>
                 <td class="text-right">{{ rtrim(rtrim(number_format((float)$si->quantity, 2), '0'), '.') }}{{ $si->unit ? ' '.$si->unit : '' }}</td>
-                <td class="text-right">{{ $fmtAmt($si->uri_tan) }}</td>
+                <td class="text-right">{{ $fmtAmt($si->selling_price) }}</td>
                 <td class="text-right">{{ $fmtAmt($si->sale_amount) }}</td>
             </tr>
             @endforeach

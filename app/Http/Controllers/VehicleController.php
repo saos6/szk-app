@@ -19,9 +19,9 @@ class VehicleController extends Controller
     {
         return [
             'vehicleModelList' => VehicleModel::active()
-                ->orderBy('kisyu_cd')
-                ->orderBy('iro_cd')
-                ->get(['kisyu_cd', 'iro_cd', 'kisyu_nm_h'])
+                ->orderBy('model_code')
+                ->orderBy('color_code')
+                ->get(['model_code', 'color_code', 'model_name_kanji'])
                 ->toArray(),
             'genders' => Vehicle::GENDERS,
         ];
@@ -29,8 +29,8 @@ class VehicleController extends Controller
 
     public function index(Request $request): Response
     {
-        $allowedSorts = ['id', 'kisyu_cd', 'frame_no', 'kisyu_nm', 'vehicle_no', 'owner_name', 'shop_name', 'sale_date', 'first_reg_date', 'created_at', 'updated_at'];
-        $sort = in_array($request->get('sort'), $allowedSorts) ? $request->get('sort') : 'kisyu_cd';
+        $allowedSorts = ['id', 'model_code', 'frame_number', 'model_name', 'vehicle_no', 'owner_name', 'shop_name', 'sale_date', 'first_reg_date', 'created_at', 'updated_at'];
+        $sort = in_array($request->get('sort'), $allowedSorts) ? $request->get('sort') : 'model_code';
         $direction = $request->get('direction') === 'desc' ? 'desc' : 'asc';
         $perPage = in_array((int) $request->get('per_page'), [10, 25, 50, 100]) ? (int) $request->get('per_page') : 10;
         $search = $request->get('search', '');
@@ -63,8 +63,8 @@ class VehicleController extends Controller
         abort_if($vehicle->is_deleted, 404);
 
         $prefill = $vehicle->only([
-            'kisyu_cd', 'name1', 'name2', 'kisyu_nm', 'keishiki', 'kisyu_no',
-            'iro_cd', 'sre_tan', 'uri_tan', 'terminal_price', 'standard_retail_price', 'maker_code', 'unit',
+            'model_code', 'name1', 'name2', 'model_name', 'model_type', 'model_number',
+            'color_code', 'purchase_price', 'selling_price', 'terminal_price', 'standard_retail_price', 'maker_code', 'unit',
             'note1', 'note2', 'note3', 'shop_name',
         ]);
 
@@ -118,7 +118,7 @@ class VehicleController extends Controller
     {
         $export = new VehiclesExport(
             search: $request->string('search')->toString(),
-            sort: $request->string('sort', 'kisyu_cd')->toString(),
+            sort: $request->string('sort', 'model_code')->toString(),
             direction: $request->string('direction', 'asc')->toString(),
         );
 

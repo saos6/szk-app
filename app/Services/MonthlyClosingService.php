@@ -49,8 +49,8 @@ class MonthlyClosingService
                     [
                         'stock_ym'           => $nextYm,
                         'warehouse_code'     => $balance->warehouse_code,
-                        'vehicle_model_code' => $balance->vehicle_model_code,
-                        'frame_no'           => $balance->frame_no,
+                        'model_code'   => $balance->model_code,
+                        'frame_number' => $balance->frame_number,
                     ],
                     ['prev_stock' => $nextStock]
                 );

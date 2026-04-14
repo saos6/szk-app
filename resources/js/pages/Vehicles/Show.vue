@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import { Copy, Pencil } from 'lucide-vue-next';
 import * as VehicleController from '@/actions/App/Http/Controllers/VehicleController';
@@ -8,16 +8,16 @@ import type { BreadcrumbItem } from '@/types';
 
 interface Vehicle {
     id: number;
-    kisyu_cd: string | null;
-    frame_no: string | null;
+    model_code: string | null;
+    frame_number: string | null;
     name1: string | null;
     name2: string | null;
-    kisyu_nm: string | null;
-    keishiki: string | null;
-    kisyu_no: string | null;
-    iro_cd: string | null;
-    sre_tan: string | null;
-    uri_tan: string | null;
+    model_name: string | null;
+    model_type: string | null;
+    model_number: string | null;
+    color_code: string | null;
+    purchase_price: string | null;
+    selling_price: string | null;
     maker_code: string | null;
     unit: string | null;
     note1: string | null;
@@ -58,7 +58,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: '車両（品番）マスタ', href: VehicleController.index.url() },
     {
-        title: props.vehicle.kisyu_cd ?? String(props.vehicle.id),
+        title: props.vehicle.model_code ?? String(props.vehicle.id),
         href: VehicleController.show.url(props.vehicle.id),
     },
 ];
@@ -76,7 +76,7 @@ function fmt(val: string | number | null): string {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head :title="`車両（品番） ${vehicle.kisyu_cd ?? vehicle.id}`" />
+        <Head :title="`車両（品番） ${vehicle.model_code ?? vehicle.id}`" />
         <div class="flex flex-col gap-4 p-4">
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <h1 class="text-2xl font-bold">車両（品番） 参照</h1>
@@ -106,27 +106,27 @@ function fmt(val: string | number | null): string {
                         <div class="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-3">
                             <div>
                                 <dt class="text-muted-foreground">機種コード（商品）</dt>
-                                <dd class="mt-0.5 font-mono font-medium">{{ vehicle.kisyu_cd ?? '—' }}</dd>
+                                <dd class="mt-0.5 font-mono font-medium">{{ vehicle.model_code ?? '—' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">車台番号</dt>
-                                <dd class="mt-0.5 font-mono font-medium">{{ vehicle.frame_no ?? '—' }}</dd>
+                                <dd class="mt-0.5 font-mono font-medium">{{ vehicle.frame_number ?? '—' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">色コード</dt>
-                                <dd class="mt-0.5 font-medium">{{ vehicle.iro_cd ?? '—' }}</dd>
+                                <dd class="mt-0.5 font-medium">{{ vehicle.color_code ?? '—' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">機種名（商品名）</dt>
-                                <dd class="mt-0.5 font-medium">{{ vehicle.kisyu_nm ?? '—' }}</dd>
+                                <dd class="mt-0.5 font-medium">{{ vehicle.model_name ?? '—' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">形式</dt>
-                                <dd class="mt-0.5 font-medium">{{ vehicle.keishiki ?? '—' }}</dd>
+                                <dd class="mt-0.5 font-medium">{{ vehicle.model_type ?? '—' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">機種番号</dt>
-                                <dd class="mt-0.5 font-medium">{{ vehicle.kisyu_no ?? '—' }}</dd>
+                                <dd class="mt-0.5 font-medium">{{ vehicle.model_number ?? '—' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">車両番号</dt>
@@ -142,11 +142,11 @@ function fmt(val: string | number | null): string {
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">仕入単価</dt>
-                                <dd class="mt-0.5 tabular-nums font-medium">{{ fmt(vehicle.sre_tan) }}</dd>
+                                <dd class="mt-0.5 tabular-nums font-medium">{{ fmt(vehicle.purchase_price) }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">売上単価</dt>
-                                <dd class="mt-0.5 tabular-nums font-medium">{{ fmt(vehicle.uri_tan) }}</dd>
+                                <dd class="mt-0.5 tabular-nums font-medium">{{ fmt(vehicle.selling_price) }}</dd>
                             </div>
                         </div>
                     </div>

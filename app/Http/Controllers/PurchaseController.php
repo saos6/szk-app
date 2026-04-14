@@ -99,14 +99,14 @@ class PurchaseController extends Controller
             'remarks'     => $purchase->remarks ?? '',
             'items'       => $purchase->items->map(fn ($item) => [
                 'vehicle_id'      => $item->vehicle_id,
-                'kisyu_cd'        => $item->kisyu_cd ?? '',
-                'frame_no'        => $item->frame_no ?? '',
+                'model_code'      => $item->model_code ?? '',
+                'frame_number'    => $item->frame_number ?? '',
                 'warehouse_code'  => $item->warehouse_code ?? '',
-                'iro_cd'          => $item->iro_cd ?? '',
-                'kisyu_nm'        => $item->kisyu_nm ?? '',
+                'color_code'      => $item->color_code ?? '',
+                'model_name'      => $item->model_name ?? '',
                 'quantity'        => $item->quantity,
                 'unit'            => $item->unit ?? '台',
-                'sre_tan'         => $item->sre_tan,
+                'purchase_price'  => $item->purchase_price,
                 'tax_rate'        => $item->tax_rate,
                 'purchase_amount' => (float) $item->purchase_amount,
                 'remarks'         => $item->remarks ?? '',
@@ -277,10 +277,10 @@ class PurchaseController extends Controller
             'suppliers' => Supplier::active()->orderBy('code')->get(['id', 'name']),
             'employees' => Employee::active()->orderBy('code')->get(['id', 'name']),
             'vehicles'  => Vehicle::active()
-                ->orderBy('kisyu_cd')
-                ->orderBy('frame_no')
-                ->get(['id', 'kisyu_cd', 'frame_no', 'iro_cd', 'kisyu_nm', 'sre_tan']),
-            'vehicleModels' => VehicleModel::active()->orderBy('kisyu_cd')->orderBy('iro_cd')->get(['kisyu_cd', 'iro_cd', 'kisyu_nm', 'sre_tan']),
+                ->orderBy('model_code')
+                ->orderBy('frame_number')
+                ->get(['id', 'model_code', 'frame_number', 'color_code', 'model_name', 'purchase_price']),
+            'vehicleModels' => VehicleModel::active()->orderBy('model_code')->orderBy('color_code')->get(['model_code', 'color_code', 'model_name', 'purchase_price']),
             'warehouses' => Warehouse::active()->orderBy('code')->get(['code', 'name']),
             'statuses'   => Purchase::STATUSES,
         ];
@@ -293,7 +293,7 @@ class PurchaseController extends Controller
 
         foreach ($items as $item) {
             $qty  = (float) ($item['quantity'] ?? 0);
-            $sre  = (float) ($item['sre_tan'] ?? 0);
+            $sre  = (float) ($item['purchase_price'] ?? 0);
             $rate = (int) ($item['tax_rate'] ?? 10);
             $amt  = round($qty * $sre, 2);
             $subtotal  += $amt;
@@ -309,20 +309,20 @@ class PurchaseController extends Controller
 
         foreach ($items as $i => $item) {
             $qty = (float) ($item['quantity'] ?? 0);
-            $sre = (float) ($item['sre_tan'] ?? 0);
+            $sre = (float) ($item['purchase_price'] ?? 0);
 
             PurchaseItem::create([
                 'purchase_id'     => $purchase->id,
                 'line_no'         => $i + 1,
                 'vehicle_id'      => $item['vehicle_id'] ?: null,
-                'kisyu_cd'        => $item['kisyu_cd'] ?? null,
-                'frame_no'        => $item['frame_no'] ?? null,
+                'model_code'      => $item['model_code'] ?? null,
+                'frame_number'    => $item['frame_number'] ?? null,
                 'warehouse_code'  => $item['warehouse_code'] ?: null,
-                'iro_cd'          => $item['iro_cd'] ?? null,
-                'kisyu_nm'        => $item['kisyu_nm'] ?? null,
+                'color_code'      => $item['color_code'] ?? null,
+                'model_name'      => $item['model_name'] ?? null,
                 'quantity'        => $qty,
                 'unit'            => $item['unit'] ?? '台',
-                'sre_tan'         => $sre,
+                'purchase_price'  => $sre,
                 'purchase_amount' => round($qty * $sre, 2),
                 'tax_rate'        => $item['tax_rate'] ?? '10',
                 'remarks'         => $item['remarks'] ?? null,
@@ -335,25 +335,25 @@ class PurchaseController extends Controller
     /** 仕入明細から車両マスタを自動登録・更新 */
     private function syncVehicleFromPurchaseItem(array $item): void
     {
-        $kisyuCd = ($item['kisyu_cd'] ?? '') ?: null;
-        $frameNo = ($item['frame_no'] ?? '') ?: null;
-        if (! $kisyuCd || ! $frameNo) {
+        $modelCode = ($item['model_code'] ?? '') ?: null;
+        $frameNumber = ($item['frame_number'] ?? '') ?: null;
+        if (! $modelCode || ! $frameNumber) {
             return;
         }
 
         $data = [
-            'kisyu_cd' => $kisyuCd,
-            'kisyu_nm' => ($item['kisyu_nm'] ?? '') ?: null,
-            'iro_cd'   => ($item['iro_cd'] ?? '') ?: null,
-            'sre_tan'  => ($item['sre_tan'] ?? 0) ?: null,
-            'unit'     => ($item['unit'] ?? '') ?: null,
+            'model_code'     => $modelCode,
+            'model_name'     => ($item['model_name'] ?? '') ?: null,
+            'color_code'     => ($item['color_code'] ?? '') ?: null,
+            'purchase_price' => ($item['purchase_price'] ?? 0) ?: null,
+            'unit'           => ($item['unit'] ?? '') ?: null,
         ];
 
-        $vehicle = Vehicle::where('frame_no', $frameNo)->where('is_deleted', false)->first();
+        $vehicle = Vehicle::where('frame_number', $frameNumber)->where('is_deleted', false)->first();
         if ($vehicle) {
             $vehicle->update($data);
         } else {
-            Vehicle::create(array_merge(['frame_no' => $frameNo], $data));
+            Vehicle::create(array_merge(['frame_number' => $frameNumber], $data));
         }
     }
 }

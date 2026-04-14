@@ -10,14 +10,14 @@ import type { BreadcrumbItem } from '@/types';
 interface PurchaseItem {
     id: number;
     line_no: number;
-    kisyu_cd: string | null;
-    frame_no: string | null;
+    model_code: string | null;
+    frame_number: string | null;
     warehouse_code: string | null;
-    iro_cd: string | null;
-    kisyu_nm: string | null;
+    color_code: string | null;
+    model_name: string | null;
     quantity: string;
     unit: string | null;
-    sre_tan: string;
+    purchase_price: string;
     purchase_amount: string;
     tax_rate: string;
     remarks: string | null;
@@ -160,16 +160,16 @@ function fmtDate(val: string | null): string {
                         <tbody>
                             <tr v-for="item in purchase.items" :key="item.id" class="border-t">
                                 <td class="px-3 py-2 text-muted-foreground">{{ item.line_no }}</td>
-                                <td class="px-3 py-2 font-medium">{{ item.kisyu_nm ?? '—' }}</td>
-                                <td class="px-3 py-2 font-mono">{{ item.frame_no ?? '—' }}</td>
+                                <td class="px-3 py-2 font-medium">{{ item.model_name ?? '—' }}</td>
+                                <td class="px-3 py-2 font-mono">{{ item.frame_number ?? '—' }}</td>
                                 <td class="px-3 py-2 text-muted-foreground">{{ item.warehouse_code ?? '—' }}</td>
-                                <td class="px-3 py-2 text-muted-foreground">{{ item.iro_cd ?? '—' }}</td>
+                                <td class="px-3 py-2 text-muted-foreground">{{ item.color_code ?? '—' }}</td>
                                 <td class="px-3 py-2 text-right tabular-nums">
                                     {{ Number(item.quantity).toLocaleString('ja-JP') }}
                                 </td>
                                 <td class="px-3 py-2 text-muted-foreground">{{ item.unit ?? '台' }}</td>
                                 <td class="px-3 py-2 text-right tabular-nums text-muted-foreground">
-                                    {{ fmt(item.sre_tan) }}
+                                    {{ fmt(item.purchase_price) }}
                                 </td>
                                 <td class="px-3 py-2 text-center text-muted-foreground">{{ item.tax_rate }}%</td>
                                 <td class="px-3 py-2 text-right tabular-nums font-medium">

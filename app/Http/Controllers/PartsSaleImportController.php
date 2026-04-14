@@ -44,7 +44,7 @@ class PartsSaleImportController extends Controller
         $search  = $request->get('search', '');
 
         $allowedSorts = [
-            'processing_ym', 'hinban', 'slip_no', 'order_date', 'sale_date',
+            'processing_ym', 'part_number', 'slip_number', 'order_date', 'sale_date',
             'ship_qty', 'unit_price', 'cost_price', 'partner_code', 'item_name',
             'quantity', 'check_flag',
         ];
@@ -131,26 +131,26 @@ class PartsSaleImportController extends Controller
             $cols = str_getcsv($line);
             if (count($cols) < self::CSV_COLUMN_COUNT) continue;
 
-            $hinban       = trim($cols[2]);
+            $partNumber   = trim($cols[2]);
             $saleDateRaw  = trim($cols[8]);
-            $redBlackKbn  = trim($cols[17]);
+            $reversalType = trim($cols[17]);
             $shipQty      = (float) trim($cols[7]);
-            $quantity     = $redBlackKbn === '2' ? $shipQty * -1 : $shipQty;
+            $quantity     = $reversalType === '2' ? $shipQty * -1 : $shipQty;
             // 品番13桁: 1-5桁目=機種CD / 6-10桁目+"-"+11-13桁目=車両CD(XXXXX-YYY)
-            $modelKisyuCd   = mb_strlen($hinban) >= 5
-                                  ? mb_substr($hinban, 0, 5)
+            $modelCode   = mb_strlen($partNumber) >= 5
+                                  ? mb_substr($partNumber, 0, 5)
                                   : null;
-            $vehicleKisyuCd = mb_strlen($hinban) >= 13
-                                  ? mb_substr($hinban, 5, 5) . '-' . mb_substr($hinban, 10, 3)
+            $vehicleCode = mb_strlen($partNumber) >= 13
+                                  ? mb_substr($partNumber, 5, 5) . '-' . mb_substr($partNumber, 10, 3)
                                   : null;
 
             $rows[] = [
                 'processing_ym'          => $ym,
-                'monthly_f_kbn'          => trim($cols[0]) ?: null,
+                'monthly_f_type'         => trim($cols[0]) ?: null,
                 'control_code'           => trim($cols[1]),
-                'hinban'                 => $hinban,
+                'part_number'            => $partNumber,
                 'office_code'            => trim($cols[3]) ?: null,
-                'slip_no'                => trim($cols[4]),
+                'slip_number'            => trim($cols[4]),
                 'order_qty'              => (float) trim($cols[5]),
                 'order_date_raw'         => trim($cols[6]),
                 'order_date'             => $this->parseReiwaDate(trim($cols[6])),
@@ -158,30 +158,30 @@ class PartsSaleImportController extends Controller
                 'sale_date_raw'          => $saleDateRaw,
                 'sale_date'              => $this->parseReiwaDate($saleDateRaw),
                 'unit_price'             => (float) trim($cols[9]),
-                'sale_kbn'               => trim($cols[10]) ?: null,
-                'les_rate'               => trim($cols[11]) ?: null,
+                'sale_type'              => trim($cols[10]) ?: null,
+                'discount_rate'          => trim($cols[11]) ?: null,
                 'partner_code'           => trim($cols[12]),
                 'cost_price'             => (float) trim($cols[13]),
                 'terminal_price'         => trim($cols[14]) ?: null,
                 'breakdown_code'         => trim($cols[15]) ?: null,
                 'maintenance_no'         => trim($cols[16]) ?: null,
-                'red_black_kbn'          => $redBlackKbn,
-                'invoice_kbn'            => trim($cols[18]) ?: null,
-                'invoice_m_kbn'          => trim($cols[19]) ?: null,
+                'reversal_type'          => $reversalType,
+                'invoice_type'           => trim($cols[18]) ?: null,
+                'invoice_monthly_type'   => trim($cols[19]) ?: null,
                 'dispatch_source'        => trim($cols[20]) ?: null,
                 'staff_code'             => trim($cols[21]) ?: null,
-                'rank_cd'                => trim($cols[22]) ?: null,
-                'first_ship_kbn'         => trim($cols[23]) ?: null,
+                'rank_code'              => trim($cols[22]) ?: null,
+                'first_shipment_type'    => trim($cols[23]) ?: null,
                 'item_code'              => trim($cols[24]) ?: null,
                 'item_name'              => trim($cols[25]) ?: null,
-                'open_kbn'               => trim($cols[26]) ?: null,
+                'open_type'              => trim($cols[26]) ?: null,
                 'dealer_code'            => trim($cols[27]) ?: null,
                 'standard_retail_price'  => trim($cols[28]) ?: null,
                 'model_group'            => trim($cols[29]) ?: null,
                 'filler'                 => trim($cols[30]) ?: null,
                 'quantity'               => $quantity,
-                'model_kisyu_cd'         => $modelKisyuCd,
-                'vehicle_kisyu_cd'       => $vehicleKisyuCd,
+                'model_code'             => $modelCode,
+                'vehicle_code'           => $vehicleCode,
                 'check_flag'             => PartsSaleWork::CHECK_NORMAL,
                 'check_message'          => null,
                 'created_at'             => $now,
@@ -343,8 +343,8 @@ class PartsSaleImportController extends Controller
         }
 
         // ── 売上変換（伝票NO単位にグループ化して1伝票N明細で作成） ──
-        // slip_no → works のグループに分割（orderBy slip_no, id で行順を保持）
-        $groups = $works->groupBy('slip_no');
+        // slip_number → works のグループに分割（orderBy slip_number, id で行順を保持）
+        $groups = $works->groupBy('slip_number');
         $count  = 0;
 
         try {
@@ -375,15 +375,15 @@ class PartsSaleImportController extends Controller
                         $items[] = [
                             'line_no'        => $lineNo++,
                             'vehicle_id'     => null,
-                            'kisyu_cd'       => $work->model_kisyu_cd,
-                            'frame_no'       => $work->vehicle_kisyu_cd,
+                            'model_code'     => $work->model_code,
+                            'frame_number'   => $work->vehicle_code,
                             'warehouse_code' => $work->dispatch_source,
-                            'iro_cd'         => null,
-                            'kisyu_nm'       => $work->item_name,
+                            'color_code'     => null,
+                            'model_name'     => $work->item_name,
                             'quantity'       => $qty,
                             'unit'           => '個',
-                            'sre_tan'        => $sreTan,
-                            'uri_tan'        => $uriTan,
+                            'purchase_price' => $sreTan,
+                            'selling_price'  => $uriTan,
                             'terminal_price' => $terminalPrice,
                             'tax_rate'       => 10,
                             'sale_amount'    => $saleAmt,
@@ -392,24 +392,24 @@ class PartsSaleImportController extends Controller
                         ];
 
                         // 車両（品番）マスタの単価を上書き更新
-                        if ($work->vehicle_kisyu_cd) {
-                            Vehicle::where('frame_no', $work->vehicle_kisyu_cd)
+                        if ($work->vehicle_code) {
+                            Vehicle::where('frame_number', $work->vehicle_code)
                                 ->where('is_deleted', false)
                                 ->update([
-                                    'sre_tan'              => $sreTan ?: null,
-                                    'uri_tan'              => $uriTan ?: null,
+                                    'purchase_price'        => $sreTan ?: null,
+                                    'selling_price'         => $uriTan ?: null,
                                     'terminal_price'        => $terminalPrice,
                                     'standard_retail_price' => $stdRetailPrice,
                                 ]);
                         }
 
                         // 車両機種（商品）マスタの単価を上書き更新
-                        if ($work->model_kisyu_cd) {
-                            VehicleModel::where('kisyu_cd', $work->model_kisyu_cd)
+                        if ($work->model_code) {
+                            VehicleModel::where('model_code', $work->model_code)
                                 ->where('is_deleted', false)
                                 ->update([
-                                    'sre_tan'              => $sreTan ?: null,
-                                    'uri_tan'              => $uriTan ?: null,
+                                    'purchase_price'        => $sreTan ?: null,
+                                    'selling_price'         => $uriTan ?: null,
                                     'terminal_price'        => $terminalPrice,
                                     'standard_retail_price' => $stdRetailPrice,
                                 ]);
@@ -478,7 +478,7 @@ class PartsSaleImportController extends Controller
     {
         // 既存車両マスタを一括取得してハッシュセット化
         $existingVehicleCodes = array_flip(
-            Vehicle::active()->pluck('frame_no')->toArray()
+            Vehicle::active()->pluck('frame_number')->toArray()
         );
 
         foreach ($works as $work) {
@@ -487,20 +487,20 @@ class PartsSaleImportController extends Controller
             $stdRetailPrice = ($work->standard_retail_price !== null && $work->standard_retail_price !== '')
                                   ? (float) $work->standard_retail_price : null;
 
-            // ── 車両（品番）マスタ自動作成 (frame_no = XXXXX-YYY) ──
-            if ($work->vehicle_kisyu_cd && ! array_key_exists($work->vehicle_kisyu_cd, $existingVehicleCodes)) {
+            // ── 車両（品番）マスタ自動作成 (frame_number = XXXXX-YYY) ──
+            if ($work->vehicle_code && ! array_key_exists($work->vehicle_code, $existingVehicleCodes)) {
                 Vehicle::create([
-                    'kisyu_cd'              => $work->model_kisyu_cd, // 機種コード（VehicleModelとの紐付け）
-                    'frame_no'              => $work->vehicle_kisyu_cd,
-                    'kisyu_nm'              => $work->item_name,
-                    'sre_tan'               => ($work->cost_price !== null && (float) $work->cost_price > 0)
+                    'model_code'            => $work->model_code, // 機種コード（VehicleModelとの紐付け）
+                    'frame_number'          => $work->vehicle_code,
+                    'model_name'            => $work->item_name,
+                    'purchase_price'        => ($work->cost_price !== null && (float) $work->cost_price > 0)
                                                   ? (float) $work->cost_price : null,
-                    'uri_tan'               => ($work->unit_price !== null && (float) $work->unit_price > 0)
+                    'selling_price'         => ($work->unit_price !== null && (float) $work->unit_price > 0)
                                                   ? (float) $work->unit_price : null,
                     'terminal_price'        => $terminalPrice,
                     'standard_retail_price' => $stdRetailPrice,
                 ]);
-                $existingVehicleCodes[$work->vehicle_kisyu_cd] = true;
+                $existingVehicleCodes[$work->vehicle_code] = true;
             }
         }
     }
@@ -549,7 +549,7 @@ class PartsSaleImportController extends Controller
             Customer::active()->whereNotNull('partner_code')->pluck('partner_code')->toArray()
         );
         $validModelCodes = array_flip(
-            VehicleModel::active()->pluck('kisyu_cd')->toArray()
+            VehicleModel::active()->pluck('model_code')->toArray()
         );
 
         $errorCount = 0;
@@ -578,13 +578,13 @@ class PartsSaleImportController extends Controller
                 }
 
                 // 4. 車両機種（商品）マスタ存在チェック（品番1-5桁）― 存在しない場合はエラー（手動登録が必要）
-                if (! $work->model_kisyu_cd || ! array_key_exists($work->model_kisyu_cd, $validModelCodes)) {
-                    $messages[] = "品番先頭5桁[{$work->model_kisyu_cd}]の車両機種マスタが存在しません";
+                if (! $work->model_code || ! array_key_exists($work->model_code, $validModelCodes)) {
+                    $messages[] = "品番先頭5桁[{$work->model_code}]の車両機種マスタが存在しません";
                 }
 
                 // 5. 車両（品番）マスタ存在チェック（品番6-13桁 XXXXX-YYY形式）
                 // ― 品番13桁未満は取得不可のためエラー、マスタ未存在は売上変換時に自動作成するためエラーにしない
-                if (! $work->vehicle_kisyu_cd) {
+                if (! $work->vehicle_code) {
                     $messages[] = '品番が13桁未満のため車両コードを取得できません';
                 }
 
@@ -609,13 +609,13 @@ class PartsSaleImportController extends Controller
         $validated = $request->validate([
             // 基本
             'processing_ym'          => ['required', 'date_format:Y-m'],
-            'monthly_f_kbn'          => ['nullable', 'string', 'max:5'],
+            'monthly_f_type'         => ['nullable', 'string', 'max:5'],
             'control_code'           => ['nullable', 'string', 'max:5'],
             'office_code'            => ['nullable', 'string', 'max:10'],
             // 伝票・品番
-            'hinban'                 => ['required', 'string', 'max:20'],
-            'slip_no'                => ['required', 'string', 'max:20'],
-            'red_black_kbn'          => ['nullable', 'string', 'in:0,2'],
+            'part_number'            => ['required', 'string', 'max:20'],
+            'slip_number'            => ['required', 'string', 'max:20'],
+            'reversal_type'          => ['nullable', 'string', 'in:0,2'],
             // 受注
             'order_qty'              => ['nullable', 'numeric', 'min:0'],
             'order_date'             => ['nullable', 'date'],
@@ -623,8 +623,8 @@ class PartsSaleImportController extends Controller
             'ship_qty'               => ['required', 'numeric'],
             'sale_date'              => ['required', 'date'],
             'unit_price'             => ['required', 'numeric', 'min:0'],
-            'sale_kbn'               => ['nullable', 'string', 'max:5'],
-            'les_rate'               => ['nullable', 'string', 'max:10'],
+            'sale_type'              => ['nullable', 'string', 'max:5'],
+            'discount_rate'          => ['nullable', 'string', 'max:10'],
             'cost_price'             => ['nullable', 'numeric', 'min:0'],
             'terminal_price'         => ['nullable', 'string', 'max:20'],
             'breakdown_code'         => ['nullable', 'string', 'max:10'],
@@ -632,17 +632,17 @@ class PartsSaleImportController extends Controller
             'partner_code'           => ['required', 'string', 'max:20'],
             'dealer_code'            => ['nullable', 'string', 'max:20'],
             // 請求
-            'invoice_kbn'            => ['nullable', 'string', 'max:5'],
-            'invoice_m_kbn'          => ['nullable', 'string', 'max:5'],
+            'invoice_type'           => ['nullable', 'string', 'max:5'],
+            'invoice_monthly_type'   => ['nullable', 'string', 'max:5'],
             // 出庫・担当
             'dispatch_source'        => ['nullable', 'string', 'max:20'],
             'staff_code'             => ['nullable', 'string', 'max:20'],
-            'rank_cd'                => ['nullable', 'string', 'max:5'],
-            'first_ship_kbn'         => ['nullable', 'string', 'max:5'],
+            'rank_code'              => ['nullable', 'string', 'max:5'],
+            'first_shipment_type'    => ['nullable', 'string', 'max:5'],
             // 商品
             'item_code'              => ['nullable', 'string', 'max:20'],
             'item_name'              => ['nullable', 'string', 'max:200'],
-            'open_kbn'               => ['nullable', 'string', 'max:5'],
+            'open_type'              => ['nullable', 'string', 'max:5'],
             'model_group'            => ['nullable', 'string', 'max:10'],
             'maintenance_no'         => ['nullable', 'string', 'max:100'],
             'standard_retail_price'  => ['nullable', 'string', 'max:20'],
@@ -650,17 +650,17 @@ class PartsSaleImportController extends Controller
             'filler'                 => ['nullable', 'string', 'max:100'],
         ]);
 
-        $hinban           = $validated['hinban'];
-        $redBlackKbn      = $validated['red_black_kbn'] ?? '0';
+        $partNumber       = $validated['part_number'];
+        $reversalType     = $validated['reversal_type'] ?? '0';
         $shipQty          = (float) ($validated['ship_qty'] ?? 0);
 
-        $validated['quantity']         = $redBlackKbn === '2' ? $shipQty * -1 : $shipQty;
-        $validated['model_kisyu_cd']   = mb_strlen($hinban) >= 5
-                                             ? mb_substr($hinban, 0, 5)
-                                             : null;
-        $validated['vehicle_kisyu_cd'] = mb_strlen($hinban) >= 13
-                                             ? mb_substr($hinban, 5, 5) . '-' . mb_substr($hinban, 10, 3)
-                                             : null;
+        $validated['quantity']      = $reversalType === '2' ? $shipQty * -1 : $shipQty;
+        $validated['model_code']    = mb_strlen($partNumber) >= 5
+                                          ? mb_substr($partNumber, 0, 5)
+                                          : null;
+        $validated['vehicle_code']  = mb_strlen($partNumber) >= 13
+                                          ? mb_substr($partNumber, 5, 5) . '-' . mb_substr($partNumber, 10, 3)
+                                          : null;
         $validated['check_flag']       = PartsSaleWork::CHECK_NORMAL;
         $validated['check_message']    = null;
 

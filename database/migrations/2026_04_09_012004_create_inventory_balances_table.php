@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('stock_ym', 7);            // 年月 YYYY-MM
             $table->string('warehouse_code', 20);     // 倉庫コード
-            $table->string('vehicle_model_code', 8);  // 機種コード
-            $table->string('frame_no', 10);           // フレームNo
+            $table->string('model_code', 8);  // 機種コード
+            $table->string('frame_number', 10);           // フレームNo
             $table->integer('prev_stock')->default(0); // 前月繰越在庫数
             $table->integer('in_stock')->default(0);   // 当月入庫数
             $table->integer('out_stock')->default(0);  // 当月出庫数
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(
-                ['stock_ym', 'warehouse_code', 'vehicle_model_code', 'frame_no'],
+                ['stock_ym', 'warehouse_code', 'model_code', 'frame_number'],
                 'inventory_balances_unique'
             );
         });

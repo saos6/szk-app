@@ -13,14 +13,14 @@ import {
 } from '@/components/ui/select';
 
 interface VehicleModelFormData {
-    kisyu_cd: string;
-    iro_cd: string;
-    kisyu_nm: string;
-    kisyu_nm_r: string;
-    kihon: string;
-    kisyu_nm_h: string;
-    sre_tan: string;
-    uri_tan: string;
+    model_code: string;
+    color_code: string;
+    model_name: string;
+    model_abbr: string;
+    base_model: string;
+    model_name_kanji: string;
+    purchase_price: string;
+    selling_price: string;
     terminal_price: string;
     standard_retail_price: string;
     g1: string | null;
@@ -28,17 +28,17 @@ interface VehicleModelFormData {
     g3: string | null;
     g4: string | null;
     g5: string | null;
-    order_no: string;
-    zei_kbn: string | null;
+    order_number: string;
+    tax_type: string | null;
     errors: {
-        kisyu_cd?: string;
-        iro_cd?: string;
-        kisyu_nm?: string;
-        kisyu_nm_r?: string;
-        kihon?: string;
-        kisyu_nm_h?: string;
-        sre_tan?: string;
-        uri_tan?: string;
+        model_code?: string;
+        color_code?: string;
+        model_name?: string;
+        model_abbr?: string;
+        base_model?: string;
+        model_name_kanji?: string;
+        purchase_price?: string;
+        selling_price?: string;
         terminal_price?: string;
         standard_retail_price?: string;
         g1?: string;
@@ -46,8 +46,8 @@ interface VehicleModelFormData {
         g3?: string;
         g4?: string;
         g5?: string;
-        order_no?: string;
-        zei_kbn?: string;
+        order_number?: string;
+        tax_type?: string;
     };
     processing: boolean;
 }
@@ -74,130 +74,130 @@ const emit = defineEmits<{ submit: [] }>();
         <!-- 機種コード・色コード -->
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div class="flex flex-col gap-1.5">
-                <Label for="kisyu_cd">
+                <Label for="model_code">
                     機種コード
                     <span class="ml-1 text-xs text-destructive">*必須</span>
                 </Label>
                 <Input
-                    id="kisyu_cd"
-                    v-model="form.kisyu_cd"
+                    id="model_code"
+                    v-model="form.model_code"
                     placeholder="例：CB400SF"
                     maxlength="8"
                     class="font-mono"
-                    :class="{ 'border-destructive': form.errors.kisyu_cd }"
+                    :class="{ 'border-destructive': form.errors.model_code }"
                 />
-                <InputError :message="form.errors.kisyu_cd" />
+                <InputError :message="form.errors.model_code" />
             </div>
             <div class="flex flex-col gap-1.5">
-                <Label for="iro_cd">
+                <Label for="color_code">
                     色コード
                     <span class="ml-1 text-xs text-destructive">*必須</span>
                 </Label>
                 <Input
-                    id="iro_cd"
-                    v-model="form.iro_cd"
+                    id="color_code"
+                    v-model="form.color_code"
                     placeholder="例：R-001"
                     maxlength="6"
                     class="font-mono"
-                    :class="{ 'border-destructive': form.errors.iro_cd }"
+                    :class="{ 'border-destructive': form.errors.color_code }"
                 />
-                <InputError :message="form.errors.iro_cd" />
+                <InputError :message="form.errors.color_code" />
             </div>
         </div>
 
         <!-- 機種名(漢字) -->
         <div class="flex flex-col gap-1.5">
-            <Label for="kisyu_nm_h">機種名（漢字）</Label>
+            <Label for="model_name_kanji">機種名（漢字）</Label>
             <Input
-                id="kisyu_nm_h"
-                v-model="form.kisyu_nm_h"
+                id="model_name_kanji"
+                v-model="form.model_name_kanji"
                 placeholder="例：ホンダ CB400スーパーフォア"
                 maxlength="32"
-                :class="{ 'border-destructive': form.errors.kisyu_nm_h }"
+                :class="{ 'border-destructive': form.errors.model_name_kanji }"
             />
-            <InputError :message="form.errors.kisyu_nm_h" />
+            <InputError :message="form.errors.model_name_kanji" />
         </div>
 
         <!-- 営業機種記号・機種略称 -->
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div class="flex flex-col gap-1.5">
-                <Label for="kisyu_nm">営業機種記号</Label>
+                <Label for="model_name">営業機種記号</Label>
                 <Input
-                    id="kisyu_nm"
-                    v-model="form.kisyu_nm"
+                    id="model_name"
+                    v-model="form.model_name"
                     placeholder="例：CB400SF-V"
                     maxlength="20"
-                    :class="{ 'border-destructive': form.errors.kisyu_nm }"
+                    :class="{ 'border-destructive': form.errors.model_name }"
                 />
-                <InputError :message="form.errors.kisyu_nm" />
+                <InputError :message="form.errors.model_name" />
             </div>
             <div class="flex flex-col gap-1.5">
-                <Label for="kisyu_nm_r">機種略称</Label>
+                <Label for="model_abbr">機種略称</Label>
                 <Input
-                    id="kisyu_nm_r"
-                    v-model="form.kisyu_nm_r"
+                    id="model_abbr"
+                    v-model="form.model_abbr"
                     placeholder="例：CB400SF"
                     maxlength="18"
-                    :class="{ 'border-destructive': form.errors.kisyu_nm_r }"
+                    :class="{ 'border-destructive': form.errors.model_abbr }"
                 />
-                <InputError :message="form.errors.kisyu_nm_r" />
+                <InputError :message="form.errors.model_abbr" />
             </div>
         </div>
 
         <!-- 基本機種・オーダーNo -->
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div class="flex flex-col gap-1.5">
-                <Label for="kihon">基本機種</Label>
+                <Label for="base_model">基本機種</Label>
                 <Input
-                    id="kihon"
-                    v-model="form.kihon"
+                    id="base_model"
+                    v-model="form.base_model"
                     placeholder="例：CB400"
                     maxlength="10"
-                    :class="{ 'border-destructive': form.errors.kihon }"
+                    :class="{ 'border-destructive': form.errors.base_model }"
                 />
-                <InputError :message="form.errors.kihon" />
+                <InputError :message="form.errors.base_model" />
             </div>
             <div class="flex flex-col gap-1.5">
-                <Label for="order_no">オーダーNo</Label>
+                <Label for="order_number">オーダーNo</Label>
                 <Input
-                    id="order_no"
-                    v-model="form.order_no"
+                    id="order_number"
+                    v-model="form.order_number"
                     placeholder="例：ORD00001"
                     maxlength="8"
                     class="font-mono"
-                    :class="{ 'border-destructive': form.errors.order_no }"
+                    :class="{ 'border-destructive': form.errors.order_number }"
                 />
-                <InputError :message="form.errors.order_no" />
+                <InputError :message="form.errors.order_number" />
             </div>
         </div>
 
         <!-- 単価情報 -->
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
             <div class="flex flex-col gap-1.5">
-                <Label for="sre_tan">仕入単価（税抜）</Label>
+                <Label for="purchase_price">仕入単価（税抜）</Label>
                 <Input
-                    id="sre_tan"
-                    v-model="form.sre_tan"
+                    id="purchase_price"
+                    v-model="form.purchase_price"
                     type="number"
                     min="0"
                     step="0.01"
                     placeholder="例：500000"
-                    :class="{ 'border-destructive': form.errors.sre_tan }"
+                    :class="{ 'border-destructive': form.errors.purchase_price }"
                 />
-                <InputError :message="form.errors.sre_tan" />
+                <InputError :message="form.errors.purchase_price" />
             </div>
             <div class="flex flex-col gap-1.5">
-                <Label for="uri_tan">売上単価（税抜）</Label>
+                <Label for="selling_price">売上単価（税抜）</Label>
                 <Input
-                    id="uri_tan"
-                    v-model="form.uri_tan"
+                    id="selling_price"
+                    v-model="form.selling_price"
                     type="number"
                     min="0"
                     step="0.01"
                     placeholder="例：650000"
-                    :class="{ 'border-destructive': form.errors.uri_tan }"
+                    :class="{ 'border-destructive': form.errors.selling_price }"
                 />
-                <InputError :message="form.errors.uri_tan" />
+                <InputError :message="form.errors.selling_price" />
             </div>
             <div class="flex flex-col gap-1.5">
                 <Label for="terminal_price">末端価格</Label>
@@ -224,12 +224,12 @@ const emit = defineEmits<{ submit: [] }>();
                 <InputError :message="form.errors.standard_retail_price" />
             </div>
             <div class="flex flex-col gap-1.5">
-                <Label for="zei_kbn">税区分</Label>
+                <Label for="tax_type">税区分</Label>
                 <Select
-                    :model-value="form.zei_kbn ?? '__none__'"
-                    @update:model-value="(v) => (form.zei_kbn = v === '__none__' ? null : v)"
+                    :model-value="form.tax_type ?? '__none__'"
+                    @update:model-value="(v) => (form.tax_type = v === '__none__' ? null : v)"
                 >
-                    <SelectTrigger id="zei_kbn" :class="{ 'border-destructive': form.errors.zei_kbn }">
+                    <SelectTrigger id="tax_type" :class="{ 'border-destructive': form.errors.tax_type }">
                         <SelectValue placeholder="（未選択）" />
                     </SelectTrigger>
                     <SelectContent>
@@ -239,7 +239,7 @@ const emit = defineEmits<{ submit: [] }>();
                         </SelectItem>
                     </SelectContent>
                 </Select>
-                <InputError :message="form.errors.zei_kbn" />
+                <InputError :message="form.errors.tax_type" />
             </div>
         </div>
 

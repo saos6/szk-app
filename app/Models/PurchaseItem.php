@@ -11,14 +11,14 @@ class PurchaseItem extends Model
         'purchase_id',
         'line_no',
         'vehicle_id',
-        'kisyu_cd',
-        'frame_no',
+        'model_code',
+        'frame_number',
         'warehouse_code',
-        'iro_cd',
-        'kisyu_nm',
+        'color_code',
+        'model_name',
         'quantity',
         'unit',
-        'sre_tan',
+        'purchase_price',
         'purchase_amount',
         'tax_rate',
         'remarks',
@@ -26,7 +26,7 @@ class PurchaseItem extends Model
 
     protected $casts = [
         'quantity'        => 'decimal:2',
-        'sre_tan'         => 'decimal:2',
+        'purchase_price'  => 'decimal:2',
         'purchase_amount' => 'decimal:2',
     ];
 

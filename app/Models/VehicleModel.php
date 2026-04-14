@@ -8,18 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 class VehicleModel extends Model
 {
     protected $fillable = [
-        'kisyu_cd', 'iro_cd', 'kisyu_nm', 'kisyu_nm_r', 'kihon', 'kisyu_nm_h',
-        'sre_tan', 'uri_tan', 'terminal_price', 'standard_retail_price',
-        'g1', 'g2', 'g3', 'g4', 'g5', 'order_no', 'zei_kbn',
+        'model_code', 'color_code', 'model_name', 'model_abbr', 'base_model', 'model_name_kanji',
+        'purchase_price', 'selling_price', 'terminal_price', 'standard_retail_price',
+        'g1', 'g2', 'g3', 'g4', 'g5', 'order_number', 'tax_type',
     ];
 
     protected $casts = [
         'is_deleted' => 'boolean',
-        'sre_tan' => 'decimal:2',
-        'uri_tan' => 'decimal:2',
+        'purchase_price' => 'decimal:2',
+        'selling_price' => 'decimal:2',
         'terminal_price' => 'decimal:2',
         'standard_retail_price' => 'decimal:2',
-        'zei_kbn' => 'string',
+        'tax_type' => 'string',
     ];
 
     /** 税区分 */
@@ -64,12 +64,12 @@ class VehicleModel extends Model
     {
         return $query->when($search !== '', function ($q) use ($search) {
             $q->where(function ($q2) use ($search) {
-                $q2->where('kisyu_cd', 'like', "%{$search}%")
-                    ->orWhere('iro_cd', 'like', "%{$search}%")
-                    ->orWhere('kisyu_nm', 'like', "%{$search}%")
-                    ->orWhere('kisyu_nm_r', 'like', "%{$search}%")
-                    ->orWhere('kisyu_nm_h', 'like', "%{$search}%")
-                    ->orWhere('kihon', 'like', "%{$search}%");
+                $q2->where('model_code', 'like', "%{$search}%")
+                    ->orWhere('color_code', 'like', "%{$search}%")
+                    ->orWhere('model_name', 'like', "%{$search}%")
+                    ->orWhere('model_abbr', 'like', "%{$search}%")
+                    ->orWhere('model_name_kanji', 'like', "%{$search}%")
+                    ->orWhere('base_model', 'like', "%{$search}%");
             });
         });
     }

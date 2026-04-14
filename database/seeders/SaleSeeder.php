@@ -15,7 +15,7 @@ class SaleSeeder extends Seeder
     {
         $customers = Customer::active()->get()->keyBy('code');
         $employees = Employee::active()->get()->keyBy('code');
-        $vehicles = Vehicle::active()->get()->keyBy('frame_no');
+        $vehicles = Vehicle::active()->get()->keyBy('frame_number');
 
         $sales = [
             [
@@ -28,7 +28,7 @@ class SaleSeeder extends Seeder
                 'status' => 'completed',
                 'remarks' => null,
                 'items' => [
-                    ['frame_no' => 'NC31100001', 'quantity' => 1, 'tax_rate' => '10'],
+                    ['frame_number' => 'NC31100001', 'quantity' => 1, 'tax_rate' => '10'],
                 ],
             ],
             [
@@ -41,7 +41,7 @@ class SaleSeeder extends Seeder
                 'status' => 'completed',
                 'remarks' => '特別カラー限定モデル',
                 'items' => [
-                    ['frame_no' => 'ZXT00E0001', 'quantity' => 1, 'tax_rate' => '10'],
+                    ['frame_number' => 'ZXT00E0001', 'quantity' => 1, 'tax_rate' => '10'],
                 ],
             ],
             [
@@ -54,8 +54,8 @@ class SaleSeeder extends Seeder
                 'status' => 'draft',
                 'remarks' => null,
                 'items' => [
-                    ['frame_no' => 'B3L0000001',  'quantity' => 1, 'tax_rate' => '10'],
-                    ['frame_no' => 'JK05E1000001', 'quantity' => 1, 'tax_rate' => '10'],
+                    ['frame_number' => 'B3L0000001',  'quantity' => 1, 'tax_rate' => '10'],
+                    ['frame_number' => 'JK05E1000001', 'quantity' => 1, 'tax_rate' => '10'],
                 ],
             ],
             [
@@ -68,7 +68,7 @@ class SaleSeeder extends Seeder
                 'status' => 'recorded',
                 'remarks' => 'レース仕様オプション取付',
                 'items' => [
-                    ['frame_no' => 'GT79A100001', 'quantity' => 1, 'tax_rate' => '10'],
+                    ['frame_number' => 'GT79A100001', 'quantity' => 1, 'tax_rate' => '10'],
                 ],
             ],
             [
@@ -81,8 +81,8 @@ class SaleSeeder extends Seeder
                 'status' => 'draft',
                 'remarks' => 'お子様向けセット販売',
                 'items' => [
-                    ['frame_no' => 'JB02E5000001',  'quantity' => 1, 'tax_rate' => '10'],
-                    ['frame_no' => 'AE01E0100001', 'quantity' => 1, 'tax_rate' => '0'],
+                    ['frame_number' => 'JB02E5000001',  'quantity' => 1, 'tax_rate' => '10'],
+                    ['frame_number' => 'AE01E0100001', 'quantity' => 1, 'tax_rate' => '0'],
                 ],
             ],
         ];
@@ -94,10 +94,10 @@ class SaleSeeder extends Seeder
             $itemRows = [];
 
             foreach ($saleData['items'] as $i => $itemDef) {
-                $vehicle = $vehicles->get($itemDef['frame_no']);
+                $vehicle = $vehicles->get($itemDef['frame_number']);
                 $qty = (float) $itemDef['quantity'];
-                $uri = $vehicle ? (float) $vehicle->uri_tan : 0;
-                $sre = $vehicle ? (float) $vehicle->sre_tan : 0;
+                $uri = $vehicle ? (float) $vehicle->selling_price : 0;
+                $sre = $vehicle ? (float) $vehicle->purchase_price : 0;
                 $rate = (int) $itemDef['tax_rate'];
                 $saleAmt = round($qty * $uri, 2);
                 $cogsAmt = round($qty * $sre, 2);
@@ -109,15 +109,15 @@ class SaleSeeder extends Seeder
                 $itemRows[] = [
                     'line_no' => $i + 1,
                     'vehicle_id' => $vehicle?->id,
-                    'kisyu_cd' => $vehicle?->kisyu_cd,
-                    'frame_no' => $itemDef['frame_no'],
+                    'model_code' => $vehicle?->model_code,
+                    'frame_number' => $itemDef['frame_number'],
                     'warehouse_code' => $itemDef['warehouse_code'] ?? null,
-                    'iro_cd' => $vehicle?->iro_cd,
-                    'kisyu_nm' => $vehicle?->kisyu_nm,
+                    'color_code' => $vehicle?->color_code,
+                    'model_name' => $vehicle?->model_name,
                     'quantity' => $qty,
                     'unit' => $vehicle?->unit ?? '台',
-                    'sre_tan' => $sre,
-                    'uri_tan' => $uri,
+                    'purchase_price' => $sre,
+                    'selling_price' => $uri,
                     'tax_rate' => $itemDef['tax_rate'],
                     'sale_amount' => $saleAmt,
                     'cogs_amount' => $cogsAmt,

@@ -10,16 +10,16 @@ return new class extends Migration
     {
         Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
-            $table->string('kisyu_cd', 8);              // 機種コード
-            $table->string('frame_no', 10);             // フレームNo
+            $table->string('model_code', 8);              // 機種コード
+            $table->string('frame_number', 10);             // フレームNo
             $table->string('name1', 1000)->nullable();  // 商品名1
             $table->string('name2', 1000)->nullable();  // 商品名2
-            $table->string('kisyu_nm', 1000)->nullable(); // 機種名
-            $table->string('keishiki', 100)->nullable();  // 形式
-            $table->string('kisyu_no', 20)->nullable();   // 機種番号
-            $table->string('iro_cd', 6)->nullable();      // 色コード
-            $table->decimal('sre_tan', 11, 2)->nullable(); // 仕入単価(税抜)
-            $table->decimal('uri_tan', 11, 2)->nullable(); // 売上単価(税抜)
+            $table->string('model_name', 1000)->nullable(); // 機種名
+            $table->string('model_type', 100)->nullable();  // 形式
+            $table->string('model_number', 20)->nullable();   // 機種番号
+            $table->string('color_code', 6)->nullable();      // 色コード
+            $table->decimal('purchase_price', 11, 2)->nullable(); // 仕入単価(税抜)
+            $table->decimal('selling_price', 11, 2)->nullable(); // 売上単価(税抜)
             $table->decimal('terminal_price', 11, 2)->nullable();        // 末端価格
             $table->decimal('standard_retail_price', 11, 2)->nullable(); // 標準小売価格
             $table->string('maker_code', 32)->nullable(); // メーカー品番

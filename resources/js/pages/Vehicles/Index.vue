@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { router, Head, Link } from '@inertiajs/vue3';
 import { ArrowUpDown, ArrowUp, ArrowDown, Download, Plus, Eye, Pencil, Trash2, Columns3, Search } from 'lucide-vue-next';
 import { ref, computed, watch } from 'vue';
@@ -16,15 +16,15 @@ import type { BreadcrumbItem } from '@/types';
 
 interface Vehicle {
     id: number;
-    kisyu_cd: string; frame_no: string;
-    kisyu_nm: string | null; vehicle_no: string | null;
+    model_code: string; frame_number: string;
+    model_name: string | null; vehicle_no: string | null;
     owner_name: string | null; owner_kana: string | null;
-    iro_cd: string | null; gender: string | null;
+    color_code: string | null; gender: string | null;
     shop_name: string | null; sale_date: string | null;
     first_reg_date: string | null;
     has_security_reg: boolean; has_theft_insurance: boolean;
     has_warranty: boolean; has_application: boolean; has_dm: boolean;
-    sre_tan: string | null; uri_tan: string | null;
+    purchase_price: string | null; selling_price: string | null;
     created_at: string; updated_at: string;
 }
 
@@ -48,12 +48,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const search = ref(props.filters.search ?? '');
 const perPage = ref(props.filters.per_page ?? '10');
-const sortField = ref(props.filters.sort ?? 'kisyu_cd');
+const sortField = ref(props.filters.sort ?? 'model_code');
 const sortDir = ref(props.filters.direction ?? 'asc');
 
-type ColumnKey = 'id' | 'kisyu_cd' | 'frame_no' | 'kisyu_nm' | 'iro_cd' | 'vehicle_no'
+type ColumnKey = 'id' | 'model_code' | 'frame_number' | 'model_name' | 'color_code' | 'vehicle_no'
     | 'owner_name' | 'owner_kana' | 'gender' | 'shop_name' | 'sale_date'
-    | 'first_reg_date' | 'sre_tan' | 'uri_tan'
+    | 'first_reg_date' | 'purchase_price' | 'selling_price'
     | 'has_security_reg' | 'has_theft_insurance' | 'has_warranty' | 'has_application' | 'has_dm'
     | 'created_at' | 'updated_at';
 
@@ -61,10 +61,10 @@ const COLUMNS_STORAGE_KEY = 'vehicles.columns';
 
 const defaultColumns: Record<ColumnKey, { label: string; visible: boolean }> = {
     id:                  { label: 'ID',           visible: false },
-    kisyu_cd:            { label: '機種コード（商品）',   visible: true  },
-    frame_no:            { label: 'フレームNo（品番）',   visible: true  },
-    kisyu_nm:            { label: '機種名（商品名）',      visible: true  },
-    iro_cd:              { label: '色コード',      visible: false },
+    model_code:            { label: '機種コード（商品）',   visible: true  },
+    frame_number:            { label: 'フレームNo（品番）',   visible: true  },
+    model_name:            { label: '機種名（商品名）',      visible: true  },
+    color_code:              { label: '色コード',      visible: false },
     vehicle_no:          { label: '車両番号',      visible: true  },
     owner_name:          { label: '氏名',          visible: true  },
     owner_kana:          { label: '氏名カナ',      visible: false },
@@ -72,8 +72,8 @@ const defaultColumns: Record<ColumnKey, { label: string; visible: boolean }> = {
     shop_name:           { label: '販売店名',      visible: true  },
     sale_date:           { label: '売上日',        visible: true  },
     first_reg_date:      { label: '初年度登録日',  visible: false },
-    sre_tan:             { label: '仕入単価',      visible: false },
-    uri_tan:             { label: '売上単価',      visible: false },
+    purchase_price:             { label: '仕入単価',      visible: false },
+    selling_price:             { label: '売上単価',      visible: false },
     has_security_reg:    { label: 'G防犯登録',     visible: false },
     has_theft_insurance: { label: '盗難保険',      visible: false },
     has_warranty:        { label: '保証書',        visible: false },
@@ -221,10 +221,10 @@ function formatDate(val: string | null) { return val ? val : '—'; }
                     <tbody>
                         <tr v-for="v in vehicles.data" :key="v.id" class="border-t transition-colors hover:bg-muted/30">
                             <td v-if="columns.id.visible" class="px-4 py-3 text-muted-foreground">{{ v.id }}</td>
-                            <td v-if="columns.kisyu_cd.visible" class="px-4 py-3 font-mono text-sm font-medium">{{ v.kisyu_cd }}</td>
-                            <td v-if="columns.frame_no.visible" class="px-4 py-3 font-mono text-sm">{{ v.frame_no }}</td>
-                            <td v-if="columns.kisyu_nm.visible" class="px-4 py-3 font-medium">{{ v.kisyu_nm ?? '—' }}</td>
-                            <td v-if="columns.iro_cd.visible" class="px-4 py-3 font-mono text-muted-foreground">{{ v.iro_cd ?? '—' }}</td>
+                            <td v-if="columns.model_code.visible" class="px-4 py-3 font-mono text-sm font-medium">{{ v.model_code }}</td>
+                            <td v-if="columns.frame_number.visible" class="px-4 py-3 font-mono text-sm">{{ v.frame_number }}</td>
+                            <td v-if="columns.model_name.visible" class="px-4 py-3 font-medium">{{ v.model_name ?? '—' }}</td>
+                            <td v-if="columns.color_code.visible" class="px-4 py-3 font-mono text-muted-foreground">{{ v.color_code ?? '—' }}</td>
                             <td v-if="columns.vehicle_no.visible" class="px-4 py-3 text-muted-foreground">{{ v.vehicle_no ?? '—' }}</td>
                             <td v-if="columns.owner_name.visible" class="px-4 py-3">{{ v.owner_name ?? '—' }}</td>
                             <td v-if="columns.owner_kana.visible" class="px-4 py-3 text-muted-foreground">{{ v.owner_kana ?? '—' }}</td>
@@ -234,8 +234,8 @@ function formatDate(val: string | null) { return val ? val : '—'; }
                             <td v-if="columns.shop_name.visible" class="px-4 py-3 text-muted-foreground">{{ v.shop_name ?? '—' }}</td>
                             <td v-if="columns.sale_date.visible" class="px-4 py-3 whitespace-nowrap text-muted-foreground">{{ formatDate(v.sale_date) }}</td>
                             <td v-if="columns.first_reg_date.visible" class="px-4 py-3 whitespace-nowrap text-muted-foreground">{{ formatDate(v.first_reg_date) }}</td>
-                            <td v-if="columns.sre_tan.visible" class="px-4 py-3 text-right tabular-nums">{{ formatPrice(v.sre_tan) }}</td>
-                            <td v-if="columns.uri_tan.visible" class="px-4 py-3 text-right tabular-nums">{{ formatPrice(v.uri_tan) }}</td>
+                            <td v-if="columns.purchase_price.visible" class="px-4 py-3 text-right tabular-nums">{{ formatPrice(v.purchase_price) }}</td>
+                            <td v-if="columns.selling_price.visible" class="px-4 py-3 text-right tabular-nums">{{ formatPrice(v.selling_price) }}</td>
                             <td v-if="columns.has_security_reg.visible" class="px-4 py-3 text-center">
                                 <Badge :variant="v.has_security_reg ? 'default' : 'secondary'">{{ v.has_security_reg ? '有' : '無' }}</Badge>
                             </td>
@@ -266,7 +266,7 @@ function formatDate(val: string | null) { return val ? val : '—'; }
                                         <Link :href="VehicleController.edit.url(v.id)"><Pencil class="h-4 w-4" /></Link>
                                     </Button>
                                     <Button variant="ghost" size="icon" class="h-8 w-8 text-destructive hover:text-destructive"
-                                        @click="deleteVehicle(v.id, v.kisyu_cd + ' / ' + v.frame_no)">
+                                        @click="deleteVehicle(v.id, v.model_code + ' / ' + v.frame_number)">
                                         <Trash2 class="h-4 w-4" />
                                     </Button>
                                 </div>

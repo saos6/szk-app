@@ -18,7 +18,7 @@ class InventoryBalanceController extends Controller
 {
     public function index(Request $request): Response
     {
-        $allowedSorts = ['stock_ym', 'warehouse_code', 'vehicle_model_code', 'frame_no', 'prev_stock', 'in_stock', 'out_stock', 'created_at', 'updated_at'];
+        $allowedSorts = ['stock_ym', 'warehouse_code', 'model_code', 'frame_number', 'prev_stock', 'in_stock', 'out_stock', 'created_at', 'updated_at'];
         $sort = in_array($request->get('sort'), $allowedSorts) ? $request->get('sort') : 'stock_ym';
         $direction = $request->get('direction') === 'asc' ? 'asc' : 'desc';
         $perPage = in_array((int) $request->get('per_page'), [10, 25, 50, 100]) ? (int) $request->get('per_page') : 10;
@@ -58,7 +58,7 @@ class InventoryBalanceController extends Controller
             $this->formData(),
             [
                 'prefill' => $inventoryBalance->only([
-                    'warehouse_code', 'vehicle_model_code', 'frame_no',
+                    'warehouse_code', 'model_code', 'frame_number',
                     'prev_stock', 'in_stock', 'out_stock',
                 ]),
             ]
@@ -130,9 +130,9 @@ class InventoryBalanceController extends Controller
         return [
             'warehouses' => Warehouse::active()->orderBy('code')->get(['code', 'name']),
             'vehicleModels' => VehicleModel::active()
-                ->selectRaw('kisyu_cd, MAX(kisyu_nm_h) as kisyu_nm_h')
-                ->groupBy('kisyu_cd')
-                ->orderBy('kisyu_cd')
+                ->selectRaw('model_code, MAX(model_name_kanji) as model_name_kanji')
+                ->groupBy('model_code')
+                ->orderBy('model_code')
                 ->get(),
         ];
     }

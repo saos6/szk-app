@@ -13,21 +13,21 @@ class VehicleRequest extends FormRequest
         $vehicle = $this->route('vehicle');
 
         return [
-            'kisyu_cd' => [
+            'model_code' => [
                 'required', 'string', 'max:8',
                 Rule::unique('vehicles')->where(function ($query) {
-                    return $query->where('frame_no', $this->frame_no)->where('is_deleted', false);
+                    return $query->where('frame_number', $this->frame_number)->where('is_deleted', false);
                 })->ignore($vehicle?->id),
             ],
-            'frame_no' => 'required|string|max:10',
+            'frame_number' => 'required|string|max:10',
             'name1' => 'nullable|string|max:1000',
             'name2' => 'nullable|string|max:1000',
-            'kisyu_nm' => 'nullable|string|max:1000',
-            'keishiki' => 'nullable|string|max:100',
-            'kisyu_no' => 'nullable|string|max:20',
-            'iro_cd' => 'nullable|string|max:6',
-            'sre_tan' => 'nullable|numeric|min:0',
-            'uri_tan' => 'nullable|numeric|min:0',
+            'model_name' => 'nullable|string|max:1000',
+            'model_type' => 'nullable|string|max:100',
+            'model_number' => 'nullable|string|max:20',
+            'color_code' => 'nullable|string|max:6',
+            'purchase_price' => 'nullable|numeric|min:0',
+            'selling_price' => 'nullable|numeric|min:0',
             'terminal_price' => 'nullable|numeric|min:0',
             'standard_retail_price' => 'nullable|numeric|min:0',
             'maker_code' => 'nullable|string|max:32',
@@ -63,13 +63,13 @@ class VehicleRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'kisyu_cd.required' => '機種コードは必須です。',
-            'kisyu_cd.max' => '機種コードは8文字以内で入力してください。',
-            'kisyu_cd.unique' => 'この機種コード・フレームNoの組み合わせはすでに使用されています。',
-            'frame_no.required' => 'フレームNoは必須です。',
-            'frame_no.max' => 'フレームNoは10文字以内で入力してください。',
-            'sre_tan.numeric' => '仕入単価は数値で入力してください。',
-            'uri_tan.numeric' => '売上単価は数値で入力してください。',
+            'model_code.required' => '機種コードは必須です。',
+            'model_code.max' => '機種コードは8文字以内で入力してください。',
+            'model_code.unique' => 'この機種コード・フレームNoの組み合わせはすでに使用されています。',
+            'frame_number.required' => 'フレームNoは必須です。',
+            'frame_number.max' => 'フレームNoは10文字以内で入力してください。',
+            'purchase_price.numeric' => '仕入単価は数値で入力してください。',
+            'selling_price.numeric' => '売上単価は数値で入力してください。',
             'gender.in' => '性別の値が不正です。',
             'birth_date.date' => '生年月日の日付形式が不正です。',
             'first_reg_date.date' => '初年度登録日の日付形式が不正です。',

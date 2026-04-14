@@ -6,12 +6,12 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 
 interface Warehouse { code: string; name: string; }
-interface VehicleModel { kisyu_cd: string; kisyu_nm_h: string | null; }
+interface VehicleModel { model_code: string; model_name_kanji: string | null; }
 
 interface Prefill {
     warehouse_code?: string;
-    vehicle_model_code?: string;
-    frame_no?: string;
+    model_code?: string;
+    frame_number?: string;
     prev_stock?: number;
     in_stock?: number;
     out_stock?: number;
@@ -34,8 +34,8 @@ const p = props.prefill;
 const form = useForm({
     stock_ym:            '',
     warehouse_code:      p?.warehouse_code      ?? '',
-    vehicle_model_code:  p?.vehicle_model_code  ?? '',
-    frame_no:            p?.frame_no            ?? '',
+    model_code:  p?.model_code  ?? '',
+    frame_number:            p?.frame_number            ?? '',
     prev_stock:          p?.prev_stock          ?? 0,
     in_stock:            p?.in_stock            ?? 0,
     out_stock:           p?.out_stock           ?? 0,

@@ -21,7 +21,7 @@ class InventoryBalancesExport implements FromCollection, WithHeadings, WithMappi
 
     public function collection()
     {
-        $allowedSorts = ['stock_ym', 'warehouse_code', 'vehicle_model_code', 'frame_no', 'prev_stock', 'in_stock', 'out_stock', 'created_at', 'updated_at'];
+        $allowedSorts = ['stock_ym', 'warehouse_code', 'model_code', 'frame_number', 'prev_stock', 'in_stock', 'out_stock', 'created_at', 'updated_at'];
         $sortField = in_array($this->sort, $allowedSorts) ? $this->sort : 'stock_ym';
         $sortDir = $this->direction === 'asc' ? 'asc' : 'desc';
 
@@ -41,8 +41,8 @@ class InventoryBalancesExport implements FromCollection, WithHeadings, WithMappi
         return [
             $row->stock_ym,
             $row->warehouse_code,
-            $row->vehicle_model_code,
-            $row->frame_no,
+            $row->model_code,
+            $row->frame_number,
             $row->prev_stock,
             $row->in_stock,
             $row->out_stock,

@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Vehicle extends Model
 {
     protected $fillable = [
-        'kisyu_cd', 'frame_no', 'name1', 'name2', 'kisyu_nm', 'keishiki', 'kisyu_no',
-        'iro_cd', 'sre_tan', 'uri_tan', 'terminal_price', 'standard_retail_price', 'maker_code', 'unit',
+        'model_code', 'frame_number', 'name1', 'name2', 'model_name', 'model_type', 'model_number',
+        'color_code', 'purchase_price', 'selling_price', 'terminal_price', 'standard_retail_price', 'maker_code', 'unit',
         'note1', 'note2', 'note3',
         'first_reg_date', 'second_reg_date', 'vehicle_no',
         'owner_name', 'owner_kana', 'birth_date', 'zip_code', 'gender',
@@ -22,8 +22,8 @@ class Vehicle extends Model
 
     protected $casts = [
         'is_deleted' => 'boolean',
-        'sre_tan' => 'decimal:2',
-        'uri_tan' => 'decimal:2',
+        'purchase_price' => 'decimal:2',
+        'selling_price' => 'decimal:2',
         'terminal_price' => 'decimal:2',
         'standard_retail_price' => 'decimal:2',
         'has_security_reg' => 'boolean',
@@ -54,9 +54,9 @@ class Vehicle extends Model
     {
         return $query->when($search !== '', function ($q) use ($search) {
             $q->where(function ($q2) use ($search) {
-                $q2->where('kisyu_cd', 'like', "%{$search}%")
-                    ->orWhere('frame_no', 'like', "%{$search}%")
-                    ->orWhere('kisyu_nm', 'like', "%{$search}%")
+                $q2->where('model_code', 'like', "%{$search}%")
+                    ->orWhere('frame_number', 'like', "%{$search}%")
+                    ->orWhere('model_name', 'like', "%{$search}%")
                     ->orWhere('vehicle_no', 'like', "%{$search}%")
                     ->orWhere('owner_name', 'like', "%{$search}%")
                     ->orWhere('owner_kana', 'like', "%{$search}%")

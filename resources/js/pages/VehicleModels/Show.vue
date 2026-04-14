@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import { Copy, Pencil } from 'lucide-vue-next';
 import * as VehicleModelController from '@/actions/App/Http/Controllers/VehicleModelController';
@@ -8,21 +8,21 @@ import type { BreadcrumbItem } from '@/types';
 
 interface VehicleModel {
     id: number;
-    kisyu_cd: string;
-    iro_cd: string | null;
-    kisyu_nm: string | null;
-    kisyu_nm_r: string | null;
-    kisyu_nm_h: string | null;
-    kihon: string | null;
-    sre_tan: string | null;
-    uri_tan: string | null;
+    model_code: string;
+    color_code: string | null;
+    model_name: string | null;
+    model_abbr: string | null;
+    model_name_kanji: string | null;
+    base_model: string | null;
+    purchase_price: string | null;
+    selling_price: string | null;
     g1: string | null;
     g2: string | null;
     g3: string | null;
     g4: string | null;
     g5: string | null;
-    order_no: number | null;
-    zei_kbn: string | null;
+    order_number: number | null;
+    tax_type: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -41,7 +41,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: '車両機種（商品）マスタ', href: VehicleModelController.index.url() },
     {
-        title: props.vehicleModel.kisyu_cd,
+        title: props.vehicleModel.model_code,
         href: VehicleModelController.show.url(props.vehicleModel.id),
     },
 ];
@@ -54,7 +54,7 @@ function fmt(val: string | number | null): string {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head :title="`車両機種（商品） ${vehicleModel.kisyu_cd}`" />
+        <Head :title="`車両機種（商品） ${vehicleModel.model_code}`" />
         <div class="flex flex-col gap-4 p-4">
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <h1 class="text-2xl font-bold">車両機種（商品） 参照</h1>
@@ -84,36 +84,36 @@ function fmt(val: string | number | null): string {
                         <div class="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-3">
                             <div>
                                 <dt class="text-muted-foreground">機種コード（商品）</dt>
-                                <dd class="mt-0.5 font-mono font-medium">{{ vehicleModel.kisyu_cd }}</dd>
+                                <dd class="mt-0.5 font-mono font-medium">{{ vehicleModel.model_code }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">色コード</dt>
-                                <dd class="mt-0.5 font-mono font-medium">{{ vehicleModel.iro_cd ?? '—' }}</dd>
+                                <dd class="mt-0.5 font-mono font-medium">{{ vehicleModel.color_code ?? '—' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">表示順</dt>
-                                <dd class="mt-0.5 font-medium">{{ vehicleModel.order_no ?? '—' }}</dd>
+                                <dd class="mt-0.5 font-medium">{{ vehicleModel.order_number ?? '—' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">機種名（商品名）</dt>
-                                <dd class="mt-0.5 font-medium">{{ vehicleModel.kisyu_nm ?? '—' }}</dd>
+                                <dd class="mt-0.5 font-medium">{{ vehicleModel.model_name ?? '—' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">機種名（読み）</dt>
-                                <dd class="mt-0.5 font-medium">{{ vehicleModel.kisyu_nm_r ?? '—' }}</dd>
+                                <dd class="mt-0.5 font-medium">{{ vehicleModel.model_abbr ?? '—' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">機種名（略称）</dt>
-                                <dd class="mt-0.5 font-medium">{{ vehicleModel.kisyu_nm_h ?? '—' }}</dd>
+                                <dd class="mt-0.5 font-medium">{{ vehicleModel.model_name_kanji ?? '—' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">基本</dt>
-                                <dd class="mt-0.5 font-medium">{{ vehicleModel.kihon ?? '—' }}</dd>
+                                <dd class="mt-0.5 font-medium">{{ vehicleModel.base_model ?? '—' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">税区分</dt>
                                 <dd class="mt-0.5 font-medium">
-                                    {{ vehicleModel.zei_kbn !== null ? zeiKbn[vehicleModel.zei_kbn] ?? vehicleModel.zei_kbn : '—' }}
+                                    {{ vehicleModel.tax_type !== null ? zeiKbn[vehicleModel.tax_type] ?? vehicleModel.tax_type : '—' }}
                                 </dd>
                             </div>
                         </div>
@@ -125,11 +125,11 @@ function fmt(val: string | number | null): string {
                         <div class="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
                             <div>
                                 <dt class="text-muted-foreground">仕入単価</dt>
-                                <dd class="mt-0.5 tabular-nums font-medium">{{ fmt(vehicleModel.sre_tan) }}</dd>
+                                <dd class="mt-0.5 tabular-nums font-medium">{{ fmt(vehicleModel.purchase_price) }}</dd>
                             </div>
                             <div>
                                 <dt class="text-muted-foreground">売上単価</dt>
-                                <dd class="mt-0.5 tabular-nums font-medium">{{ fmt(vehicleModel.uri_tan) }}</dd>
+                                <dd class="mt-0.5 tabular-nums font-medium">{{ fmt(vehicleModel.selling_price) }}</dd>
                             </div>
                         </div>
                     </div>

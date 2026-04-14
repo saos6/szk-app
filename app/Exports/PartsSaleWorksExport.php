@@ -17,18 +17,18 @@ class PartsSaleWorksExport implements FromQuery, WithHeadings, WithMapping, With
     {
         return PartsSaleWork::byYm($this->processingYm)
             ->orderBy('sale_date')
-            ->orderBy('slip_no');
+            ->orderBy('slip_number');
     }
 
     public function map($work): array
     {
         return [
             $work->processing_ym,
-            $work->monthly_f_kbn ?? '',
+            $work->monthly_f_type ?? '',
             $work->control_code ?? '',
             $work->office_code ?? '',
-            $work->hinban ?? '',
-            $work->slip_no ?? '',
+            $work->part_number ?? '',
+            $work->slip_number ?? '',
             $work->order_qty !== null ? (float) $work->order_qty : '',
             $work->order_date?->format('Y/m/d') ?? '',
             $work->order_date_raw ?? '',
@@ -36,30 +36,30 @@ class PartsSaleWorksExport implements FromQuery, WithHeadings, WithMapping, With
             $work->sale_date?->format('Y/m/d') ?? '',
             $work->sale_date_raw ?? '',
             (float) $work->unit_price,
-            $work->sale_kbn ?? '',
-            $work->les_rate ?? '',
+            $work->sale_type ?? '',
+            $work->discount_rate ?? '',
             $work->partner_code ?? '',
             $work->dealer_code ?? '',
             (float) $work->cost_price,
             $work->terminal_price ?? '',
             $work->breakdown_code ?? '',
             $work->maintenance_no ?? '',
-            $work->red_black_kbn,
-            $work->invoice_kbn ?? '',
-            $work->invoice_m_kbn ?? '',
+            $work->reversal_type,
+            $work->invoice_type ?? '',
+            $work->invoice_monthly_type ?? '',
             $work->dispatch_source ?? '',
             $work->staff_code ?? '',
-            $work->rank_cd ?? '',
-            $work->first_ship_kbn ?? '',
+            $work->rank_code ?? '',
+            $work->first_shipment_type ?? '',
             $work->item_code ?? '',
             $work->item_name ?? '',
-            $work->open_kbn ?? '',
+            $work->open_type ?? '',
             $work->standard_retail_price ?? '',
             $work->model_group ?? '',
             $work->filler ?? '',
             (float) $work->quantity,
-            $work->model_kisyu_cd ?? '',
-            $work->vehicle_kisyu_cd ?? '',
+            $work->model_code ?? '',
+            $work->vehicle_code ?? '',
             $work->check_flag === PartsSaleWork::CHECK_NORMAL ? '正常' : 'エラー',
             $work->check_message ?? '',
         ];

@@ -7,7 +7,7 @@ use App\Models\InventoryBalance;
 /**
  * 在庫残高マスタの入出庫数を売上/仕入明細と連動して更新するサービス
  *
- * キー: stock_ym (YYYY-MM) × warehouse_code × vehicle_model_code (kisyu_cd) × frame_no
+ * キー: stock_ym (YYYY-MM) × warehouse_code × model_code × frame_number
  * 売上 → out_stock を増減
  * 仕入 → in_stock  を増減
  */
@@ -31,8 +31,8 @@ class InventoryService
             self::adjust(
                 $ym,
                 $fields['warehouse_code'],
-                $fields['kisyu_cd'],
-                $fields['frame_no'],
+                $fields['model_code'],
+                $fields['frame_number'],
                 $type === 'in'  ? $fields['quantity'] : 0,
                 $type === 'out' ? $fields['quantity'] : 0,
             );
@@ -57,8 +57,8 @@ class InventoryService
             self::adjust(
                 $ym,
                 $fields['warehouse_code'],
-                $fields['kisyu_cd'],
-                $fields['frame_no'],
+                $fields['model_code'],
+                $fields['frame_number'],
                 $type === 'in'  ? -$fields['quantity'] : 0,
                 $type === 'out' ? -$fields['quantity'] : 0,
             );
@@ -67,12 +67,12 @@ class InventoryService
 
     // ─── Private helpers ──────────────────────────────────────────────
 
-    /** @return array{kisyu_cd:?string, frame_no:?string, warehouse_code:?string, quantity:int} */
+    /** @return array{model_code:?string, frame_number:?string, warehouse_code:?string, quantity:int} */
     private static function extractFields(array $item): array
     {
         return [
-            'kisyu_cd'       => ($item['kisyu_cd'] ?? '') ?: null,
-            'frame_no'       => ($item['frame_no'] ?? '') ?: null,
+            'model_code'     => ($item['model_code'] ?? '') ?: null,
+            'frame_number'   => ($item['frame_number'] ?? '') ?: null,
             'warehouse_code' => ($item['warehouse_code'] ?? '') ?: null,
             'quantity'       => (int) round((float) ($item['quantity'] ?? 0)),
         ];
@@ -80,8 +80,8 @@ class InventoryService
 
     private static function isTrackable(array $fields): bool
     {
-        return $fields['kisyu_cd'] !== null
-            && $fields['frame_no'] !== null
+        return $fields['model_code'] !== null
+            && $fields['frame_number'] !== null
             && $fields['warehouse_code'] !== null
             && $fields['quantity'] > 0;
     }
@@ -89,17 +89,17 @@ class InventoryService
     private static function adjust(
         string $ym,
         string $wareCode,
-        string $kisyuCd,
-        string $frameNo,
+        string $modelCode,
+        string $frameNumber,
         int $inDelta,
         int $outDelta,
     ): void {
         $balance = InventoryBalance::firstOrCreate(
             [
-                'stock_ym'           => $ym,
-                'warehouse_code'     => $wareCode,
-                'vehicle_model_code' => $kisyuCd,
-                'frame_no'           => $frameNo,
+                'stock_ym'       => $ym,
+                'warehouse_code' => $wareCode,
+                'model_code'     => $modelCode,
+                'frame_number'   => $frameNumber,
             ],
             ['prev_stock' => 0, 'in_stock' => 0, 'out_stock' => 0],
         );

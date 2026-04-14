@@ -15,12 +15,12 @@ interface Employee {
 }
 interface VehicleOption {
     id: number;
-    kisyu_cd: string;
-    frame_no: string;
-    iro_cd: string | null;
-    kisyu_nm: string | null;
-    sre_tan: string;
-    uri_tan: string;
+    model_code: string;
+    frame_number: string;
+    color_code: string | null;
+    model_name: string | null;
+    purchase_price: string;
+    selling_price: string;
 }
 interface Warehouse {
     code: string;
@@ -28,15 +28,15 @@ interface Warehouse {
 }
 interface PrefillItem {
     vehicle_id: number | null;
-    kisyu_cd: string;
-    frame_no: string;
+    model_code: string;
+    frame_number: string;
     warehouse_code: string;
-    iro_cd: string;
-    kisyu_nm: string;
+    color_code: string;
+    model_name: string;
     quantity: string;
     unit: string;
-    sre_tan: string;
-    uri_tan: string;
+    purchase_price: string;
+    selling_price: string;
     tax_rate: string;
     sale_amount: number;
     cogs_amount: number;
@@ -54,7 +54,7 @@ interface Prefill {
     items?: PrefillItem[];
 }
 
-interface VehicleModelOption { kisyu_cd: string; iro_cd: string | null; kisyu_nm: string | null; sre_tan: string; uri_tan: string; }
+interface VehicleModelOption { model_code: string; color_code: string | null; model_name: string | null; purchase_price: string; selling_price: string; }
 
 const props = defineProps<{
     customers: Customer[];
@@ -77,15 +77,15 @@ const p = props.prefill;
 
 const defaultItem = {
     vehicle_id: null as number | null,
-    kisyu_cd: '',
-    frame_no: '',
+    model_code: '',
+    frame_number: '',
     warehouse_code: '',
-    iro_cd: '',
-    kisyu_nm: '',
+    color_code: '',
+    model_name: '',
     quantity: '1',
     unit: '台',
-    sre_tan: '0',
-    uri_tan: '0',
+    purchase_price: '0',
+    selling_price: '0',
     tax_rate: '10',
     sale_amount: 0,
     cogs_amount: 0,

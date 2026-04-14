@@ -10,16 +10,16 @@ import type { BreadcrumbItem } from '@/types';
 interface Supplier { id: number; name: string; }
 interface Employee { id: number; name: string; }
 interface VehicleOption {
-    id: number; kisyu_cd: string; frame_no: string;
-    iro_cd: string | null; kisyu_nm: string | null; sre_tan: string;
+    id: number; model_code: string; frame_number: string;
+    color_code: string | null; model_name: string | null; purchase_price: string;
 }
 interface Warehouse { code: string; name: string; }
 interface PurchaseItemData {
     vehicle_id: number | null;
-    kisyu_cd: string | null; frame_no: string | null; warehouse_code: string | null;
-    iro_cd: string | null; kisyu_nm: string | null;
+    model_code: string | null; frame_number: string | null; warehouse_code: string | null;
+    color_code: string | null; model_name: string | null;
     quantity: string; unit: string | null;
-    sre_tan: string; purchase_amount: string;
+    purchase_price: string; purchase_amount: string;
     tax_rate: string; remarks: string | null;
 }
 interface PurchaseData {
@@ -34,7 +34,7 @@ interface PurchaseData {
     items: PurchaseItemData[];
 }
 
-interface VehicleModelOption { kisyu_cd: string; iro_cd: string | null; kisyu_nm: string | null; sre_tan: string; }
+interface VehicleModelOption { model_code: string; color_code: string | null; model_name: string | null; purchase_price: string; }
 
 const props = defineProps<{
     purchase: PurchaseData;
@@ -62,14 +62,14 @@ const form = useForm({
     remarks:       props.purchase.remarks ?? '',
     items: props.purchase.items.map((item) => ({
         vehicle_id:      item.vehicle_id,
-        kisyu_cd:        item.kisyu_cd ?? '',
-        frame_no:        item.frame_no ?? '',
+        model_code:        item.model_code ?? '',
+        frame_number:        item.frame_number ?? '',
         warehouse_code:  item.warehouse_code ?? '',
-        iro_cd:          item.iro_cd ?? '',
-        kisyu_nm:        item.kisyu_nm ?? '',
+        color_code:          item.color_code ?? '',
+        model_name:        item.model_name ?? '',
         quantity:        item.quantity,
         unit:            item.unit ?? '台',
-        sre_tan:         item.sre_tan,
+        purchase_price:         item.purchase_price,
         tax_rate:        item.tax_rate,
         purchase_amount: parseFloat(item.purchase_amount) || 0,
         remarks:         item.remarks ?? '',

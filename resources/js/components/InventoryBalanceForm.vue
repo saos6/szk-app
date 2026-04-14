@@ -13,23 +13,23 @@ interface Warehouse {
 }
 
 interface VehicleModel {
-    kisyu_cd: string;
-    kisyu_nm_h: string | null;
+    model_code: string;
+    model_name_kanji: string | null;
 }
 
 interface InventoryBalanceFormData {
     stock_ym: string;
     warehouse_code: string;
-    vehicle_model_code: string;
-    frame_no: string;
+    model_code: string;
+    frame_number: string;
     prev_stock: number;
     in_stock: number;
     out_stock: number;
     errors: {
         stock_ym?: string;
         warehouse_code?: string;
-        vehicle_model_code?: string;
-        frame_no?: string;
+        model_code?: string;
+        frame_number?: string;
         prev_stock?: string;
         in_stock?: string;
         out_stock?: string;
@@ -62,8 +62,8 @@ const warehouseOptions = computed(() =>
 
 const vehicleModelOptions = computed(() =>
     props.vehicleModels.map((m) => ({
-        value: m.kisyu_cd,
-        label: m.kisyu_nm_h ? `[${m.kisyu_cd}] ${m.kisyu_nm_h}` : m.kisyu_cd,
+        value: m.model_code,
+        label: m.model_name_kanji ? `[${m.model_code}] ${m.model_name_kanji}` : m.model_code,
     })),
 );
 </script>
@@ -88,18 +88,18 @@ const vehicleModelOptions = computed(() =>
 
             <!-- フレームNo -->
             <div class="flex flex-col gap-1.5">
-                <Label for="frame_no">
+                <Label for="frame_number">
                     フレームNo（品番）
                     <span class="ml-1 text-xs text-destructive">*必須</span>
                 </Label>
                 <Input
-                    id="frame_no"
-                    v-model="form.frame_no"
+                    id="frame_number"
+                    v-model="form.frame_number"
                     placeholder="例：AB1234567C"
                     maxlength="10"
-                    :class="{ 'border-destructive': form.errors.frame_no }"
+                    :class="{ 'border-destructive': form.errors.frame_number }"
                 />
-                <InputError :message="form.errors.frame_no" />
+                <InputError :message="form.errors.frame_number" />
             </div>
 
             <!-- 倉庫 -->
@@ -125,11 +125,11 @@ const vehicleModelOptions = computed(() =>
                 </Label>
                 <Combobox
                     :options="vehicleModelOptions"
-                    :model-value="form.vehicle_model_code"
+                    :model-value="form.model_code"
                     placeholder="機種を選択..."
-                    @update:model-value="form.vehicle_model_code = $event"
+                    @update:model-value="form.model_code = $event"
                 />
-                <InputError :message="form.errors.vehicle_model_code" />
+                <InputError :message="form.errors.model_code" />
             </div>
         </div>
 

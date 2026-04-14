@@ -13,14 +13,14 @@ class VehiclesExport implements FromCollection, WithHeadings, WithMapping, WithS
 {
     public function __construct(
         private string $search = '',
-        private string $sort = 'kisyu_cd',
+        private string $sort = 'model_code',
         private string $direction = 'asc',
     ) {}
 
     public function collection()
     {
-        $allowedSorts = ['id', 'kisyu_cd', 'frame_no', 'kisyu_nm', 'vehicle_no', 'owner_name', 'shop_name', 'sale_date', 'first_reg_date', 'created_at', 'updated_at'];
-        $sortField = in_array($this->sort, $allowedSorts) ? $this->sort : 'kisyu_cd';
+        $allowedSorts = ['id', 'model_code', 'frame_number', 'model_name', 'vehicle_no', 'owner_name', 'shop_name', 'sale_date', 'first_reg_date', 'created_at', 'updated_at'];
+        $sortField = in_array($this->sort, $allowedSorts) ? $this->sort : 'model_code';
         $sortDir = $this->direction === 'desc' ? 'desc' : 'asc';
 
         return Vehicle::active()
@@ -51,16 +51,16 @@ class VehiclesExport implements FromCollection, WithHeadings, WithMapping, WithS
     {
         return [
             $v->id,
-            $v->kisyu_cd,
-            $v->frame_no,
+            $v->model_code,
+            $v->frame_number,
             $v->name1 ?? '',
             $v->name2 ?? '',
-            $v->kisyu_nm ?? '',
-            $v->keishiki ?? '',
-            $v->kisyu_no ?? '',
-            $v->iro_cd ?? '',
-            $v->sre_tan !== null ? number_format($v->sre_tan, 2) : '',
-            $v->uri_tan !== null ? number_format($v->uri_tan, 2) : '',
+            $v->model_name ?? '',
+            $v->model_type ?? '',
+            $v->model_number ?? '',
+            $v->color_code ?? '',
+            $v->purchase_price !== null ? number_format($v->purchase_price, 2) : '',
+            $v->selling_price !== null ? number_format($v->selling_price, 2) : '',
             $v->maker_code ?? '',
             $v->unit ?? '',
             $v->note1 ?? '',

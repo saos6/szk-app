@@ -15,7 +15,7 @@ class PurchaseSeeder extends Seeder
     {
         $suppliers = Supplier::active()->get()->keyBy('code');
         $employees = Employee::active()->get()->keyBy('code');
-        $vehicles  = Vehicle::active()->get()->keyBy('frame_no');
+        $vehicles  = Vehicle::active()->get()->keyBy('frame_number');
 
         $purchases = [
             [
@@ -27,7 +27,7 @@ class PurchaseSeeder extends Seeder
                 'status'          => 'completed',
                 'remarks'         => null,
                 'items' => [
-                    ['frame_no' => 'NC31100001', 'quantity' => 1, 'tax_rate' => '10'],
+                    ['frame_number' => 'NC31100001', 'quantity' => 1, 'tax_rate' => '10'],
                 ],
             ],
             [
@@ -39,7 +39,7 @@ class PurchaseSeeder extends Seeder
                 'status'          => 'completed',
                 'remarks'         => '特別カラー限定モデル',
                 'items' => [
-                    ['frame_no' => 'ZXT00E0001', 'quantity' => 1, 'tax_rate' => '10'],
+                    ['frame_number' => 'ZXT00E0001', 'quantity' => 1, 'tax_rate' => '10'],
                 ],
             ],
             [
@@ -51,8 +51,8 @@ class PurchaseSeeder extends Seeder
                 'status'          => 'recorded',
                 'remarks'         => null,
                 'items' => [
-                    ['frame_no' => 'B3L0000001',   'quantity' => 1, 'tax_rate' => '10'],
-                    ['frame_no' => 'JK05E1000001', 'quantity' => 1, 'tax_rate' => '10'],
+                    ['frame_number' => 'B3L0000001',   'quantity' => 1, 'tax_rate' => '10'],
+                    ['frame_number' => 'JK05E1000001', 'quantity' => 1, 'tax_rate' => '10'],
                 ],
             ],
             [
@@ -64,7 +64,7 @@ class PurchaseSeeder extends Seeder
                 'status'          => 'draft',
                 'remarks'         => null,
                 'items' => [
-                    ['frame_no' => 'GT79A100001', 'quantity' => 1, 'tax_rate' => '10'],
+                    ['frame_number' => 'GT79A100001', 'quantity' => 1, 'tax_rate' => '10'],
                 ],
             ],
         ];
@@ -75,9 +75,9 @@ class PurchaseSeeder extends Seeder
             $itemRows  = [];
 
             foreach ($purchaseData['items'] as $i => $itemDef) {
-                $vehicle = $vehicles->get($itemDef['frame_no']);
+                $vehicle = $vehicles->get($itemDef['frame_number']);
                 $qty     = (float) $itemDef['quantity'];
-                $sre     = $vehicle ? (float) $vehicle->sre_tan : 0;
+                $sre     = $vehicle ? (float) $vehicle->purchase_price : 0;
                 $rate    = (int) $itemDef['tax_rate'];
                 $amt     = round($qty * $sre, 2);
 
@@ -87,14 +87,14 @@ class PurchaseSeeder extends Seeder
                 $itemRows[] = [
                     'line_no'         => $i + 1,
                     'vehicle_id'      => $vehicle?->id,
-                    'kisyu_cd'        => $vehicle?->kisyu_cd,
-                    'frame_no'        => $itemDef['frame_no'],
+                    'model_code'      => $vehicle?->model_code,
+                    'frame_number'    => $itemDef['frame_number'],
                     'warehouse_code'  => null,
-                    'iro_cd'          => $vehicle?->iro_cd,
-                    'kisyu_nm'        => $vehicle?->kisyu_nm,
+                    'color_code'      => $vehicle?->color_code,
+                    'model_name'      => $vehicle?->model_name,
                     'quantity'        => $qty,
                     'unit'            => $vehicle?->unit ?? '台',
-                    'sre_tan'         => $sre,
+                    'purchase_price'  => $sre,
                     'purchase_amount' => $amt,
                     'tax_rate'        => $itemDef['tax_rate'],
                     'remarks'         => null,

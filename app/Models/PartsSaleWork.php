@@ -12,11 +12,11 @@ class PartsSaleWork extends Model
 
     protected $fillable = [
         'processing_ym',
-        'monthly_f_kbn',
+        'monthly_f_type',
         'control_code',
-        'hinban',
+        'part_number',
         'office_code',
-        'slip_no',
+        'slip_number',
         'order_qty',
         'order_date_raw',
         'order_date',
@@ -24,30 +24,30 @@ class PartsSaleWork extends Model
         'sale_date_raw',
         'sale_date',
         'unit_price',
-        'sale_kbn',
-        'les_rate',
+        'sale_type',
+        'discount_rate',
         'partner_code',
         'cost_price',
         'terminal_price',
         'breakdown_code',
         'maintenance_no',
-        'red_black_kbn',
-        'invoice_kbn',
-        'invoice_m_kbn',
+        'reversal_type',
+        'invoice_type',
+        'invoice_monthly_type',
         'dispatch_source',
         'staff_code',
-        'rank_cd',
-        'first_ship_kbn',
+        'rank_code',
+        'first_shipment_type',
         'item_code',
         'item_name',
-        'open_kbn',
+        'open_type',
         'dealer_code',
         'standard_retail_price',
         'model_group',
         'filler',
         'quantity',
-        'model_kisyu_cd',
-        'vehicle_kisyu_cd',
+        'model_code',
+        'vehicle_code',
         'check_flag',
         'check_message',
         'converted_at',
@@ -74,8 +74,8 @@ class PartsSaleWork extends Model
     {
         return $query->when($search !== null && $search !== '', function ($q) use ($search) {
             $q->where(function ($q2) use ($search) {
-                $q2->where('hinban', 'like', "%{$search}%")
-                    ->orWhere('slip_no', 'like', "%{$search}%")
+                $q2->where('part_number', 'like', "%{$search}%")
+                    ->orWhere('slip_number', 'like', "%{$search}%")
                     ->orWhere('item_name', 'like', "%{$search}%")
                     ->orWhere('partner_code', 'like', "%{$search}%")
                     ->orWhere('control_code', 'like', "%{$search}%")

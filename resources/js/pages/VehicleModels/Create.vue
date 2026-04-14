@@ -6,12 +6,12 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 
 interface Prefill {
-    kisyu_nm?: string;
-    kisyu_nm_r?: string;
-    kihon?: string;
-    kisyu_nm_h?: string;
-    sre_tan?: string | null;
-    uri_tan?: string | null;
+    model_name?: string;
+    model_abbr?: string;
+    base_model?: string;
+    model_name_kanji?: string;
+    purchase_price?: string | null;
+    selling_price?: string | null;
     terminal_price?: string | null;
     standard_retail_price?: string | null;
     g1?: string | null;
@@ -19,8 +19,8 @@ interface Prefill {
     g3?: string | null;
     g4?: string | null;
     g5?: string | null;
-    order_no?: string;
-    zei_kbn?: string | null;
+    order_number?: string;
+    tax_type?: string | null;
 }
 
 const props = defineProps<{
@@ -42,23 +42,23 @@ const breadcrumbs: BreadcrumbItem[] = [
 const p = props.prefill ?? {};
 
 const form = useForm({
-    kisyu_cd:   '',
-    iro_cd:     '',
-    kisyu_nm:   p.kisyu_nm ?? '',
-    kisyu_nm_r: p.kisyu_nm_r ?? '',
-    kihon:      p.kihon ?? '',
-    kisyu_nm_h: p.kisyu_nm_h ?? '',
-    sre_tan:               p.sre_tan ?? '',
-    uri_tan:               p.uri_tan ?? '',
+    model_code:            '',
+    color_code:            '',
+    model_name:            p.model_name ?? '',
+    model_abbr:            p.model_abbr ?? '',
+    base_model:            p.base_model ?? '',
+    model_name_kanji:      p.model_name_kanji ?? '',
+    purchase_price:        p.purchase_price ?? '',
+    selling_price:         p.selling_price ?? '',
     terminal_price:        p.terminal_price ?? '',
     standard_retail_price: p.standard_retail_price ?? '',
-    g1:         p.g1 ?? (null as string | null),
-    g2:         p.g2 ?? (null as string | null),
-    g3:         p.g3 ?? (null as string | null),
-    g4:         p.g4 ?? (null as string | null),
-    g5:         p.g5 ?? (null as string | null),
-    order_no:   p.order_no ?? '',
-    zei_kbn:    p.zei_kbn ?? (null as string | null),
+    g1:                    p.g1 ?? (null as string | null),
+    g2:                    p.g2 ?? (null as string | null),
+    g3:                    p.g3 ?? (null as string | null),
+    g4:                    p.g4 ?? (null as string | null),
+    g5:                    p.g5 ?? (null as string | null),
+    order_number:          p.order_number ?? '',
+    tax_type:              p.tax_type ?? (null as string | null),
 });
 
 function submit() {

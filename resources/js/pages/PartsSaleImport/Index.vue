@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3';
 import {
     AlertCircle,
@@ -51,11 +51,11 @@ import type { BreadcrumbItem } from '@/types';
 interface Work {
     id: number;
     processing_ym: string;
-    monthly_f_kbn: string | null;
+    monthly_f_type: string | null;
     control_code: string | null;
     office_code: string | null;
-    hinban: string | null;
-    slip_no: string | null;
+    part_number: string | null;
+    slip_number: string | null;
     order_qty: string | null;
     order_date_raw: string | null;
     order_date: string | null;
@@ -63,30 +63,30 @@ interface Work {
     sale_date_raw: string | null;
     sale_date: string | null;
     unit_price: string;
-    sale_kbn: string | null;
-    les_rate: string | null;
+    sale_type: string | null;
+    discount_rate: string | null;
     partner_code: string | null;
     dealer_code: string | null;
     cost_price: string;
     terminal_price: string | null;
     breakdown_code: string | null;
     maintenance_no: string | null;
-    red_black_kbn: string;
-    invoice_kbn: string | null;
-    invoice_m_kbn: string | null;
+    reversal_type: string;
+    invoice_type: string | null;
+    invoice_monthly_type: string | null;
     dispatch_source: string | null;
     staff_code: string | null;
-    rank_cd: string | null;
-    first_ship_kbn: string | null;
+    rank_code: string | null;
+    first_shipment_type: string | null;
     item_code: string | null;
     item_name: string | null;
-    open_kbn: string | null;
+    open_type: string | null;
     standard_retail_price: string | null;
     model_group: string | null;
     filler: string | null;
     quantity: string;
-    model_kisyu_cd: string | null;
-    vehicle_kisyu_cd: string | null;
+    model_code: string | null;
+    vehicle_code: string | null;
     check_flag: number;
     check_message: string | null;
     converted_at: string | null;
@@ -124,79 +124,79 @@ const breadcrumbs: BreadcrumbItem[] = [
 // ── 列表示設定 ──
 type ColumnKey =
     | 'processing_ym'
-    | 'monthly_f_kbn'
+    | 'monthly_f_type'
     | 'control_code'
     | 'office_code'
-    | 'hinban'
-    | 'slip_no'
+    | 'part_number'
+    | 'slip_number'
     | 'order_qty'
     | 'order_date'
     | 'ship_qty'
-    | 'red_black_kbn'
+    | 'reversal_type'
     | 'sale_date'
     | 'unit_price'
-    | 'sale_kbn'
-    | 'les_rate'
+    | 'sale_type'
+    | 'discount_rate'
     | 'partner_code'
     | 'dealer_code'
     | 'cost_price'
     | 'terminal_price'
     | 'breakdown_code'
     | 'maintenance_no'
-    | 'invoice_kbn'
-    | 'invoice_m_kbn'
+    | 'invoice_type'
+    | 'invoice_monthly_type'
     | 'dispatch_source'
     | 'staff_code'
-    | 'rank_cd'
-    | 'first_ship_kbn'
+    | 'rank_code'
+    | 'first_shipment_type'
     | 'item_code'
     | 'item_name'
-    | 'open_kbn'
+    | 'open_type'
     | 'standard_retail_price'
     | 'model_group'
     | 'filler'
     | 'quantity'
-    | 'model_kisyu_cd'
-    | 'vehicle_kisyu_cd';
+    | 'model_code'
+    | 'vehicle_code';
 
 const LS_KEY = 'parts-sale-work.columns';
 
 const defaultColumns: Record<ColumnKey, { label: string; visible: boolean }> = {
     processing_ym:         { label: '処理年月',         visible: true  },
-    monthly_f_kbn:         { label: '月次区分',         visible: false },
+    monthly_f_type:         { label: '月次区分',         visible: false },
     control_code:          { label: '制御コード',       visible: false },
     office_code:           { label: '営業所CD',         visible: false },
-    hinban:                { label: '品番',             visible: true  },
-    slip_no:               { label: '伝票NO',           visible: true  },
+    part_number:            { label: '品番',             visible: true  },
+    slip_number:            { label: '伝票NO',           visible: true  },
     order_qty:             { label: '受注数',           visible: false },
     order_date:            { label: '受注日',           visible: false },
     ship_qty:              { label: '出荷数',           visible: false },
-    red_black_kbn:         { label: '赤黒区分',         visible: false },
+    reversal_type:          { label: '赤黒区分',         visible: false },
     sale_date:             { label: '売上日',           visible: true  },
     unit_price:            { label: '販売単価',         visible: true  },
-    sale_kbn:              { label: '売上区分',         visible: false },
-    les_rate:              { label: 'LES比率',          visible: false },
+    sale_type:              { label: '売上区分',         visible: false },
+    discount_rate:          { label: 'LES比率',          visible: false },
     partner_code:          { label: '販売店CD',         visible: true  },
     dealer_code:           { label: '販売店CD(全角)',   visible: false },
     cost_price:            { label: '売上原価',         visible: true  },
     terminal_price:        { label: '端末価格',         visible: false },
     breakdown_code:        { label: '内訳CD',           visible: false },
     maintenance_no:        { label: '整備注文NO',       visible: false },
-    invoice_kbn:           { label: '請求区分',         visible: false },
-    invoice_m_kbn:         { label: '請求月区分',       visible: false },
+    invoice_type:           { label: '請求区分',         visible: false },
+    invoice_monthly_type:   { label: '請求月区分',       visible: false },
     dispatch_source:       { label: '出庫元',           visible: false },
     staff_code:            { label: '担当CD',           visible: false },
-    rank_cd:               { label: 'ランクCD',         visible: false },
-    first_ship_kbn:        { label: '初回区分',         visible: false },
+    rank_code:              { label: 'ランクCD',         visible: false },
+    first_shipment_type:    { label: '初回区分',         visible: false },
     item_code:             { label: '品目CD',           visible: false },
     item_name:             { label: '品名',             visible: true  },
-    open_kbn:              { label: '公開区分',         visible: false },
+    open_type:              { label: '公開区分',         visible: false },
     standard_retail_price: { label: '標準小売価格',     visible: false },
     model_group:           { label: 'モデルグループ',   visible: false },
     filler:                { label: 'フィラー',         visible: false },
     quantity:              { label: '数量(変換後)',     visible: true  },
-    model_kisyu_cd:        { label: '機種CD',           visible: false },
-    vehicle_kisyu_cd:      { label: '車体機種CD',       visible: false },
+    model_code:             { label: '機種CD',           visible: false },
+    vehicle_code:           { label: '車体機種CD',       visible: false },
 };
 
 function loadColumns(): Record<ColumnKey, { label: string; visible: boolean }> {
@@ -241,8 +241,8 @@ const perPage   = ref(props.filters.per_page ?? '50');
 // ソート可能列: ColumnKey → DBフィールド名 のマッピング
 const sortableColumns: Partial<Record<ColumnKey, string>> = {
     processing_ym: 'processing_ym',
-    hinban:        'hinban',
-    slip_no:       'slip_no',
+    part_number:   'part_number',
+    slip_number:   'slip_number',
     order_date:    'order_date',
     sale_date:     'sale_date',
     ship_qty:      'ship_qty',
@@ -368,34 +368,34 @@ const editingId  = ref<number | null>(null);
 
 const workForm = useForm({
     processing_ym:         '',
-    monthly_f_kbn:         '',
+    monthly_f_type:         ''',
     control_code:          '',
     office_code:           '',
-    hinban:                '',
-    slip_no:               '',
+    part_number:            ''',
+    slip_number:            ''',
     order_qty:             '',
     order_date:            '',
     ship_qty:              '',
-    red_black_kbn:         '0',
+    reversal_type:          '0',
     sale_date:             '',
     unit_price:            '',
-    sale_kbn:              '',
-    les_rate:              '',
+    sale_type:              ''',
+    discount_rate:          ''',
     partner_code:          '',
     dealer_code:           '',
     cost_price:            '',
     terminal_price:        '',
     breakdown_code:        '',
     maintenance_no:        '',
-    invoice_kbn:           '',
-    invoice_m_kbn:         '',
+    invoice_type:           ''',
+    invoice_monthly_type:   ''',
     dispatch_source:       '',
     staff_code:            '',
-    rank_cd:               '',
-    first_ship_kbn:        '',
+    rank_code:              ''',
+    first_shipment_type:    ''',
     item_code:             '',
     item_name:             '',
-    open_kbn:              '',
+    open_type:              ''',
     standard_retail_price: '',
     model_group:           '',
     filler:                '',
@@ -405,41 +405,41 @@ function openAddDialog() {
     editingId.value = null;
     workForm.reset();
     workForm.processing_ym = props.processingYm;
-    workForm.red_black_kbn = '0';
+    workForm.reversal_type = '0';
     dialogOpen.value = true;
 }
 
 function openEditDialog(work: Work) {
     editingId.value = work.id;
     workForm.processing_ym         = work.processing_ym;
-    workForm.monthly_f_kbn         = work.monthly_f_kbn         ?? '';
+    workForm.monthly_f_type         = work.monthly_f_type         ?? '';
     workForm.control_code          = work.control_code          ?? '';
     workForm.office_code           = work.office_code           ?? '';
-    workForm.hinban                = work.hinban                ?? '';
-    workForm.slip_no               = work.slip_no               ?? '';
+    workForm.part_number            = work.part_number            ?? '';
+    workForm.slip_number            = work.slip_number            ?? '';
     workForm.order_qty             = work.order_qty             ?? '';
     workForm.order_date            = work.order_date            ?? '';
     workForm.ship_qty              = work.ship_qty              ?? '';
-    workForm.red_black_kbn         = work.red_black_kbn         ?? '0';
+    workForm.reversal_type          = work.reversal_type          ?? '0';
     workForm.sale_date             = work.sale_date             ?? '';
     workForm.unit_price            = work.unit_price            ?? '';
-    workForm.sale_kbn              = work.sale_kbn              ?? '';
-    workForm.les_rate              = work.les_rate              ?? '';
+    workForm.sale_type              = work.sale_type              ?? '';
+    workForm.discount_rate          = work.discount_rate          ?? '';
     workForm.partner_code          = work.partner_code          ?? '';
     workForm.dealer_code           = work.dealer_code           ?? '';
     workForm.cost_price            = work.cost_price            ?? '';
     workForm.terminal_price        = work.terminal_price        ?? '';
     workForm.breakdown_code        = work.breakdown_code        ?? '';
     workForm.maintenance_no        = work.maintenance_no        ?? '';
-    workForm.invoice_kbn           = work.invoice_kbn           ?? '';
-    workForm.invoice_m_kbn         = work.invoice_m_kbn         ?? '';
+    workForm.invoice_type           = work.invoice_type           ?? '';
+    workForm.invoice_monthly_type   = work.invoice_monthly_type   ?? '';
     workForm.dispatch_source       = work.dispatch_source       ?? '';
     workForm.staff_code            = work.staff_code            ?? '';
-    workForm.rank_cd               = work.rank_cd               ?? '';
-    workForm.first_ship_kbn        = work.first_ship_kbn        ?? '';
+    workForm.rank_code              = work.rank_code              ?? '';
+    workForm.first_shipment_type    = work.first_shipment_type    ?? '';
     workForm.item_code             = work.item_code             ?? '';
     workForm.item_name             = work.item_name             ?? '';
-    workForm.open_kbn              = work.open_kbn              ?? '';
+    workForm.open_type              = work.open_type              ?? '';
     workForm.standard_retail_price = work.standard_retail_price ?? '';
     workForm.model_group           = work.model_group           ?? '';
     workForm.filler                = work.filler                ?? '';
@@ -461,7 +461,7 @@ function submitWorkForm() {
 function deleteWork(work: Work) {
     if (
         !confirm(
-            `品番[${work.hinban ?? ''}] 伝票NO[${work.slip_no ?? ''}] を削除してよろしいですか？`,
+            `品番[${work.part_number ?? ''] 伝票NO[${work.slip_number ?? ''] を削除してよろしいですか？`,
         )
     )
         return;
@@ -488,40 +488,40 @@ function fmtNum(n: string | null | undefined): string {
 function getCellValue(key: ColumnKey, work: Work): string {
     switch (key) {
         case 'processing_ym':         return fmtYm(work.processing_ym);
-        case 'monthly_f_kbn':         return work.monthly_f_kbn         ?? '—';
+        case 'monthly_f_type':         return work.monthly_f_type         ?? '—';
         case 'control_code':          return work.control_code          ?? '—';
         case 'office_code':           return work.office_code           ?? '—';
-        case 'hinban':                return work.hinban                ?? '—';
-        case 'slip_no':               return work.slip_no               ?? '—';
+        case 'part_number':            return work.part_number                ?? '—';
+        case 'slip_number':            return work.slip_number               ?? '—';
         case 'order_qty':             return fmtNum(work.order_qty);
         case 'order_date':            return fmtDate(work.order_date);
         case 'ship_qty':              return fmtNum(work.ship_qty);
-        case 'red_black_kbn':         return work.red_black_kbn === '2' ? '赤伝(2)' : '黒伝(0)';
+        case 'reversal_type':          return work.reversal_type === '2' ? '赤伝(2)' : '黒伝(0)';
         case 'sale_date':             return fmtDate(work.sale_date);
         case 'unit_price':            return fmtNum(work.unit_price);
-        case 'sale_kbn':              return work.sale_kbn              ?? '—';
-        case 'les_rate':              return work.les_rate              ?? '—';
+        case 'sale_type':              return work.sale_type              ?? '—';
+        case 'discount_rate':          return work.discount_rate              ?? '—';
         case 'partner_code':          return work.partner_code          ?? '—';
         case 'dealer_code':           return work.dealer_code           ?? '—';
         case 'cost_price':            return fmtNum(work.cost_price);
         case 'terminal_price':        return work.terminal_price        ?? '—';
         case 'breakdown_code':        return work.breakdown_code        ?? '—';
         case 'maintenance_no':        return work.maintenance_no        ?? '—';
-        case 'invoice_kbn':           return work.invoice_kbn           ?? '—';
-        case 'invoice_m_kbn':         return work.invoice_m_kbn         ?? '—';
+        case 'invoice_type':           return work.invoice_type           ?? '—';
+        case 'invoice_monthly_type':   return work.invoice_monthly_type         ?? '—';
         case 'dispatch_source':       return work.dispatch_source       ?? '—';
         case 'staff_code':            return work.staff_code            ?? '—';
-        case 'rank_cd':               return work.rank_cd               ?? '—';
-        case 'first_ship_kbn':        return work.first_ship_kbn        ?? '—';
+        case 'rank_code':              return work.rank_code               ?? '—';
+        case 'first_shipment_type':    return work.first_shipment_type        ?? '—';
         case 'item_code':             return work.item_code             ?? '—';
         case 'item_name':             return work.item_name             ?? '—';
-        case 'open_kbn':              return work.open_kbn              ?? '—';
+        case 'open_type':              return work.open_type              ?? '—';
         case 'standard_retail_price': return work.standard_retail_price ?? '—';
         case 'model_group':           return work.model_group           ?? '—';
         case 'filler':                return work.filler                ?? '—';
         case 'quantity':              return fmtNum(work.quantity);
-        case 'model_kisyu_cd':        return work.model_kisyu_cd        ?? '—';
-        case 'vehicle_kisyu_cd':      return work.vehicle_kisyu_cd      ?? '—';
+        case 'model_code':             return work.model_code        ?? '—';
+        case 'vehicle_code':           return work.vehicle_code      ?? '—';
         default:                      return '—';
     }
 }
@@ -763,7 +763,7 @@ const numericColumns = new Set<ColumnKey>([
                                 class="px-3 py-2 text-xs"
                                 :class="[
                                     numericColumns.has(key) ? 'text-right tabular-nums' : 'text-left',
-                                    key === 'hinban' ? 'font-mono' : '',
+                                    key === 'part_number' ? 'font-mono' : '',
                                     key === 'item_name' ? 'max-w-[160px] truncate' : '',
                                 ]"
                             >
@@ -869,7 +869,7 @@ const numericColumns = new Set<ColumnKey>([
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label>月次区分</Label>
-                            <Input v-model="workForm.monthly_f_kbn" maxlength="5" />
+                            <Input v-model='workForm.monthly_f_type' maxlength="5" />
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label>制御コード</Label>
@@ -886,13 +886,13 @@ const numericColumns = new Set<ColumnKey>([
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label>品番 <span class="text-destructive">*</span></Label>
-                            <Input v-model="workForm.hinban" maxlength="20" placeholder="13桁品番" class="font-mono" />
-                            <p v-if="workForm.errors.hinban" class="text-xs text-destructive">{{ workForm.errors.hinban }}</p>
+                            <Input v-model='workForm.part_number' maxlength="20" placeholder="13桁品番" class="font-mono" />
+                            <p v-if="workForm.errors.part_number" class="text-xs text-destructive">{{ workForm.errors.part_number }}</p>
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label>伝票NO <span class="text-destructive">*</span></Label>
-                            <Input v-model="workForm.slip_no" maxlength="20" />
-                            <p v-if="workForm.errors.slip_no" class="text-xs text-destructive">{{ workForm.errors.slip_no }}</p>
+                            <Input v-model='workForm.slip_number' maxlength="20" />
+                            <p v-if="workForm.errors.slip_number" class="text-xs text-destructive">{{ workForm.errors.slip_number }}</p>
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label>受注日</Label>
@@ -914,7 +914,7 @@ const numericColumns = new Set<ColumnKey>([
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label>赤黒区分</Label>
-                            <Select v-model="workForm.red_black_kbn">
+                            <Select v-model='workForm.reversal_type'>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="0">黒伝（0）</SelectItem>
@@ -946,7 +946,7 @@ const numericColumns = new Set<ColumnKey>([
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label>LES比率</Label>
-                            <Input v-model="workForm.les_rate" maxlength="10" />
+                            <Input v-model='workForm.discount_rate' maxlength="10" />
                         </div>
 
                         <!-- ── 得意先・請求情報 ── -->
@@ -964,15 +964,15 @@ const numericColumns = new Set<ColumnKey>([
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label>売上区分</Label>
-                            <Input v-model="workForm.sale_kbn" maxlength="5" />
+                            <Input v-model='workForm.sale_type' maxlength="5" />
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label>請求区分</Label>
-                            <Input v-model="workForm.invoice_kbn" maxlength="5" />
+                            <Input v-model='workForm.invoice_type' maxlength="5" />
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label>請求月区分</Label>
-                            <Input v-model="workForm.invoice_m_kbn" maxlength="5" />
+                            <Input v-model='workForm.invoice_monthly_type' maxlength="5" />
                         </div>
 
                         <!-- ── 出庫・担当情報 ── -->
@@ -989,11 +989,11 @@ const numericColumns = new Set<ColumnKey>([
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label>ランクCD</Label>
-                            <Input v-model="workForm.rank_cd" maxlength="5" />
+                            <Input v-model='workForm.rank_code' maxlength="5" />
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label>初回区分</Label>
-                            <Input v-model="workForm.first_ship_kbn" maxlength="5" />
+                            <Input v-model='workForm.first_shipment_type' maxlength="5" />
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label>内訳CD</Label>
@@ -1001,7 +1001,7 @@ const numericColumns = new Set<ColumnKey>([
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <Label>公開区分</Label>
-                            <Input v-model="workForm.open_kbn" maxlength="5" />
+                            <Input v-model='workForm.open_type' maxlength="5" />
                         </div>
 
                         <!-- ── 商品情報 ── -->

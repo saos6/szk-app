@@ -164,12 +164,12 @@
         @foreach($purchase->items as $item)
         <tr>
             <td class="text-center">{{ $item->line_no }}</td>
-            <td>{{ $item->kisyu_nm ?? '' }}</td>
-            <td class="text-center">{{ $item->frame_no ?? '' }}</td>
-            <td class="text-center">{{ $item->iro_cd ?? '' }}</td>
+            <td>{{ $item->model_name ?? '' }}</td>
+            <td class="text-center">{{ $item->frame_number ?? '' }}</td>
+            <td class="text-center">{{ $item->color_code ?? '' }}</td>
             <td class="text-right">{{ rtrim(rtrim(number_format((float)$item->quantity, 2), '0'), '.') }}</td>
             <td class="text-center">{{ $item->unit ?? '台' }}</td>
-            <td class="text-right">¥{{ number_format((float)$item->sre_tan) }}</td>
+            <td class="text-right">¥{{ number_format((float)$item->purchase_price) }}</td>
             <td class="text-center">{{ $item->tax_rate }}%</td>
             <td class="text-right">¥{{ number_format((float)$item->purchase_amount) }}</td>
             <td class="text-center">{{ $item->remarks ?? '' }}</td>

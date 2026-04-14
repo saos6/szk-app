@@ -13,11 +13,11 @@ return new class extends Migration
             $table->string('processing_ym', 7)->comment('処理年月 YYYY-MM');
 
             // ── CSV 項目 ──
-            $table->string('monthly_f_kbn', 5)->nullable()->comment('col1: 月報Ｆ登録区分');
+            $table->string('monthly_f_type', 5)->nullable()->comment('col1: 月報Ｆ登録区分');
             $table->string('control_code', 5)->nullable()->comment('col2: コントロールコード');
-            $table->string('hinban', 20)->nullable()->comment('col3: 品番(13桁)');
+            $table->string('part_number', 20)->nullable()->comment('col3: 品番(13桁)');
             $table->string('office_code', 10)->nullable()->comment('col4: 営業所ｺｰﾄﾞ');
-            $table->string('slip_no', 20)->nullable()->comment('col5: 伝票NO');
+            $table->string('slip_number', 20)->nullable()->comment('col5: 伝票NO');
             $table->decimal('order_qty', 10, 2)->default(0)->comment('col6: 受注数');
             $table->string('order_date_raw', 10)->nullable()->comment('col7: 受注日(生値)');
             $table->date('order_date')->nullable()->comment('col7: 受注日(変換後)');
@@ -25,23 +25,23 @@ return new class extends Migration
             $table->string('sale_date_raw', 10)->nullable()->comment('col9: 売上日(生値)');
             $table->date('sale_date')->nullable()->comment('col9: 売上日(変換後)');
             $table->decimal('unit_price', 12, 2)->default(0)->comment('col10: 販売単価');
-            $table->string('sale_kbn', 5)->nullable()->comment('col11: 販売区分');
-            $table->string('les_rate', 10)->nullable()->comment('col12: ﾚｽ率');
+            $table->string('sale_type', 5)->nullable()->comment('col11: 販売区分');
+            $table->string('discount_rate', 10)->nullable()->comment('col12: ﾚｽ率');
             $table->string('partner_code', 20)->nullable()->comment('col13: 販売店コード');
             $table->decimal('cost_price', 12, 2)->default(0)->comment('col14: 売上原価');
             $table->string('terminal_price', 20)->nullable()->comment('col15: 末端価格');
             $table->string('breakdown_code', 10)->nullable()->comment('col16: 内訳ｺｰﾄﾞ');
             $table->string('maintenance_no', 100)->nullable()->comment('col17: 整備注文NO');
-            $table->string('red_black_kbn', 2)->default('0')->comment('col18: 赤黒区分(0=黒伝/2=赤伝)');
-            $table->string('invoice_kbn', 5)->nullable()->comment('col19: 請求書発行区分');
-            $table->string('invoice_m_kbn', 5)->nullable()->comment('col20: 請求書Ｍ登録区分');
+            $table->string('reversal_type', 2)->default('0')->comment('col18: 赤黒区分(0=黒伝/2=赤伝)');
+            $table->string('invoice_type', 5)->nullable()->comment('col19: 請求書発行区分');
+            $table->string('invoice_monthly_type', 5)->nullable()->comment('col20: 請求書Ｍ登録区分');
             $table->string('dispatch_source', 20)->nullable()->comment('col21: 出庫元(倉庫コード)');
             $table->string('staff_code', 20)->nullable()->comment('col22: 担当');
-            $table->string('rank_cd', 5)->nullable()->comment('col23: ランク');
-            $table->string('first_ship_kbn', 5)->nullable()->comment('col24: 初回出荷区分');
+            $table->string('rank_code', 5)->nullable()->comment('col23: ランク');
+            $table->string('first_shipment_type', 5)->nullable()->comment('col24: 初回出荷区分');
             $table->string('item_code', 20)->nullable()->comment('col25: 品目コード');
             $table->string('item_name', 200)->nullable()->comment('col26: 品名');
-            $table->string('open_kbn', 5)->nullable()->comment('col27: オープン区分');
+            $table->string('open_type', 5)->nullable()->comment('col27: オープン区分');
             $table->string('dealer_code', 20)->nullable()->comment('col28: 販売店コード（全角）');
             $table->string('standard_retail_price', 20)->nullable()->comment('col29: 標準小売価格');
             $table->string('model_group', 10)->nullable()->comment('col30: 機種グループ');
@@ -49,8 +49,8 @@ return new class extends Migration
 
             // ── 取込時導出項目 ──
             $table->decimal('quantity', 10, 2)->default(0)->comment('最終数量（赤黒区分適用後）');
-            $table->string('model_kisyu_cd', 5)->nullable()->comment('品番1-5桁: 機種コード');
-            $table->string('vehicle_kisyu_cd', 10)->nullable()->comment('品番6-13桁: 車両コード(XXXXX-YYY形式)');
+            $table->string('model_code', 5)->nullable()->comment('品番1-5桁: 機種コード');
+            $table->string('vehicle_code', 10)->nullable()->comment('品番6-13桁: 車両コード(XXXXX-YYY形式)');
 
             // ── 管理項目 ──
             $table->tinyInteger('check_flag')->default(0)->comment('0=正常/1=エラー');

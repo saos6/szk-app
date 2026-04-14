@@ -22,8 +22,8 @@ interface InventoryBalance {
     id: number;
     stock_ym: string;
     warehouse_code: string;
-    vehicle_model_code: string;
-    frame_no: string;
+    model_code: string;
+    frame_number: string;
     prev_stock: number;
     in_stock: number;
     out_stock: number;
@@ -62,7 +62,7 @@ const perPage = ref(props.filters.per_page ?? '10');
 const sortField = ref(props.filters.sort ?? 'stock_ym');
 const sortDir   = ref(props.filters.direction ?? 'desc');
 
-type ColumnKey = 'stock_ym' | 'warehouse_code' | 'vehicle_model_code' | 'frame_no' | 'prev_stock' | 'in_stock' | 'out_stock' | 'current_stock' | 'created_at' | 'updated_at';
+type ColumnKey = 'stock_ym' | 'warehouse_code' | 'model_code' | 'frame_number' | 'prev_stock' | 'in_stock' | 'out_stock' | 'current_stock' | 'created_at' | 'updated_at';
 
 const nonSortable: ColumnKey[] = ['current_stock'];
 
@@ -71,8 +71,8 @@ const COLUMNS_STORAGE_KEY = 'inventory-balances.columns';
 const defaultColumns: Record<ColumnKey, { label: string; visible: boolean }> = {
     stock_ym:            { label: '年月',           visible: true  },
     warehouse_code:      { label: '倉庫コード',     visible: true  },
-    vehicle_model_code:  { label: '機種コード（商品）',     visible: true  },
-    frame_no:            { label: 'フレームNo（品番）',      visible: true  },
+    model_code:  { label: '機種コード（商品）',     visible: true  },
+    frame_number:            { label: 'フレームNo（品番）',      visible: true  },
     prev_stock:          { label: '前月繰越',        visible: true  },
     in_stock:            { label: '当月入庫',        visible: true  },
     out_stock:           { label: '当月出庫',        visible: true  },
@@ -231,7 +231,7 @@ function paginationLabel(label: string): string {
                 <table class="w-full text-sm">
                     <thead class="bg-muted/50">
                         <tr>
-                            <th v-for="col in (['stock_ym', 'warehouse_code', 'vehicle_model_code', 'frame_no', 'prev_stock', 'in_stock', 'out_stock', 'current_stock', 'created_at', 'updated_at'] as ColumnKey[])"
+                            <th v-for="col in (['stock_ym', 'warehouse_code', 'model_code', 'frame_number', 'prev_stock', 'in_stock', 'out_stock', 'current_stock', 'created_at', 'updated_at'] as ColumnKey[])"
                                 :key="col"
                                 v-show="columns[col].visible"
                                 :class="['px-4 py-3 text-left font-medium whitespace-nowrap select-none', nonSortable.includes(col) ? '' : 'cursor-pointer']"
@@ -255,8 +255,8 @@ function paginationLabel(label: string): string {
                         >
                             <td v-show="columns.stock_ym.visible" class="px-4 py-3 font-medium">{{ row.stock_ym }}</td>
                             <td v-show="columns.warehouse_code.visible" class="px-4 py-3">{{ row.warehouse_code }}</td>
-                            <td v-show="columns.vehicle_model_code.visible" class="px-4 py-3">{{ row.vehicle_model_code }}</td>
-                            <td v-show="columns.frame_no.visible" class="px-4 py-3">{{ row.frame_no }}</td>
+                            <td v-show="columns.model_code.visible" class="px-4 py-3">{{ row.model_code }}</td>
+                            <td v-show="columns.frame_number.visible" class="px-4 py-3">{{ row.frame_number }}</td>
                             <td v-show="columns.prev_stock.visible" class="px-4 py-3 text-right">{{ row.prev_stock.toLocaleString() }}</td>
                             <td v-show="columns.in_stock.visible" class="px-4 py-3 text-right">{{ row.in_stock.toLocaleString() }}</td>
                             <td v-show="columns.out_stock.visible" class="px-4 py-3 text-right">{{ row.out_stock.toLocaleString() }}</td>
@@ -281,7 +281,7 @@ function paginationLabel(label: string): string {
                                     </Button>
                                     <Button
                                         variant="ghost" size="icon" class="h-8 w-8 text-destructive hover:text-destructive"
-                                        @click="deleteRecord(row.id, `${row.stock_ym} ${row.warehouse_code} ${row.vehicle_model_code}`)"
+                                        @click="deleteRecord(row.id, `${row.stock_ym} ${row.warehouse_code} ${row.model_code}`)"
                                     >
                                         <Trash2 class="h-4 w-4" />
                                     </Button>

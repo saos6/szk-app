@@ -1,18 +1,18 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
 import * as VehicleController from '@/actions/App/Http/Controllers/VehicleController';
 import VehicleForm from '@/components/VehicleForm.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 
-interface VehicleModelItem { kisyu_cd: string; iro_cd: string; kisyu_nm_h: string | null; }
+interface VehicleModelItem { model_code: string; color_code: string; model_name_kanji: string | null; }
 
 interface Prefill {
-    kisyu_cd?: string;
-    name1?: string; name2?: string; kisyu_nm?: string;
-    keishiki?: string; kisyu_no?: string;
-    iro_cd?: string | null;
-    sre_tan?: string | null; uri_tan?: string | null;
+    model_code?: string;
+    name1?: string; name2?: string; model_name?: string;
+    model_type?: string; model_number?: string;
+    color_code?: string | null;
+    purchase_price?: string | null; selling_price?: string | null;
     terminal_price?: string | null; standard_retail_price?: string | null;
     maker_code?: string; unit?: string; shop_name?: string;
     note1?: string; note2?: string; note3?: string;
@@ -33,12 +33,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 const p = props.prefill ?? {};
 
 const form = useForm({
-    kisyu_cd: p.kisyu_cd ?? '',
-    frame_no: '',
+    model_code: p.model_code ?? '',
+    frame_number: '',
     name1: p.name1 ?? '', name2: p.name2 ?? '',
-    kisyu_nm: p.kisyu_nm ?? '', keishiki: p.keishiki ?? '', kisyu_no: p.kisyu_no ?? '',
-    iro_cd: p.iro_cd ?? (null as string | null),
-    sre_tan: p.sre_tan ?? '', uri_tan: p.uri_tan ?? '',
+    model_name: p.model_name ?? '', model_type: p.model_type ?? '', model_number: p.model_number ?? '',
+    color_code: p.color_code ?? (null as string | null),
+    purchase_price: p.purchase_price ?? '', selling_price: p.selling_price ?? '',
     terminal_price: p.terminal_price ?? '', standard_retail_price: p.standard_retail_price ?? '',
     maker_code: p.maker_code ?? '', unit: p.unit ?? '',
     note1: p.note1 ?? '', note2: p.note2 ?? '', note3: p.note3 ?? '',

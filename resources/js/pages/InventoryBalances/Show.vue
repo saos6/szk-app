@@ -10,8 +10,8 @@ interface InventoryBalance {
     id: number;
     stock_ym: string;
     warehouse_code: string;
-    vehicle_model_code: string;
-    frame_no: string;
+    model_code: string;
+    frame_number: string;
     prev_stock: number;
     in_stock: number;
     out_stock: number;
@@ -67,11 +67,11 @@ const breadcrumbs: BreadcrumbItem[] = [
                     </div>
                     <div>
                         <dt class="text-muted-foreground">機種コード（商品）</dt>
-                        <dd class="mt-0.5 font-medium">{{ inventoryBalance.vehicle_model_code }}</dd>
+                        <dd class="mt-0.5 font-medium">{{ inventoryBalance.model_code }}</dd>
                     </div>
                     <div>
                         <dt class="text-muted-foreground">フレームNo（品番）</dt>
-                        <dd class="mt-0.5 font-medium">{{ inventoryBalance.frame_no }}</dd>
+                        <dd class="mt-0.5 font-medium">{{ inventoryBalance.frame_number }}</dd>
                     </div>
 
                     <div class="sm:col-span-2 border-t pt-4">

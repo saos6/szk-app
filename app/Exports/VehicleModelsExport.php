@@ -13,14 +13,14 @@ class VehicleModelsExport implements FromCollection, WithHeadings, WithMapping, 
 {
     public function __construct(
         private string $search = '',
-        private string $sort = 'kisyu_cd',
+        private string $sort = 'model_code',
         private string $direction = 'asc',
     ) {}
 
     public function collection()
     {
-        $allowedSorts = ['id', 'kisyu_cd', 'iro_cd', 'kisyu_nm', 'kisyu_nm_r', 'kisyu_nm_h', 'kihon', 'sre_tan', 'uri_tan', 'g1', 'g2', 'zei_kbn', 'created_at', 'updated_at'];
-        $sortField = in_array($this->sort, $allowedSorts) ? $this->sort : 'kisyu_cd';
+        $allowedSorts = ['id', 'model_code', 'color_code', 'model_name', 'model_abbr', 'model_name_kanji', 'base_model', 'purchase_price', 'selling_price', 'g1', 'g2', 'tax_type', 'created_at', 'updated_at'];
+        $sortField = in_array($this->sort, $allowedSorts) ? $this->sort : 'model_code';
         $sortDir = $this->direction === 'desc' ? 'desc' : 'asc';
 
         return VehicleModel::active()
@@ -43,21 +43,21 @@ class VehicleModelsExport implements FromCollection, WithHeadings, WithMapping, 
     {
         return [
             $model->id,
-            $model->kisyu_cd,
-            $model->iro_cd,
-            $model->kisyu_nm ?? '',
-            $model->kisyu_nm_r ?? '',
-            $model->kihon ?? '',
-            $model->kisyu_nm_h ?? '',
-            $model->sre_tan !== null ? number_format($model->sre_tan, 2) : '',
-            $model->uri_tan !== null ? number_format($model->uri_tan, 2) : '',
+            $model->model_code,
+            $model->color_code,
+            $model->model_name ?? '',
+            $model->model_abbr ?? '',
+            $model->base_model ?? '',
+            $model->model_name_kanji ?? '',
+            $model->purchase_price !== null ? number_format($model->purchase_price, 2) : '',
+            $model->selling_price !== null ? number_format($model->selling_price, 2) : '',
             VehicleModel::G1_TYPES[$model->g1] ?? ($model->g1 ?? ''),
             VehicleModel::G2_DISP[$model->g2] ?? ($model->g2 ?? ''),
             VehicleModel::G3_OPTIONS[$model->g3] ?? ($model->g3 ?? ''),
             VehicleModel::G4_OPTIONS[$model->g4] ?? ($model->g4 ?? ''),
             VehicleModel::G5_OPTIONS[$model->g5] ?? ($model->g5 ?? ''),
-            $model->order_no ?? '',
-            VehicleModel::ZEI_KBN[$model->zei_kbn] ?? ($model->zei_kbn ?? ''),
+            $model->order_number ?? '',
+            VehicleModel::ZEI_KBN[$model->tax_type] ?? ($model->tax_type ?? ''),
             $model->created_at?->format('Y-m-d H:i:s') ?? '',
             $model->updated_at?->format('Y-m-d H:i:s') ?? '',
         ];

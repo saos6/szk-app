@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Copy } from 'lucide-vue-next';
 import * as VehicleController from '@/actions/App/Http/Controllers/VehicleController';
@@ -7,15 +7,15 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 
-interface VehicleModelItem { kisyu_cd: string; iro_cd: string; kisyu_nm_h: string | null; }
+interface VehicleModelItem { model_code: string; color_code: string; model_name_kanji: string | null; }
 
 interface Vehicle {
     id: number;
-    kisyu_cd: string; frame_no: string;
+    model_code: string; frame_number: string;
     name1: string | null; name2: string | null;
-    kisyu_nm: string | null; keishiki: string | null; kisyu_no: string | null;
-    iro_cd: string | null;
-    sre_tan: string | null; uri_tan: string | null;
+    model_name: string | null; model_type: string | null; model_number: string | null;
+    color_code: string | null;
+    purchase_price: string | null; selling_price: string | null;
     terminal_price: string | null; standard_retail_price: string | null;
     maker_code: string | null; unit: string | null;
     note1: string | null; note2: string | null; note3: string | null;
@@ -43,11 +43,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const v = props.vehicle;
 const form = useForm({
-    kisyu_cd: v.kisyu_cd, frame_no: v.frame_no,
+    model_code: v.model_code, frame_number: v.frame_number,
     name1: v.name1 ?? '', name2: v.name2 ?? '',
-    kisyu_nm: v.kisyu_nm ?? '', keishiki: v.keishiki ?? '', kisyu_no: v.kisyu_no ?? '',
-    iro_cd: v.iro_cd ?? (null as string | null),
-    sre_tan: v.sre_tan ?? '', uri_tan: v.uri_tan ?? '',
+    model_name: v.model_name ?? '', model_type: v.model_type ?? '', model_number: v.model_number ?? '',
+    color_code: v.color_code ?? (null as string | null),
+    purchase_price: v.purchase_price ?? '', selling_price: v.selling_price ?? '',
     terminal_price: v.terminal_price ?? '', standard_retail_price: v.standard_retail_price ?? '',
     maker_code: v.maker_code ?? '', unit: v.unit ?? '',
     note1: v.note1 ?? '', note2: v.note2 ?? '', note3: v.note3 ?? '',
@@ -73,7 +73,7 @@ function submit() {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head :title="`車両（品番）マスタ 編集 - ${vehicle.frame_no}`" />
+        <Head :title="`車両（品番）マスタ 編集 - ${vehicle.frame_number}`" />
         <div class="max-w-4xl p-6">
             <div class="rounded-lg border bg-card p-6 shadow-sm">
                 <div class="mb-6 flex items-center justify-between">

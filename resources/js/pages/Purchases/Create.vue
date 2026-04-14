@@ -8,15 +8,15 @@ import type { BreadcrumbItem } from '@/types';
 interface Supplier { id: number; name: string; }
 interface Employee { id: number; name: string; }
 interface VehicleOption {
-    id: number; kisyu_cd: string; frame_no: string;
-    iro_cd: string | null; kisyu_nm: string | null; sre_tan: string;
+    id: number; model_code: string; frame_number: string;
+    color_code: string | null; model_name: string | null; purchase_price: string;
 }
 interface Warehouse { code: string; name: string; }
 interface PrefillItem {
     vehicle_id: number | null;
-    kisyu_cd: string; frame_no: string; warehouse_code: string;
-    iro_cd: string; kisyu_nm: string;
-    quantity: string; unit: string; sre_tan: string;
+    model_code: string; frame_number: string; warehouse_code: string;
+    color_code: string; model_name: string;
+    quantity: string; unit: string; purchase_price: string;
     tax_rate: string; purchase_amount: number; remarks: string;
 }
 interface Prefill {
@@ -27,7 +27,7 @@ interface Prefill {
     items?: PrefillItem[];
 }
 
-interface VehicleModelOption { kisyu_cd: string; iro_cd: string | null; kisyu_nm: string | null; sre_tan: string; }
+interface VehicleModelOption { model_code: string; color_code: string | null; model_name: string | null; purchase_price: string; }
 
 const props = defineProps<{
     suppliers: Supplier[];
@@ -50,9 +50,9 @@ const p = props.prefill;
 
 const defaultItem = {
     vehicle_id: null as number | null,
-    kisyu_cd: '', frame_no: '', warehouse_code: '',
-    iro_cd: '', kisyu_nm: '',
-    quantity: '1', unit: '台', sre_tan: '0',
+    model_code: '', frame_number: '', warehouse_code: '',
+    color_code: '', model_name: '',
+    quantity: '1', unit: '台', purchase_price: '0',
     tax_rate: '10', purchase_amount: 0, remarks: '',
 };
 

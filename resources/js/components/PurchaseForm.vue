@@ -25,17 +25,17 @@ interface Employee {
 }
 interface VehicleOption {
     id: number;
-    kisyu_cd: string;
-    frame_no: string;
-    iro_cd: string | null;
-    kisyu_nm: string | null;
-    sre_tan: string;
+    model_code: string;
+    frame_number: string;
+    color_code: string | null;
+    model_name: string | null;
+    purchase_price: string;
 }
 interface VehicleModelOption {
-    kisyu_cd: string;
-    iro_cd: string | null;
-    kisyu_nm: string | null;
-    sre_tan: string;
+    model_code: string;
+    color_code: string | null;
+    model_name: string | null;
+    purchase_price: string;
 }
 interface Warehouse {
     code: string;
@@ -43,14 +43,14 @@ interface Warehouse {
 }
 interface PurchaseItem {
     vehicle_id: number | null;
-    kisyu_cd: string;
-    frame_no: string;
+    model_code: string;
+    frame_number: string;
     warehouse_code: string;
-    iro_cd: string;
-    kisyu_nm: string;
+    color_code: string;
+    model_name: string;
     quantity: string;
     unit: string;
-    sre_tan: string;
+    purchase_price: string;
     tax_rate: string;
     purchase_amount: number;
     remarks: string;
@@ -85,14 +85,14 @@ const supplierOptions = computed(() =>
     props.suppliers.map((s) => ({ value: String(s.id), label: s.name })),
 );
 
-const kisyuCdOptions = computed(() => {
+const modelCodeOptions = computed(() => {
     const seen = new Set<string>();
     const list: { value: string; label: string }[] = [];
     for (const m of props.vehicleModels) {
-        if (!seen.has(m.kisyu_cd)) { seen.add(m.kisyu_cd); list.push({ value: m.kisyu_cd, label: m.kisyu_cd }); }
+        if (!seen.has(m.model_code)) { seen.add(m.model_code); list.push({ value: m.model_code, label: m.model_code }); }
     }
     for (const v of props.vehicles) {
-        if (!seen.has(v.kisyu_cd)) { seen.add(v.kisyu_cd); list.push({ value: v.kisyu_cd, label: v.kisyu_cd }); }
+        if (!seen.has(v.model_code)) { seen.add(v.model_code); list.push({ value: v.model_code, label: v.model_code }); }
     }
     return list;
 });
@@ -101,21 +101,21 @@ const warehouseOptions = computed(() =>
     props.warehouses.map((w) => ({ value: w.code, label: `${w.code} ${w.name}` })),
 );
 
-function frameNoList(kisyuCd: string) {
-    return props.vehicles.filter((v) => v.kisyu_cd === kisyuCd);
+function frameNumberList(modelCode: string) {
+    return props.vehicles.filter((v) => v.model_code === modelCode);
 }
 
 function addItem() {
     props.form.items.push({
         vehicle_id: null,
-        kisyu_cd: '',
-        frame_no: '',
+        model_code: '',
+        frame_number: '',
         warehouse_code: '',
-        iro_cd: '',
-        kisyu_nm: '',
+        color_code: '',
+        model_name: '',
         quantity: '1',
         unit: '台',
-        sre_tan: '0',
+        purchase_price: '0',
         tax_rate: '10',
         purchase_amount: 0,
         remarks: '',
@@ -126,45 +126,45 @@ function removeItem(index: number) {
     props.form.items.splice(index, 1);
 }
 
-function iroCdOptions(kisyuCd: string) {
+function colorCodeOptions(modelCode: string) {
     const seen = new Set<string>();
     return props.vehicleModels
-        .filter((m) => m.kisyu_cd === kisyuCd && m.iro_cd)
-        .filter((m) => { if (seen.has(m.iro_cd!)) return false; seen.add(m.iro_cd!); return true; })
-        .map((m) => ({ value: m.iro_cd!, label: m.iro_cd! }));
+        .filter((m) => m.model_code === modelCode && m.color_code)
+        .filter((m) => { if (seen.has(m.color_code!)) return false; seen.add(m.color_code!); return true; })
+        .map((m) => ({ value: m.color_code!, label: m.color_code! }));
 }
 
-function onKisyuCdChange(i: number, val: string) {
-    props.form.items[i].kisyu_cd = val;
-    props.form.items[i].frame_no = '';
-    props.form.items[i].iro_cd = '';
-    props.form.items[i].kisyu_nm = '';
-    props.form.items[i].sre_tan = '0';
+function onModelCodeChange(i: number, val: string) {
+    props.form.items[i].model_code = val;
+    props.form.items[i].frame_number = '';
+    props.form.items[i].color_code = '';
+    props.form.items[i].model_name = '';
+    props.form.items[i].purchase_price = '0';
     props.form.items[i].vehicle_id = null;
     recalcItem(i);
 }
 
-function onIroCdChange(i: number, val: string) {
-    props.form.items[i].iro_cd = val;
+function onColorCodeChange(i: number, val: string) {
+    props.form.items[i].color_code = val;
     const vm = props.vehicleModels.find(
-        (m) => m.kisyu_cd === props.form.items[i].kisyu_cd && m.iro_cd === val,
+        (m) => m.model_code === props.form.items[i].model_code && m.color_code === val,
     );
     if (vm) {
-        props.form.items[i].kisyu_nm = vm.kisyu_nm ?? '';
-        props.form.items[i].sre_tan = vm.sre_tan ?? '0';
+        props.form.items[i].model_name = vm.model_name ?? '';
+        props.form.items[i].purchase_price = vm.purchase_price ?? '0';
     }
     recalcItem(i);
 }
 
-function onFrameNoChange(i: number) {
-    const frameNo = props.form.items[i].frame_no;
+function onFrameNumberChange(i: number) {
+    const frameNumber = props.form.items[i].frame_number;
     const vehicle = props.vehicles.find(
-        (v) => v.kisyu_cd === props.form.items[i].kisyu_cd && v.frame_no === frameNo,
+        (v) => v.model_code === props.form.items[i].model_code && v.frame_number === frameNumber,
     );
     if (vehicle) {
-        props.form.items[i].iro_cd = vehicle.iro_cd ?? '';
-        props.form.items[i].kisyu_nm = vehicle.kisyu_nm ?? '';
-        props.form.items[i].sre_tan = vehicle.sre_tan ?? '0';
+        props.form.items[i].color_code = vehicle.color_code ?? '';
+        props.form.items[i].model_name = vehicle.model_name ?? '';
+        props.form.items[i].purchase_price = vehicle.purchase_price ?? '0';
         props.form.items[i].vehicle_id = vehicle.id;
     }
     recalcItem(i);
@@ -173,7 +173,7 @@ function onFrameNoChange(i: number) {
 function recalcItem(i: number) {
     const item = props.form.items[i];
     const qty = parseFloat(item.quantity) || 0;
-    const sre = parseFloat(item.sre_tan) || 0;
+    const sre = parseFloat(item.purchase_price) || 0;
     item.purchase_amount = Math.round(qty * sre * 100) / 100;
 }
 
@@ -342,36 +342,36 @@ function getItemError(index: number, field: string): string | undefined {
                             <!-- 機種コード -->
                             <td class="px-2 py-1.5">
                                 <Combobox
-                                    :options="kisyuCdOptions"
-                                    :model-value="item.kisyu_cd"
+                                    :options="modelCodeOptions"
+                                    :model-value="item.model_code"
                                     placeholder="機種コード（商品）..."
-                                    :class="['w-36', getItemError(i, 'kisyu_cd') ? '[&_input]:border-destructive' : '']"
-                                    @update:model-value="(v) => onKisyuCdChange(i, v)"
+                                    :class="['w-36', getItemError(i, 'model_code') ? '[&_input]:border-destructive' : '']"
+                                    @update:model-value="(v) => onModelCodeChange(i, v)"
                                 />
-                                <p v-if="getItemError(i, 'kisyu_cd')" class="mt-0.5 text-xs text-destructive">{{ getItemError(i, 'kisyu_cd') }}</p>
+                                <p v-if="getItemError(i, 'model_code')" class="mt-0.5 text-xs text-destructive">{{ getItemError(i, 'model_code') }}</p>
                             </td>
                             <!-- フレームNo -->
                             <td class="px-2 py-1.5">
                                 <Input
-                                    v-model="item.frame_no"
-                                    :list="`frame-no-${i}`"
+                                    v-model="item.frame_number"
+                                    :list="`frame-number-${i}`"
                                     placeholder="フレームNo（品番）..."
-                                    :class="['h-8 w-40', getItemError(i, 'frame_no') ? 'border-destructive' : '']"
-                                    @change="onFrameNoChange(i)"
+                                    :class="['h-8 w-40', getItemError(i, 'frame_number') ? 'border-destructive' : '']"
+                                    @change="onFrameNumberChange(i)"
                                 />
-                                <datalist :id="`frame-no-${i}`">
-                                    <option v-for="v in frameNoList(item.kisyu_cd)" :key="v.frame_no" :value="v.frame_no" />
+                                <datalist :id="`frame-number-${i}`">
+                                    <option v-for="v in frameNumberList(item.model_code)" :key="v.frame_number" :value="v.frame_number" />
                                 </datalist>
-                                <p v-if="getItemError(i, 'frame_no')" class="mt-0.5 text-xs text-destructive">{{ getItemError(i, 'frame_no') }}</p>
+                                <p v-if="getItemError(i, 'frame_number')" class="mt-0.5 text-xs text-destructive">{{ getItemError(i, 'frame_number') }}</p>
                             </td>
                             <!-- 色コード -->
                             <td class="px-2 py-1.5">
                                 <Combobox
-                                    :options="iroCdOptions(item.kisyu_cd)"
-                                    :model-value="item.iro_cd"
+                                    :options="colorCodeOptions(item.model_code)"
+                                    :model-value="item.color_code"
                                     placeholder="色..."
                                     class="w-24"
-                                    @update:model-value="(v) => onIroCdChange(i, v)"
+                                    @update:model-value="(v) => onColorCodeChange(i, v)"
                                 />
                             </td>
                             <!-- 倉庫コード -->
@@ -386,7 +386,7 @@ function getItemError(index: number, field: string): string | undefined {
                             </td>
                             <!-- 機種名（自動） -->
                             <td class="px-2 py-1.5">
-                                <Input v-model="item.kisyu_nm" class="h-8 min-w-40" readonly tabindex="-1" />
+                                <Input v-model="item.model_name" class="h-8 min-w-40" readonly tabindex="-1" />
                             </td>
                             <!-- 数量 -->
                             <td class="px-2 py-1.5">
@@ -407,12 +407,12 @@ function getItemError(index: number, field: string): string | undefined {
                             <!-- 仕入単価 -->
                             <td class="px-2 py-1.5">
                                 <Input
-                                    v-model="item.sre_tan"
+                                    v-model="item.purchase_price"
                                     type="number"
                                     step="1"
                                     min="0"
                                     class="h-8 w-24 text-right tabular-nums"
-                                    :class="{ 'border-destructive': getItemError(i, 'sre_tan') }"
+                                    :class="{ 'border-destructive': getItemError(i, 'purchase_price') }"
                                     @input="recalcItem(i)"
                                 />
                             </td>

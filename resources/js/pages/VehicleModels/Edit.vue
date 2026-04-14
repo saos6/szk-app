@@ -9,14 +9,14 @@ import type { BreadcrumbItem } from '@/types';
 
 interface VehicleModel {
     id: number;
-    kisyu_cd: string;
-    iro_cd: string;
-    kisyu_nm: string | null;
-    kisyu_nm_r: string | null;
-    kihon: string | null;
-    kisyu_nm_h: string | null;
-    sre_tan: string | null;
-    uri_tan: string | null;
+    model_code: string;
+    color_code: string;
+    model_name: string | null;
+    model_abbr: string | null;
+    base_model: string | null;
+    model_name_kanji: string | null;
+    purchase_price: string | null;
+    selling_price: string | null;
     terminal_price: string | null;
     standard_retail_price: string | null;
     g1: string | null;
@@ -24,8 +24,8 @@ interface VehicleModel {
     g3: string | null;
     g4: string | null;
     g5: string | null;
-    order_no: string | null;
-    zei_kbn: string | null;
+    order_number: string | null;
+    tax_type: string | null;
 }
 
 const props = defineProps<{
@@ -45,23 +45,23 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const form = useForm({
-    kisyu_cd:   props.vehicleModel.kisyu_cd,
-    iro_cd:     props.vehicleModel.iro_cd,
-    kisyu_nm:   props.vehicleModel.kisyu_nm ?? '',
-    kisyu_nm_r: props.vehicleModel.kisyu_nm_r ?? '',
-    kihon:      props.vehicleModel.kihon ?? '',
-    kisyu_nm_h: props.vehicleModel.kisyu_nm_h ?? '',
-    sre_tan:               props.vehicleModel.sre_tan ?? '',
-    uri_tan:               props.vehicleModel.uri_tan ?? '',
+    model_code:            props.vehicleModel.model_code,
+    color_code:            props.vehicleModel.color_code,
+    model_name:            props.vehicleModel.model_name ?? '',
+    model_abbr:            props.vehicleModel.model_abbr ?? '',
+    base_model:            props.vehicleModel.base_model ?? '',
+    model_name_kanji:      props.vehicleModel.model_name_kanji ?? '',
+    purchase_price:        props.vehicleModel.purchase_price ?? '',
+    selling_price:         props.vehicleModel.selling_price ?? '',
     terminal_price:        props.vehicleModel.terminal_price ?? '',
     standard_retail_price: props.vehicleModel.standard_retail_price ?? '',
-    g1:         props.vehicleModel.g1 ?? (null as string | null),
-    g2:         props.vehicleModel.g2 ?? (null as string | null),
-    g3:         props.vehicleModel.g3 ?? (null as string | null),
-    g4:         props.vehicleModel.g4 ?? (null as string | null),
-    g5:         props.vehicleModel.g5 ?? (null as string | null),
-    order_no:   props.vehicleModel.order_no ?? '',
-    zei_kbn:    props.vehicleModel.zei_kbn ?? (null as string | null),
+    g1:                    props.vehicleModel.g1 ?? (null as string | null),
+    g2:                    props.vehicleModel.g2 ?? (null as string | null),
+    g3:                    props.vehicleModel.g3 ?? (null as string | null),
+    g4:                    props.vehicleModel.g4 ?? (null as string | null),
+    g5:                    props.vehicleModel.g5 ?? (null as string | null),
+    order_number:          props.vehicleModel.order_number ?? '',
+    tax_type:              props.vehicleModel.tax_type ?? (null as string | null),
 });
 
 function submit() {
@@ -71,7 +71,7 @@ function submit() {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head :title="`車両機種（商品）マスタ 編集 - ${vehicleModel.kisyu_cd}`" />
+        <Head :title="`車両機種（商品）マスタ 編集 - ${vehicleModel.model_code}`" />
         <div class="max-w-4xl p-6">
             <div class="rounded-lg border bg-card p-6 shadow-sm">
                 <div class="mb-6 flex items-center justify-between">

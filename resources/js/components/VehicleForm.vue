@@ -16,22 +16,22 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 
 interface VehicleModelItem {
-    kisyu_cd: string;
-    iro_cd: string;
-    kisyu_nm_h: string | null;
+    model_code: string;
+    color_code: string;
+    model_name_kanji: string | null;
 }
 
 interface VehicleFormData {
-    kisyu_cd: string;
-    frame_no: string;
+    model_code: string;
+    frame_number: string;
     name1: string;
     name2: string;
-    kisyu_nm: string;
-    keishiki: string;
-    kisyu_no: string;
-    iro_cd: string | null;
-    sre_tan: string;
-    uri_tan: string;
+    model_name: string;
+    model_type: string;
+    model_number: string;
+    color_code: string | null;
+    purchase_price: string;
+    selling_price: string;
     terminal_price: string;
     standard_retail_price: string;
     maker_code: string;
@@ -78,25 +78,25 @@ const props = defineProps<Props>();
 const emit = defineEmits<{ submit: [] }>();
 
 // 機種コード一覧（重複排除）
-const kisyuCdOptions = computed(() => {
+const modelCodeOptions = computed(() => {
     const seen = new Set<string>();
     return props.vehicleModelList.filter((vm) => {
-        if (seen.has(vm.kisyu_cd)) return false;
-        seen.add(vm.kisyu_cd);
+        if (seen.has(vm.model_code)) return false;
+        seen.add(vm.model_code);
         return true;
     });
 });
 
 // 色コード一覧（選択中の機種コードで絞り込み）
-const iroCdOptions = computed(() =>
-    props.vehicleModelList.filter((vm) => vm.kisyu_cd === props.form.kisyu_cd),
+const colorCodeOptions = computed(() =>
+    props.vehicleModelList.filter((vm) => vm.model_code === props.form.model_code),
 );
 
 // 機種コード変更時に色コードをリセット
 watch(
-    () => props.form.kisyu_cd,
+    () => props.form.model_code,
     () => {
-        props.form.iro_cd = null;
+        props.form.color_code = null;
     },
 );
 </script>
@@ -113,26 +113,26 @@ watch(
                     <div class="flex flex-col gap-1.5">
                         <Label>機種コード（商品） <span class="ml-1 text-xs text-destructive">*必須</span></Label>
                         <Select
-                            :model-value="form.kisyu_cd || '__none__'"
-                            @update:model-value="(v) => (form.kisyu_cd = v === '__none__' ? '' : v)"
+                            :model-value="form.model_code || '__none__'"
+                            @update:model-value="(v) => (form.model_code = v === '__none__' ? '' : v)"
                         >
-                            <SelectTrigger :class="{ 'border-destructive': form.errors.kisyu_cd }">
+                            <SelectTrigger :class="{ 'border-destructive': form.errors.model_code }">
                                 <SelectValue placeholder="機種コードを選択" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="__none__">（未選択）</SelectItem>
-                                <SelectItem v-for="vm in kisyuCdOptions" :key="vm.kisyu_cd" :value="vm.kisyu_cd">
-                                    {{ vm.kisyu_cd }}{{ vm.kisyu_nm_h ? ` — ${vm.kisyu_nm_h}` : '' }}
+                                <SelectItem v-for="vm in modelCodeOptions" :key="vm.model_code" :value="vm.model_code">
+                                    {{ vm.model_code }}{{ vm.model_name_kanji ? ` — ${vm.model_name_kanji}` : '' }}
                                 </SelectItem>
                             </SelectContent>
                         </Select>
-                        <InputError :message="form.errors.kisyu_cd" />
+                        <InputError :message="form.errors.model_code" />
                     </div>
                     <div class="flex flex-col gap-1.5">
-                        <Label for="frame_no">フレームNo（品番） <span class="ml-1 text-xs text-destructive">*必須</span></Label>
-                        <Input id="frame_no" v-model="form.frame_no" maxlength="10" class="font-mono"
-                            :class="{ 'border-destructive': form.errors.frame_no }" />
-                        <InputError :message="form.errors.frame_no" />
+                        <Label for="frame_number">フレームNo（品番） <span class="ml-1 text-xs text-destructive">*必須</span></Label>
+                        <Input id="frame_number" v-model="form.frame_number" maxlength="10" class="font-mono"
+                            :class="{ 'border-destructive': form.errors.frame_number }" />
+                        <InputError :message="form.errors.frame_number" />
                     </div>
                 </div>
                 <!-- 色コード -->
@@ -140,40 +140,40 @@ watch(
                     <div class="flex flex-col gap-1.5">
                         <Label>色コード</Label>
                         <Select
-                            :model-value="form.iro_cd ?? '__none__'"
-                            @update:model-value="(v) => (form.iro_cd = v === '__none__' ? null : v)"
+                            :model-value="form.color_code ?? '__none__'"
+                            @update:model-value="(v) => (form.color_code = v === '__none__' ? null : v)"
                         >
-                            <SelectTrigger :class="{ 'border-destructive': form.errors.iro_cd }">
+                            <SelectTrigger :class="{ 'border-destructive': form.errors.color_code }">
                                 <SelectValue placeholder="（未選択）" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="__none__">（未選択）</SelectItem>
-                                <SelectItem v-for="vm in iroCdOptions" :key="vm.iro_cd" :value="vm.iro_cd">
-                                    {{ vm.iro_cd }}
+                                <SelectItem v-for="vm in colorCodeOptions" :key="vm.color_code" :value="vm.color_code">
+                                    {{ vm.color_code }}
                                 </SelectItem>
                             </SelectContent>
                         </Select>
-                        <InputError :message="form.errors.iro_cd" />
+                        <InputError :message="form.errors.color_code" />
                     </div>
                     <div class="flex flex-col gap-1.5">
-                        <Label for="kisyu_no">機種番号</Label>
-                        <Input id="kisyu_no" v-model="form.kisyu_no" maxlength="20" class="font-mono"
-                            :class="{ 'border-destructive': form.errors.kisyu_no }" />
-                        <InputError :message="form.errors.kisyu_no" />
+                        <Label for="model_number">機種番号</Label>
+                        <Input id="model_number" v-model="form.model_number" maxlength="20" class="font-mono"
+                            :class="{ 'border-destructive': form.errors.model_number }" />
+                        <InputError :message="form.errors.model_number" />
                     </div>
                     <div class="flex flex-col gap-1.5">
-                        <Label for="keishiki">形式</Label>
-                        <Input id="keishiki" v-model="form.keishiki" maxlength="100"
-                            :class="{ 'border-destructive': form.errors.keishiki }" />
-                        <InputError :message="form.errors.keishiki" />
+                        <Label for="model_type">形式</Label>
+                        <Input id="model_type" v-model="form.model_type" maxlength="100"
+                            :class="{ 'border-destructive': form.errors.model_type }" />
+                        <InputError :message="form.errors.model_type" />
                     </div>
                 </div>
                 <!-- 機種名 -->
                 <div class="flex flex-col gap-1.5">
-                    <Label for="kisyu_nm">機種名（商品名）</Label>
-                    <Input id="kisyu_nm" v-model="form.kisyu_nm" maxlength="1000"
-                        :class="{ 'border-destructive': form.errors.kisyu_nm }" />
-                    <InputError :message="form.errors.kisyu_nm" />
+                    <Label for="model_name">機種名（商品名）</Label>
+                    <Input id="model_name" v-model="form.model_name" maxlength="1000"
+                        :class="{ 'border-destructive': form.errors.model_name }" />
+                    <InputError :message="form.errors.model_name" />
                 </div>
                 <!-- 商品名1・2 -->
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -198,16 +198,16 @@ watch(
             <h2 class="mb-4 text-sm font-semibold text-muted-foreground">価格・商品情報</h2>
             <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <div class="flex flex-col gap-1.5">
-                    <Label for="sre_tan">仕入単価（税抜）</Label>
-                    <Input id="sre_tan" v-model="form.sre_tan" type="number" min="0" step="0.01"
-                        :class="{ 'border-destructive': form.errors.sre_tan }" />
-                    <InputError :message="form.errors.sre_tan" />
+                    <Label for="purchase_price">仕入単価（税抜）</Label>
+                    <Input id="purchase_price" v-model="form.purchase_price" type="number" min="0" step="0.01"
+                        :class="{ 'border-destructive': form.errors.purchase_price }" />
+                    <InputError :message="form.errors.purchase_price" />
                 </div>
                 <div class="flex flex-col gap-1.5">
-                    <Label for="uri_tan">売上単価（税抜）</Label>
-                    <Input id="uri_tan" v-model="form.uri_tan" type="number" min="0" step="0.01"
-                        :class="{ 'border-destructive': form.errors.uri_tan }" />
-                    <InputError :message="form.errors.uri_tan" />
+                    <Label for="selling_price">売上単価（税抜）</Label>
+                    <Input id="selling_price" v-model="form.selling_price" type="number" min="0" step="0.01"
+                        :class="{ 'border-destructive': form.errors.selling_price }" />
+                    <InputError :message="form.errors.selling_price" />
                 </div>
                 <div class="flex flex-col gap-1.5">
                     <Label for="terminal_price">末端価格</Label>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { router, Head, Link } from '@inertiajs/vue3';
 import {
     ArrowUpDown,
@@ -36,21 +36,21 @@ import type { BreadcrumbItem } from '@/types';
 
 interface VehicleModel {
     id: number;
-    kisyu_cd: string;
-    iro_cd: string;
-    kisyu_nm: string | null;
-    kisyu_nm_r: string | null;
-    kihon: string | null;
-    kisyu_nm_h: string | null;
-    sre_tan: string | null;
-    uri_tan: string | null;
+    model_code: string;
+    color_code: string;
+    model_name: string | null;
+    model_abbr: string | null;
+    base_model: string | null;
+    model_name_kanji: string | null;
+    purchase_price: string | null;
+    selling_price: string | null;
     g1: string | null;
     g2: string | null;
     g3: string | null;
     g4: string | null;
     g5: string | null;
-    order_no: string | null;
-    zei_kbn: number | null;
+    order_number: string | null;
+    tax_type: number | null;
     created_at: string;
     updated_at: string;
 }
@@ -92,26 +92,26 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const search = ref(props.filters.search ?? '');
 const perPage = ref(props.filters.per_page ?? '10');
-const sortField = ref(props.filters.sort ?? 'kisyu_cd');
+const sortField = ref(props.filters.sort ?? 'model_code');
 const sortDir = ref(props.filters.direction ?? 'asc');
 
 type ColumnKey =
     | 'id'
-    | 'kisyu_cd'
-    | 'iro_cd'
-    | 'kisyu_nm_h'
-    | 'kisyu_nm'
-    | 'kisyu_nm_r'
-    | 'kihon'
-    | 'sre_tan'
-    | 'uri_tan'
+    | 'model_code'
+    | 'color_code'
+    | 'model_name_kanji'
+    | 'model_name'
+    | 'model_abbr'
+    | 'base_model'
+    | 'purchase_price'
+    | 'selling_price'
     | 'g1'
     | 'g2'
     | 'g3'
     | 'g4'
     | 'g5'
-    | 'order_no'
-    | 'zei_kbn'
+    | 'order_number'
+    | 'tax_type'
     | 'created_at'
     | 'updated_at';
 
@@ -119,21 +119,21 @@ const COLUMNS_STORAGE_KEY = 'vehicle-models.columns';
 
 const defaultColumns: Record<ColumnKey, { label: string; visible: boolean }> = {
     id:         { label: 'ID',            visible: false },
-    kisyu_cd:   { label: '機種コード（商品）',    visible: true  },
-    iro_cd:     { label: '色コード',      visible: true  },
-    kisyu_nm_h: { label: '機種名(漢字)',  visible: true  },
-    kisyu_nm:   { label: '営業機種記号',  visible: true  },
-    kisyu_nm_r: { label: '機種略称',      visible: true  },
-    kihon:      { label: '基本機種',      visible: false },
-    sre_tan:    { label: '仕入単価(税抜)', visible: true  },
-    uri_tan:    { label: '売上単価(税抜)', visible: true  },
+    model_code:   { label: '機種コード（商品）',    visible: true  },
+    color_code:     { label: '色コード',      visible: true  },
+    model_name_kanji: { label: '機種名(漢字)',  visible: true  },
+    model_name:   { label: '営業機種記号',  visible: true  },
+    model_abbr: { label: '機種略称',      visible: true  },
+    base_model:      { label: '基本機種',      visible: false },
+    purchase_price:    { label: '仕入単価(税抜)', visible: true  },
+    selling_price:    { label: '売上単価(税抜)', visible: true  },
     g1:         { label: 'タイプ区分(G1)', visible: true  },
     g2:         { label: '排気量区分(G2)', visible: true  },
     g3:         { label: 'G3',            visible: false },
     g4:         { label: 'G4',            visible: false },
     g5:         { label: 'G5',            visible: false },
-    order_no:   { label: 'オーダーNo',    visible: false },
-    zei_kbn:    { label: '税区分',        visible: false },
+    order_number:   { label: 'オーダーNo',    visible: false },
+    tax_type:    { label: '税区分',        visible: false },
     created_at: { label: '作成日時',      visible: false },
     updated_at: { label: '更新日時',      visible: false },
 };
@@ -326,21 +326,21 @@ function formatPrice(val: string | null): string {
                             class="border-t transition-colors hover:bg-muted/30"
                         >
                             <td v-if="columns.id.visible" class="px-4 py-3 text-muted-foreground">{{ vm.id }}</td>
-                            <td v-if="columns.kisyu_cd.visible" class="px-4 py-3 font-mono text-sm font-medium">{{ vm.kisyu_cd }}</td>
-                            <td v-if="columns.iro_cd.visible" class="px-4 py-3 font-mono text-sm">{{ vm.iro_cd }}</td>
-                            <td v-if="columns.kisyu_nm_h.visible" class="px-4 py-3 font-medium">{{ vm.kisyu_nm_h ?? '—' }}</td>
-                            <td v-if="columns.kisyu_nm.visible" class="px-4 py-3 text-muted-foreground">{{ vm.kisyu_nm ?? '—' }}</td>
-                            <td v-if="columns.kisyu_nm_r.visible" class="px-4 py-3 text-muted-foreground">{{ vm.kisyu_nm_r ?? '—' }}</td>
-                            <td v-if="columns.kihon.visible" class="px-4 py-3 text-muted-foreground">{{ vm.kihon ?? '—' }}</td>
-                            <td v-if="columns.sre_tan.visible" class="px-4 py-3 text-right tabular-nums">{{ formatPrice(vm.sre_tan) }}</td>
-                            <td v-if="columns.uri_tan.visible" class="px-4 py-3 text-right tabular-nums">{{ formatPrice(vm.uri_tan) }}</td>
+                            <td v-if="columns.model_code.visible" class="px-4 py-3 font-mono text-sm font-medium">{{ vm.model_code }}</td>
+                            <td v-if="columns.color_code.visible" class="px-4 py-3 font-mono text-sm">{{ vm.color_code }}</td>
+                            <td v-if="columns.model_name_kanji.visible" class="px-4 py-3 font-medium">{{ vm.model_name_kanji ?? '—' }}</td>
+                            <td v-if="columns.model_name.visible" class="px-4 py-3 text-muted-foreground">{{ vm.model_name ?? '—' }}</td>
+                            <td v-if="columns.model_abbr.visible" class="px-4 py-3 text-muted-foreground">{{ vm.model_abbr ?? '—' }}</td>
+                            <td v-if="columns.base_model.visible" class="px-4 py-3 text-muted-foreground">{{ vm.base_model ?? '—' }}</td>
+                            <td v-if="columns.purchase_price.visible" class="px-4 py-3 text-right tabular-nums">{{ formatPrice(vm.purchase_price) }}</td>
+                            <td v-if="columns.selling_price.visible" class="px-4 py-3 text-right tabular-nums">{{ formatPrice(vm.selling_price) }}</td>
                             <td v-if="columns.g1.visible" class="px-4 py-3 text-center text-muted-foreground">{{ vm.g1 ? (g1Types[vm.g1] ?? vm.g1) : '—' }}</td>
                             <td v-if="columns.g2.visible" class="px-4 py-3 text-center text-muted-foreground">{{ vm.g2 ? (g2Disp[vm.g2] ?? vm.g2) : '—' }}</td>
                             <td v-if="columns.g3.visible" class="px-4 py-3 text-center font-mono text-muted-foreground">{{ vm.g3 ?? '—' }}</td>
                             <td v-if="columns.g4.visible" class="px-4 py-3 text-center font-mono text-muted-foreground">{{ vm.g4 ?? '—' }}</td>
                             <td v-if="columns.g5.visible" class="px-4 py-3 text-center font-mono text-muted-foreground">{{ vm.g5 ?? '—' }}</td>
-                            <td v-if="columns.order_no.visible" class="px-4 py-3 font-mono text-muted-foreground">{{ vm.order_no ?? '—' }}</td>
-                            <td v-if="columns.zei_kbn.visible" class="px-4 py-3 text-center text-muted-foreground">{{ vm.zei_kbn != null ? (zeiKbn[vm.zei_kbn] ?? vm.zei_kbn) : '—' }}</td>
+                            <td v-if="columns.order_number.visible" class="px-4 py-3 font-mono text-muted-foreground">{{ vm.order_number ?? '—' }}</td>
+                            <td v-if="columns.tax_type.visible" class="px-4 py-3 text-center text-muted-foreground">{{ vm.tax_type != null ? (zeiKbn[vm.tax_type] ?? vm.tax_type) : '—' }}</td>
                             <td v-if="columns.created_at.visible" class="px-4 py-3 whitespace-nowrap text-muted-foreground">
                                 {{ vm.created_at ? new Date(vm.created_at).toLocaleString('ja-JP') : '—' }}
                             </td>
@@ -363,7 +363,7 @@ function formatPrice(val: string | null): string {
                                         variant="ghost"
                                         size="icon"
                                         class="h-8 w-8 text-destructive hover:text-destructive"
-                                        @click="deleteVehicleModel(vm.id, vm.kisyu_cd + ' / ' + vm.iro_cd)"
+                                        @click="deleteVehicleModel(vm.id, vm.model_code + ' / ' + vm.color_code)"
                                     >
                                         <Trash2 class="h-4 w-4" />
                                     </Button>

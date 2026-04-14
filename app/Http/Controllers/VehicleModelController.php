@@ -28,8 +28,8 @@ class VehicleModelController extends Controller
 
     public function index(Request $request): Response
     {
-        $allowedSorts = ['id', 'kisyu_cd', 'iro_cd', 'kisyu_nm', 'kisyu_nm_r', 'kisyu_nm_h', 'kihon', 'sre_tan', 'uri_tan', 'g1', 'g2', 'zei_kbn', 'created_at', 'updated_at'];
-        $sort = in_array($request->get('sort'), $allowedSorts) ? $request->get('sort') : 'kisyu_cd';
+        $allowedSorts = ['id', 'model_code', 'color_code', 'model_name', 'model_abbr', 'model_name_kanji', 'base_model', 'purchase_price', 'selling_price', 'g1', 'g2', 'tax_type', 'created_at', 'updated_at'];
+        $sort = in_array($request->get('sort'), $allowedSorts) ? $request->get('sort') : 'model_code';
         $direction = $request->get('direction') === 'desc' ? 'desc' : 'asc';
         $perPage = in_array((int) $request->get('per_page'), [10, 25, 50, 100]) ? (int) $request->get('per_page') : 10;
         $search = $request->get('search', '');
@@ -61,9 +61,9 @@ class VehicleModelController extends Controller
         abort_if($vehicleModel->is_deleted, 404);
 
         $prefill = $vehicleModel->only([
-            'kisyu_nm', 'kisyu_nm_r', 'kihon', 'kisyu_nm_h',
-            'sre_tan', 'uri_tan', 'terminal_price', 'standard_retail_price',
-            'g1', 'g2', 'g3', 'g4', 'g5', 'order_no', 'zei_kbn',
+            'model_name', 'model_abbr', 'base_model', 'model_name_kanji',
+            'purchase_price', 'selling_price', 'terminal_price', 'standard_retail_price',
+            'g1', 'g2', 'g3', 'g4', 'g5', 'order_number', 'tax_type',
         ]);
 
         return Inertia::render('VehicleModels/Create', array_merge(
@@ -116,7 +116,7 @@ class VehicleModelController extends Controller
     {
         $export = new VehicleModelsExport(
             search: $request->string('search')->toString(),
-            sort: $request->string('sort', 'kisyu_cd')->toString(),
+            sort: $request->string('sort', 'model_code')->toString(),
             direction: $request->string('direction', 'asc')->toString(),
         );
 

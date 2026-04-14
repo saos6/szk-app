@@ -8,14 +8,14 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 
 interface Warehouse { code: string; name: string; }
-interface VehicleModel { kisyu_cd: string; kisyu_nm_h: string | null; }
+interface VehicleModel { model_code: string; model_name_kanji: string | null; }
 
 interface InventoryBalance {
     id: number;
     stock_ym: string;
     warehouse_code: string;
-    vehicle_model_code: string;
-    frame_no: string;
+    model_code: string;
+    frame_number: string;
     prev_stock: number;
     in_stock: number;
     out_stock: number;
@@ -36,8 +36,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 const form = useForm({
     stock_ym:           props.inventoryBalance.stock_ym,
     warehouse_code:     props.inventoryBalance.warehouse_code,
-    vehicle_model_code: props.inventoryBalance.vehicle_model_code,
-    frame_no:           props.inventoryBalance.frame_no,
+    model_code: props.inventoryBalance.model_code,
+    frame_number:           props.inventoryBalance.frame_number,
     prev_stock:         props.inventoryBalance.prev_stock,
     in_stock:           props.inventoryBalance.in_stock,
     out_stock:          props.inventoryBalance.out_stock,
