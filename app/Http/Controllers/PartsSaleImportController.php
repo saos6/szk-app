@@ -365,9 +365,9 @@ class PartsSaleImportController extends Controller
                         $qty              = (float) $work->quantity;
                         $uriTan           = (float) $work->unit_price;
                         $sreTan           = (float) $work->cost_price;
-                        $terminalPrice    = ($work->terminal_price !== null && $work->terminal_price !== '')
+                        $terminalPrice    = ($work->terminal_price !== null && (float) $work->terminal_price > 0)
                                                ? (float) $work->terminal_price : null;
-                        $stdRetailPrice   = ($work->standard_retail_price !== null && $work->standard_retail_price !== '')
+                        $stdRetailPrice   = ($work->standard_retail_price !== null && (float) $work->standard_retail_price > 0)
                                                ? (float) $work->standard_retail_price : null;
                         $saleAmt          = round($qty * $uriTan, 2);
                         $cogsAmt          = round($qty * $sreTan, 2);
@@ -483,9 +483,9 @@ class PartsSaleImportController extends Controller
         );
 
         foreach ($works as $work) {
-            $terminalPrice  = ($work->terminal_price !== null && $work->terminal_price !== '')
+            $terminalPrice  = ($work->terminal_price !== null && (float) $work->terminal_price > 0)
                                   ? (float) $work->terminal_price : null;
-            $stdRetailPrice = ($work->standard_retail_price !== null && $work->standard_retail_price !== '')
+            $stdRetailPrice = ($work->standard_retail_price !== null && (float) $work->standard_retail_price > 0)
                                   ? (float) $work->standard_retail_price : null;
 
             // ── 車両品番自動作成 (frame_number = XXXXX-YYY) ──
