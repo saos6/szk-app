@@ -368,34 +368,34 @@ const editingId  = ref<number | null>(null);
 
 const workForm = useForm({
     processing_ym:         '',
-    monthly_f_type:         ''',
+    monthly_f_type:         '',
     control_code:          '',
     office_code:           '',
-    part_number:            ''',
-    slip_number:            ''',
+    part_number:            '',
+    slip_number:            '',
     order_qty:             '',
     order_date:            '',
     ship_qty:              '',
     reversal_type:          '0',
     sale_date:             '',
     unit_price:            '',
-    sale_type:              ''',
-    discount_rate:          ''',
+    sale_type:              '',
+    discount_rate:          '',
     partner_code:          '',
     dealer_code:           '',
     cost_price:            '',
     terminal_price:        '',
     breakdown_code:        '',
     maintenance_no:        '',
-    invoice_type:           ''',
-    invoice_monthly_type:   ''',
+    invoice_type:           '',
+    invoice_monthly_type:   '',
     dispatch_source:       '',
     staff_code:            '',
-    rank_code:              ''',
-    first_shipment_type:    ''',
+    rank_code:              '',
+    first_shipment_type:    '',
     item_code:             '',
     item_name:             '',
-    open_type:              ''',
+    open_type:              '',
     standard_retail_price: '',
     model_group:           '',
     filler:                '',
@@ -461,7 +461,7 @@ function submitWorkForm() {
 function deleteWork(work: Work) {
     if (
         !confirm(
-            `品番[${work.part_number ?? ''] 伝票NO[${work.slip_number ?? ''] を削除してよろしいですか？`,
+            `品番[${work.part_number ?? ''}] 伝票NO[${work.slip_number ?? ''}] を削除してよろしいですか？`,
         )
     )
         return;
